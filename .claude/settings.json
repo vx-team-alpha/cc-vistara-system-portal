@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(pnpm supabase:push*)",
+      "Bash(pnpm supabase db push*)",
+      "Bash(pnpm exec supabase db push*)",
+      "Bash(npx supabase db push*)",
+      "Bash(npm run supabase:push*)",
+      "Bash(npm exec supabase db push*)",
+      "Bash(yarn supabase:push*)",
+      "Bash(yarn supabase db push*)",
+      "Bash(bun run supabase:push*)",
+      "Bash(bunx supabase db push*)",
+      "Bash(supabase db push*)"
+    ]
+  }
+}

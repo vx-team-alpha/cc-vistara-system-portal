@@ -1,0 +1,53 @@
+{
+  "name": "next-boilerplate",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "supabase:template": "scripts/supabase-vm/template.sh",
+    "supabase:template-refresh": "scripts/supabase-vm/template.sh --force",
+    "supabase:template-destroy": "scripts/supabase-vm/template-destroy.sh",
+    "supabase:start": "scripts/supabase-vm/start.sh",
+    "supabase:stop": "scripts/supabase-vm/stop.sh",
+    "supabase:destroy": "scripts/supabase-vm/destroy.sh",
+    "supabase:reset": "scripts/supabase-vm/exec.sh db reset",
+    "supabase:diff": "scripts/supabase-vm/exec.sh db diff --use-pg-delta -f",
+    "supabase:typegen": "scripts/supabase-vm/exec.sh gen types typescript --local > src/types/supabase.ts",
+    "worktree:add": "scripts/supabase-vm/worktree-add.sh",
+    "worktree:remove": "scripts/supabase-vm/worktree-remove.sh"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^7.0.5",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.0",
+    "@tanstack/react-query": "^5.107.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "input-otp": "^1.5.0",
+    "lucide-react": "^1.70.0",
+    "next": "16.4.5",
+    "radix-ui": "^1.8.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-hook-form": "^7.91.0",
+    "server-only": "^0.0.1",
+    "shadcn": "^4.23.0",
+    "tailwind-merge": "^3.7.0",
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.5",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^6.0.3"
+  }
+}

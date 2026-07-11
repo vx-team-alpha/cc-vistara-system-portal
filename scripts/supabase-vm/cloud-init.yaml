@@ -1,0 +1,15 @@
+#cloud-config
+# Minimal first-boot provisioning for a Supabase OrbStack VM: just Docker and
+# jq. Anything that depends on the --user account (which OrbStack creates on
+# a separate, unsynchronized pass) is done later by provision.sh, invoked
+# explicitly from start.sh once the VM is confirmed reachable.
+
+package_update: true
+
+packages:
+  - ca-certificates
+  - curl
+  - jq
+
+runcmd:
+  - [ sh, -c, "command -v docker >/dev/null || curl -fsSL https://get.docker.com | sh" ]
