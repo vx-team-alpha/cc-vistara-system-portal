@@ -90,3 +90,93 @@ grant update (name, picture_url) on public.accounts to authenticated;
 -- service_role ---------------------------------------------------------------
 -- BYPASSRLS, but it still needs table grants.
 grant all on public.accounts to service_role;
+
+
+-- ===========================================================================
+-- Catalogue tables
+-- (configurator_types, product_ranges, design_styles, layouts, questions,
+--  options, assets)
+--
+-- Authenticated users can SELECT only. No INSERT/UPDATE/DELETE — that is
+-- exclusively for service_role (admin pipelines / scrape scripts).
+-- ===========================================================================
+
+-- configurator_types ----------------------------------------------------------
+revoke all on public.configurator_types from public;
+revoke all on public.configurator_types from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.configurator_types from anon, authenticated;
+grant select on public.configurator_types to authenticated;
+grant all    on public.configurator_types to service_role;
+
+-- product_ranges --------------------------------------------------------------
+revoke all on public.product_ranges from public;
+revoke all on public.product_ranges from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.product_ranges from anon, authenticated;
+grant select on public.product_ranges to authenticated;
+grant all    on public.product_ranges to service_role;
+
+-- design_styles ---------------------------------------------------------------
+revoke all on public.design_styles from public;
+revoke all on public.design_styles from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.design_styles from anon, authenticated;
+grant select on public.design_styles to authenticated;
+grant all    on public.design_styles to service_role;
+
+-- layouts ---------------------------------------------------------------------
+revoke all on public.layouts from public;
+revoke all on public.layouts from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.layouts from anon, authenticated;
+grant select on public.layouts to authenticated;
+grant all    on public.layouts to service_role;
+
+-- questions -------------------------------------------------------------------
+revoke all on public.questions from public;
+revoke all on public.questions from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.questions from anon, authenticated;
+grant select on public.questions to authenticated;
+grant all    on public.questions to service_role;
+
+-- options ---------------------------------------------------------------------
+revoke all on public.options from public;
+revoke all on public.options from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.options from anon, authenticated;
+grant select on public.options to authenticated;
+grant all    on public.options to service_role;
+
+-- assets ----------------------------------------------------------------------
+revoke all on public.assets from public;
+revoke all on public.assets from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.assets from anon, authenticated;
+grant select on public.assets to authenticated;
+grant all    on public.assets to service_role;
+
+
+-- ===========================================================================
+-- leads
+--
+-- Authenticated dealers can read, insert, and delete their own rows.
+-- UPDATE is column-restricted: only `status` may be changed after insert.
+-- `spec` is intentionally excluded from the UPDATE grant — it is an
+-- immutable snapshot of choices at submission time.
+-- `name`, `email`, `phone`, `source_url` are also excluded: if contact info
+-- needs correcting, close the lead and create a new one.
+-- ===========================================================================
+revoke all on public.leads from public;
+revoke all on public.leads from anon, authenticated, service_role;
+revoke maintain, references, trigger, truncate on public.leads from anon, authenticated;
+
+grant select, insert, delete on public.leads to authenticated;
+grant update (status)         on public.leads to authenticated;
+grant all                     on public.leads to service_role;
+-- Catalogue identities are allocated only by the trusted import service.
+revoke all on sequence public.configurator_types_id_seq from public, anon, authenticated, service_role;
+grant usage, select on sequence public.configurator_types_id_seq to service_role;
+
+
+revoke all on public.embed_widgets from public, anon, authenticated, service_role;
+grant select, insert on public.embed_widgets to authenticated;
+grant update (name, website_url, enabled) on public.embed_widgets to authenticated;
+grant all on public.embed_widgets to service_role;
+revoke all on public.widget_views from public, anon, authenticated, service_role;
+grant select on public.widget_views to authenticated;
+grant all on public.widget_views to service_role;

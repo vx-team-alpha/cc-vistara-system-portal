@@ -45,3 +45,101 @@ create policy accounts_update on public.accounts
 -- would be able to desync the mirror from the real address.
 
 -- No DELETE policy: accounts die via the auth.users cascade.
+
+
+-- ===========================================================================
+-- Catalogue tables
+-- (configurator_types, product_ranges, design_styles, layouts, questions,
+--  options, assets)
+--
+-- Platform-managed reference data. Authenticated users may SELECT; only
+-- service_role writes (via admin scripts / scrape pipelines). service_role
+-- has BYPASSRLS so no policies are needed for it.
+--
+-- All catalogue tables use `active = true` guards where applicable so that
+-- soft-deleted rows are invisible to clients without a migration.
+-- ===========================================================================
+
+alter table public.configurator_types enable row level security;
+alter table public.product_ranges     enable row level security;
+alter table public.design_styles      enable row level security;
+alter table public.layouts            enable row level security;
+alter table public.questions          enable row level security;
+alter table public.options            enable row level security;
+alter table public.assets             enable row level security;
+
+-- configurator_types: always show all rows (no active column)
+create policy configurator_types_select on public.configurator_types
+  for select to authenticated
+  using (true);
+
+-- product_ranges: only active ranges are visible
+create policy product_ranges_select on public.product_ranges
+  for select to authenticated
+  using (active = true);
+
+-- design_styles: always show all rows
+create policy design_styles_select on public.design_styles
+  for select to authenticated
+  using (true);
+
+-- layouts: only active layouts are visible
+create policy layouts_select on public.layouts
+  for select to authenticated
+  using (active = true);
+
+-- questions: only active questions are visible
+create policy questions_select on public.questions
+  for select to authenticated
+  using (active = true);
+
+-- options: always show all rows (visibility controlled by question.active)
+create policy options_select on public.options
+  for select to authenticated
+  using (true);
+
+-- assets: always show all rows
+create policy assets_select on public.assets
+  for select to authenticated
+  using (true);
+
+
+-- ===========================================================================
+-- leads
+--
+-- Owned by the dealer account. A dealer can only see and manage their own
+-- leads. No INSERT policy for anonymous homeowners — leads from the public
+-- widget are created via the service_role client (API route), which bypasses
+-- RLS. The INSERT policy here covers authenticated dealers creating test leads
+-- or importing existing enquiries.
+-- ===========================================================================
+
+alter table public.leads enable row level security;
+
+create policy leads_select on public.leads
+  for select to authenticated
+  using (account_id = (select auth.uid()));
+
+create policy leads_insert on public.leads
+  for insert to authenticated
+  with check (account_id = (select auth.uid()));
+
+-- Only `status` is actually writable after insert (enforced by column-level
+-- UPDATE grant in 999-grants.sql). The policy allows the row to be addressed;
+-- the grant restricts which columns can change.
+create policy leads_update on public.leads
+  for update to authenticated
+  using      (account_id = (select auth.uid()))
+  with check (account_id = (select auth.uid()));
+
+create policy leads_delete on public.leads
+  for delete to authenticated
+  using (account_id = (select auth.uid()));
+
+alter table public.embed_widgets enable row level security;
+create policy embed_widgets_select on public.embed_widgets for select to authenticated using (account_id = (select auth.uid()));
+create policy embed_widgets_insert on public.embed_widgets for insert to authenticated with check (account_id = (select auth.uid()));
+create policy embed_widgets_update on public.embed_widgets for update to authenticated using (account_id = (select auth.uid())) with check (account_id = (select auth.uid()));
+-- Pause embeds instead of deleting them, preserving quote attribution.
+alter table public.widget_views enable row level security;
+create policy widget_views_select on public.widget_views for select to authenticated using (account_id = (select auth.uid()));

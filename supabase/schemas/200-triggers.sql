@@ -28,6 +28,10 @@ create trigger set_updated_at
   before update on public.accounts
   for each row execute function public.set_updated_at();
 
+create trigger set_updated_at
+  before update on public.leads
+  for each row execute function public.set_updated_at();
+
 
 -- ---------------------------------------------------------------------------
 -- Signup: create the account row.
@@ -107,3 +111,6 @@ begin
   return new;
 end;
 $$;
+
+create trigger set_updated_at before update on public.embed_widgets
+  for each row execute function public.set_updated_at();
