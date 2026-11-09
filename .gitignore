@@ -49,3 +49,8 @@ supabase/signing_keys.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+cc-
+# Generated catalogue seed data and prepared storage objects
+/.frontage-seed/

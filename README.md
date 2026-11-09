@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Catalogue data and storage
+
+The MVP catalogue can be imported into Supabase with:
+
+```sh
+pnpm catalogue:prepare
+pnpm catalogue:upload
+pnpm catalogue:seed
+```
+
+See [the catalogue import guide](scripts/catalogue/README.md) for migration
+prerequisites, environment configuration, generated seed files, storage URL
+rewriting, and how to safely rerun an import.
