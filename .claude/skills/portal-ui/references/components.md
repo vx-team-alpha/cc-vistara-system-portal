@@ -1,6 +1,6 @@
 # Components
 
-All shared components live in `app/admin/`. **Always reuse these before creating new ones.**
+These component names, props, and snippets describe the source implementation in `app/admin/`. In the target project, locate matching components and reuse or adapt them; implement missing primitives locally. All imports below are illustrative and must resolve to actual target files.
 
 ## Table of Contents
 1. [ui.tsx — server components](#uitsx--server-components)

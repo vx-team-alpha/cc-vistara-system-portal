@@ -1,5 +1,7 @@
 # Styling
 
+> Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
+
 ## Table of Contents
 1. [Styling approach](#styling-approach)
 2. [Spacing scale](#spacing-scale)
@@ -16,7 +18,7 @@
 ## Styling Approach
 
 - **CSS Modules only.** No Tailwind, no styled-components, no inline style for layout. Inline `style` is acceptable for one-off numeric gaps (e.g. `style={{ height: 14 }}`).
-- All admin styles live in `admin.module.css`. Page-specific styles are in `<page>.module.css` files.
+- In the source, shared styles live in `admin.module.css`; use the target project's shared stylesheet location and page-specific modules.
 - CSS custom properties from `globals.css` are the source of truth for all design tokens.
 - The `composes` keyword is used in some places (e.g. `.card` composes `.frame`); do not break these chains.
 

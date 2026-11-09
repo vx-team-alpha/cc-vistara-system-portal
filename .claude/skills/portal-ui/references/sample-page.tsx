@@ -1,7 +1,9 @@
 "use client";
 
 /**
- * /admin/notifications — a sample page built exclusively from the portal-ui
+ * Illustrative composition only: imports and backend APIs must be adapted
+ * to the target project. No /admin route is required.
+ * A sample page built exclusively from the portal-ui
  * skill to validate the design system is captured correctly.
  *
  * Layout: PageHead + SectionNav + long settings form (StickySave) + a data

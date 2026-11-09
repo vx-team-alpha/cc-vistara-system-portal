@@ -1,5 +1,7 @@
 # Colors
 
+> Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
+
 ## Rules
 - All colors are CSS custom properties. Never hardcode a hex value in component code.
 - The `.app` and `.login` root elements define every token; `data-theme="dark"` overrides them.

@@ -1,5 +1,7 @@
 # Layout
 
+> Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
+
 ## Table of Contents
 1. [App shell](#app-shell)
 2. [Sidebar](#sidebar)
@@ -31,7 +33,7 @@ The shell is a **CSS Grid**, defined by the `.app` class in `admin.module.css`:
 }
 ```
 
-`data-admin-app` and `data-theme` are always on the root `.app` element.
+The source uses `data-admin-app` and `data-theme` on `.app`. Use the target root selector and preserve `data-theme` for token overrides; `data-admin-app` is only needed if target behavior depends on it.
 
 At **≤ 860px**: single column grid; sidebar becomes a fixed drawer.
 
@@ -110,7 +112,7 @@ div.work (flex column, min-width: 0)
 
 ## Page Anatomy
 
-Every admin page follows this structure:
+Use this composition for portal content pages where appropriate. Standalone pages and components use the same tokens and treatments without requiring the full shell:
 
 ```tsx
 <>

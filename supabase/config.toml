@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "next-boilerplate"
+project_id = "cc-frontage-desgn"
 
 [api]
 enabled = true
@@ -255,7 +255,7 @@ otp_expiry = 3600
 # LOCAL QUIRK (CLI 2.109.1): GoTrue fetches these over HTTP from Kong. At boot
 # Kong may not be listening yet, so the first emails after `supabase start` can
 # use GoTrue's built-in default template until the ~10s reloader succeeds — see
-#   docker logs supabase_auth_next-boilerplate | grep templatemailer
+#   docker logs supabase_auth_cc-frontage-desgn | grep templatemailer
 # Verified working after warm-up (recovery email rendered this file's
 # token_hash link on 2026-07-16). If a sent email shows the default content,
 # wait a few seconds and resend.

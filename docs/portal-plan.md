@@ -69,7 +69,7 @@ runtime onto a database populated by an older importer.
 Run the local integration checks with:
 
 ```sh
-docker exec -i supabase_db_next-boilerplate psql -U postgres -d postgres < supabase/tests/portal-isolation.sql
+docker exec -i supabase_db_cc-frontage-desgn psql -U postgres -d postgres < supabase/tests/portal-isolation.sql
 pnpm build
 pnpm start --port 3018
 # In a second terminal:

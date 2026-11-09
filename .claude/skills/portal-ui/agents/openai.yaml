@@ -1,4 +1,4 @@
 interface:
   display_name: "Portal UI"
-  short_description: "Design system for the Admin Panel portal."
-  default_prompt: "Build a new admin page that matches the portal design system."
+  short_description: "Apply the Portal UI design system in any project."
+  default_prompt: "Use $portal-ui to apply its design system to the requested UI in this project, regardless of page path."

@@ -4,46 +4,49 @@ import { useState } from 'react';
 
 import { Eye, EyeOff, Lock } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { cn } from '@/lib/utils';
 
 export function PasswordInput({
   groupClassName,
+  disabled,
   ...props
 }: React.ComponentProps<'input'> & { groupClassName?: string }) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <InputGroup className={cn('dark:bg-background', groupClassName)}>
-      <InputGroupAddon>
-        <Lock className="h-4 w-4" />
-      </InputGroupAddon>
-
+    <InputGroup className={cn(groupClassName)}>
       <InputGroupInput
         data-test="password-input"
         type={showPassword ? 'text' : 'password'}
         placeholder={'************'}
+        disabled={disabled}
         {...props}
       />
 
+      <InputGroupAddon>
+        <Lock aria-hidden="true" />
+      </InputGroupAddon>
+
       <InputGroupAddon align="inline-end">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowPassword(!showPassword)}
+        <InputGroupButton
+          size="icon-xs"
+          disabled={disabled}
+          aria-label={showPassword ? "Hide password" : "Show password"}
+          aria-pressed={showPassword}
+          onClick={() => setShowPassword((visible) => !visible)}
         >
           {showPassword ? (
-            <EyeOff className="h-4 w-4" />
+            <EyeOff aria-hidden="true" />
           ) : (
-            <Eye className="h-4 w-4" />
+            <Eye aria-hidden="true" />
           )}
-        </Button>
+        </InputGroupButton>
       </InputGroupAddon>
     </InputGroup>
   );

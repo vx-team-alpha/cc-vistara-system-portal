@@ -1,7 +1,9 @@
 # Typography
 
+> Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
+
 ## Rules
-- Two font families: **Roobert** (display/headings) and **Geist** (body/interface). Both are CSS variables loaded via Next.js `localFont`; use the CSS tokens, not the font names directly.
+- Two font families: **Roobert** (display/headings) and **Geist** (body/interface). Expose both through CSS variables using the target framework's font loader or `@font-face` (the source used Next.js `localFont`); use the CSS tokens, not the font names directly.
 - Letter-spacing is almost always **negative** on display text (tracking tightening). Match the exact values below — do not approximate with `-0.05em`.
 - Line-height is `1.6` for body text, `1.2`–`1.5` for headings and notes.
 - Font features: `"blwf" 1, "cv03" 1, "cv04" 1, "cv09" 1, "cv11" 1` are set globally on `<body>`.

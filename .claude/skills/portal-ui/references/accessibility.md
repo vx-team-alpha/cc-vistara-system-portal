@@ -1,5 +1,7 @@
 # Accessibility
 
+> Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
+
 ## Rules
 1. **Hugeicons are always `aria-hidden`.** The `<Icon>` wrapper adds `aria-hidden` automatically. Provide an `aria-label` on the surrounding button instead.
 2. **Interactive elements always have visible focus styles** — either `outline` or `box-shadow: var(--ring)`. Never suppress focus without a replacement.

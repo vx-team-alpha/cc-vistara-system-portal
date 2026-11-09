@@ -74,7 +74,7 @@ Alphabetical load order means `900-rls.sql` runs **before** `999-grants.sql`. So
 - `ALTER DEFAULT PRIVILEGES … GRANT ALL ON {TABLES,FUNCTIONS,SEQUENCES} TO anon` is a silent footgun: it makes every *future* object anon-readable. If you're hardening, audit `999-grants.sql` for these. Note that `auto_expose_new_tables` is unset in `config.toml`, so new tables get **no** grants by default — the reverse footgun applies too: a new table with perfect RLS and no grant returns "permission denied" on every request.
 - Verify default ACLs with:
   ```bash
-  docker exec supabase_db_next-boilerplate psql -U postgres -d postgres -c \
+  docker exec supabase_db_cc-frontage-desgn psql -U postgres -d postgres -c \
     "SELECT defaclrole::regrole, defaclobjtype, defaclacl FROM pg_default_acl WHERE defaclnamespace = 'public'::regnamespace;"
   ```
   `anon` should not appear in any `postgres`-owned default ACL.
@@ -123,7 +123,7 @@ Rare. Known gaps:
 
   This is why `999-grants.sql` carries an explicit per-function revoke line for every function. **Add one there whenever you add a function**, then verify after `pnpm supabase:reset`:
   ```bash
-  docker exec supabase_db_next-boilerplate psql -U postgres -d postgres -c \
+  docker exec supabase_db_cc-frontage-desgn psql -U postgres -d postgres -c \
     "SELECT p.proname, r.rolname, has_function_privilege(r.rolname, p.oid, 'EXECUTE') AS can_exec
        FROM pg_proc p, pg_roles r
       WHERE p.pronamespace = 'public'::regnamespace
@@ -181,7 +181,7 @@ All three diff commands must report "No schema changes found" before merging.
 For ad-hoc psql against the local DB:
 
 ```bash
-docker exec -it supabase_db_next-boilerplate psql -U postgres -d postgres
+docker exec -it supabase_db_cc-frontage-desgn psql -U postgres -d postgres
 ```
 
 ### When the local stack won't start
@@ -195,7 +195,7 @@ cd ../<other-project> && pnpm supabase stop
 If `supabase start` prints "Starting database from backup..." and then fails, that project's docker volume is corrupt. Removing it is safe when the DB is reproducible from migrations and there is no `supabase/seed.sql` (there isn't one here):
 
 ```bash
-docker volume rm supabase_db_next-boilerplate
+docker volume rm supabase_db_cc-frontage-desgn
 ```
 
 If the stack is genuinely unavailable, schema files can still be verified by loading them into a throwaway Postgres cluster with stubbed `auth` objects — see the verification section in `postgres-expert`'s `examples.md`. That proves parse-correctness and RLS behaviour, but it does **not** substitute for the cross-engine diff check, which needs the real stack.
