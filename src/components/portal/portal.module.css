@@ -118,7 +118,6 @@
 .chartBar { width: min(100%, 32px); min-height: 2px; border-radius: 3px 3px 0 0; background: var(--ink-soft); }
 .chartLabel { color: var(--soft); font-size: 11px; }
 .mobileMenu { display: none; }
-.loading { padding: 60px 20px; color: var(--soft); text-align: center; }
 .embed { display: block; min-height: 100dvh; padding: 28px; }
 .preview { display: block; width: 100%; max-height: 320px; object-fit: contain; margin: 20px 0; }
 .honeypot { display: none; }
