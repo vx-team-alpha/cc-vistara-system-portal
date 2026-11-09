@@ -18,15 +18,21 @@
     "supabase:diff": "scripts/supabase-vm/exec.sh db diff --use-pg-delta -f",
     "supabase:typegen": "scripts/supabase-vm/exec.sh gen types typescript --local > src/types/supabase.ts",
     "worktree:add": "scripts/supabase-vm/worktree-add.sh",
-    "worktree:remove": "scripts/supabase-vm/worktree-remove.sh"
+    "worktree:remove": "scripts/supabase-vm/worktree-remove.sh",
+    "catalogue:prepare": "node scripts/catalogue/seed.mjs prepare",
+    "catalogue:upload": "node scripts/catalogue/seed.mjs upload",
+    "catalogue:seed": "node scripts/catalogue/seed.mjs seed"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.5",
+    "@hugeicons/core-free-icons": "^4.4.0",
+    "@hugeicons/react": "^1.1.10",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
     "@tanstack/react-query": "^5.107.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.17",
     "input-otp": "^1.5.0",
     "lucide-react": "^1.70.0",
     "next": "16.4.5",
@@ -47,6 +53,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.5",
+    "jsdom": "^31.0.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3"
   }
