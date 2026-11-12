@@ -93,6 +93,8 @@
 .badge::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ''; }
 .badge[data-state='active'], .badge[data-state='contacted'] { background: var(--ok-bg); color: var(--ok); }
 .badge[data-state='new'] { background: var(--warn-bg); color: var(--warn); }
+.badge[data-state='admin'] { background: rgb(59 31 229 / .1); color: #3b1fe5; }
+.app[data-theme='dark'] .badge[data-state='admin'] { background: rgb(164 153 255 / .15); color: #a499ff; }
 .tableScroll { overflow-x: auto; overscroll-behavior: contain; }
 .table { width: 100%; border-collapse: collapse; font-size: 13px; letter-spacing: -.02em; }
 .table th { padding: 12px 22px; background: var(--band), var(--band-bg); color: var(--soft); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
@@ -224,3 +226,10 @@
   .optionPanel > .actions { position: sticky; bottom: 0; z-index: 1; padding: 12px 0; background: var(--page-bg); }
   .optionScroll { max-height: 45dvh; }
 }
+
+/* Admin dialog — shared with create-user-dialog */
+.adminDialog { display: block; width: min(520px, calc(100vw - 32px)); max-width: 520px; max-height: calc(100dvh - 48px); overflow-y: auto; overscroll-behavior: contain; padding: 0; border-radius: 16px; background: var(--page-bg); color: var(--ink-soft); box-shadow: 0 0 0 1px var(--line), 0 16px 48px rgb(0 0 0 / .14); border: none; }
+.adminDialog::backdrop { background: rgb(0 0 0 / .4); backdrop-filter: blur(2px); }
+.adminDialogInner { padding: 24px; }
+.adminDialogHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.hint { color: var(--soft); font-size: 12px; }

@@ -16,7 +16,7 @@
     "supabase:destroy": "scripts/supabase-vm/destroy.sh",
     "supabase:reset": "scripts/supabase-vm/exec.sh db reset",
     "supabase:diff": "scripts/supabase-vm/exec.sh db diff --use-pg-delta -f",
-    "supabase:typegen": "scripts/supabase-vm/exec.sh gen types typescript --local > src/types/supabase.ts",
+    "supabase:typegen": "scripts/supabase-vm/exec.sh gen types typescript | sed -n '/^export type Json/,$p' | sed '/^} as const/q' > src/types/supabase.ts",
     "worktree:add": "scripts/supabase-vm/worktree-add.sh",
     "worktree:remove": "scripts/supabase-vm/worktree-remove.sh",
     "catalogue:prepare": "node scripts/catalogue/seed.mjs prepare",

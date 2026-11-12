@@ -1,4 +1,3 @@
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -25,14 +24,14 @@ export type Database = {
           Tables: {
             "accounts": {
                   Row: {
-                    "created_at": string,"email": string | null,"id": string,"name": string,"picture_url": string | null,"updated_at": string
+                    "created_at": string,"email": string | null,"id": string,"name": string,"picture_url": string | null,"role": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"email"?: string | null,"id": string,"name": string,"picture_url"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"email"?: string | null,"id": string,"name": string,"picture_url"?: string | null,"role"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"email"?: string | null,"id"?: string,"name"?: string,"picture_url"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"email"?: string | null,"id"?: string,"name"?: string,"picture_url"?: string | null,"role"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -268,6 +267,7 @@ isOneToOne: false
 "id": string,
 "name": string,
 "picture_url": string | null,
+"role": string,
 "updated_at": string
             }[]
                           SetofOptions: {

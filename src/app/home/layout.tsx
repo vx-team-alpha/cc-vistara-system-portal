@@ -6,6 +6,7 @@ import { signOutAction } from '@/server/auth';
 export const metadata: Metadata = { title: { default:'Overview · Frontage', template:'%s · Frontage' } };
 export default async function HomeLayout({children}:{children:React.ReactNode}) {
   const {account,user}=await portalContext();
+  const role = account.role ?? 'user';
   async function signOut(){'use server'; await signOutAction(); redirect('/auth/sign-in');}
-  return <PortalShell name={account.name || ''} email={user.email || ''} signOut={signOut}>{children}</PortalShell>;
+  return <PortalShell name={account.name || ''} email={user.email || ''} role={role} signOut={signOut}>{children}</PortalShell>;
 }

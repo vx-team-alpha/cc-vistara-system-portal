@@ -7,9 +7,16 @@ create table public.accounts (
   name        text not null,
   email       text,
   picture_url text,
+  role        text not null default 'user' check (role in ('admin', 'user')),
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+
+-- `role` is the platform-level role for this account ('admin' | 'user').
+-- It is also mirrored into auth.users.app_metadata.role so that the JWT
+-- carries it without a DB round-trip. Only service_role may write this column
+-- (see 999-grants.sql). Admins change roles via the admin portal, which uses
+-- the service-role client.
 
 comment on table public.accounts is
   'One row per auth user, created by handle_new_user(). id IS the auth.users id.';

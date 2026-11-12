@@ -1,6 +1,6 @@
 export { authAction } from "./auth-action";
 export { authRoute } from "./auth-route";
-export { resolveAuthContext } from "./context";
+export { getCurrentAccount, resolveAuthContext } from "./context";
 export {
   AccountNotFoundError,
   AuthActionError,

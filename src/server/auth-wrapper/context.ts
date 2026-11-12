@@ -1,16 +1,17 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { toJWTUserData } from "@/lib/auth/jwt-user";
 import { AccountNotFoundError, UnauthorizedError } from "./errors";
-import type { AuthContext } from "./types";
+import type { Account, AuthContext } from "./types";
 
 /**
  * Authenticate the caller and load their account.
  *
- * Shared by `authAction` and `authRoute` so the two cannot drift apart. They
- * differ only in how they surface the errors thrown here: an action lets them
- * reject, a route maps them to HTTP status codes.
+ * Wrapped in React `cache()` so that multiple calls within the same server request
+ * lifecycle (layout, page, server actions, nested components) share the same single
+ * database query and auth verification without redundant RPC round-trips.
  */
-export async function resolveAuthContext(): Promise<AuthContext> {
+export const resolveAuthContext = cache(async (): Promise<AuthContext> => {
   const supabase = await createClient();
 
   // `getClaims()` verifies the access token locally against the project's JWKS
@@ -43,4 +44,13 @@ export async function resolveAuthContext(): Promise<AuthContext> {
   }
 
   return { user, account, supabase };
-}
+});
+
+/**
+ * Cached helper that returns the caller's full account row from `public.accounts`.
+ * Reuses `resolveAuthContext()`, guaranteeing zero duplicate database queries per request.
+ */
+export const getCurrentAccount = cache(async (): Promise<Account> => {
+  const { account } = await resolveAuthContext();
+  return account;
+});

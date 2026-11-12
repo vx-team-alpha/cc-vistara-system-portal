@@ -85,6 +85,10 @@ revoke maintain, references, trigger, truncate on public.accounts from anon, aut
 -- Email changes must go through GoTrue (supabase.auth.updateUser), which
 -- verifies ownership and then feeds the trigger.
 grant select on public.accounts to authenticated;
+-- `role` is intentionally excluded from the authenticated UPDATE grant.
+-- Only service_role (admin portal) may change a user's role. The column-level
+-- grant is what enforces immutability: a WITH CHECK cannot see the OLD row,
+-- so it cannot express "this column did not change".
 grant update (name, picture_url) on public.accounts to authenticated;
 
 -- service_role ---------------------------------------------------------------
