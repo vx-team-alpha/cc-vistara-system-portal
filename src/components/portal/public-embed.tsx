@@ -128,7 +128,7 @@ export function PublicEmbed({ publicKey, name, ranges, products }: {
             completionAction={<DialogTrigger asChild><button type="button" className={`${s.btn} ${s.btnPrimary}`} disabled={!configuration} data-test="submit-configuration">Submit</button></DialogTrigger>}
           />}
         </div>
-        <p className={s.hint}>Powered by Frontage</p>
+        <p className={s.hint}>Powered by Vistara</p>
         <DialogContent container={dialogContainer} className={s.enquiryDialog} overlayClassName={s.enquiryOverlay} showCloseButton={!pending}
           onEscapeKeyDown={event => { if (pending) event.preventDefault(); }}
           onInteractOutside={event => { if (pending) event.preventDefault(); }}>

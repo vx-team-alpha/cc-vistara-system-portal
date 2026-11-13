@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { PortalShell } from '@/components/portal/shell';
 import { portalContext } from '@/server/portal/data';
 import { signOutAction } from '@/server/auth';
-export const metadata: Metadata = { title: { default:'Overview · Frontage', template:'%s · Frontage' } };
+export const metadata: Metadata = { title: { default:'Overview · Vistara', template:'%s · Vistara' } };
 export default async function HomeLayout({children}:{children:React.ReactNode}) {
   const {account,user}=await portalContext();
   const role = account.role ?? 'user';

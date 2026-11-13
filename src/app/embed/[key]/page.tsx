@@ -4,7 +4,7 @@ import {getSupabaseAdminClient} from '@/lib/supabase/admin';
 import {PublicEmbed} from '@/components/portal/public-embed';
 import s from '@/components/portal/portal.module.css';
 export const dynamic='force-dynamic';
-export const metadata={title:'Choose your product · Frontage',robots:{index:false,follow:false}};
+export const metadata={title:'Choose your product · Vistara',robots:{index:false,follow:false}};
 export default async function EmbedPage({params}:{params:Promise<{key:string}>}){
  const {key}=await params;if(!z.uuid().safeParse(key).success)notFound();
  const db=getSupabaseAdminClient();
