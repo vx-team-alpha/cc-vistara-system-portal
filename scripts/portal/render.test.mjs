@@ -59,7 +59,7 @@ test('window glazing reveals dependent questions and inside/outside SVGs render'
   const output=renderWindow(svg,next.questions,next.picks,internal,materials,source);assert.match(output,/<svg/);assert.doesNotMatch(output,/<script|foreignObject/i);
   assert.match(output,/layertype="Dimensions"/);
   assert.match(output,/data-dimension="Overall width"/);
-  assert.match(output,new RegExp(`>(?:✎ )?${catalogueDimensions(source).find(d=>d.description==='Overall width')?.value}<`));
+  assert.match(output,new RegExp(`>${catalogueDimensions(source).find(d=>d.description==='Overall width')?.value}<`));
  }
  const result=await validateConfiguration({kind:'window',source,paths,read:async key=>read(key),layout:{product_ranges:{slug:range.slug}}},{...configuration,picks:next.picks});
  assert.ok(result.particulars.some(p=>p.question==='Glazing Method'&&p.answer==='Glazed'));
@@ -79,14 +79,16 @@ test('window and door elevations expose catalogue millimetre dimensions', async 
  assert.match(output,/data-dimension="Overall height"/);
  assert.match(output,/data-dimension="Horizontal span 1"/);
  const width=String(catalogueDimensions(source).find(d=>d.description==='Overall width').value);
- assert.match(output,new RegExp(`>(?:✎ )?${width}<`));
+ assert.match(output,new RegExp(`>${width}<`));
 
  const doorSvg=await renderDoor({data:manifest,layout:door.features.source,design:doorState(manifest,door.features.source,configuration).design,sideDesigns:{},questions:doorState(manifest,door.features.source,configuration).questions,picks:doorState(manifest,door.features.source,configuration).picks,texts:{},internal:false});
  assert.match(doorSvg,/layertype="Dimensions"/);
  assert.match(doorSvg,/data-dimension="Overall width"/);
  assert.match(doorSvg,/data-dimension="Overall height"/);
- assert.match(doorSvg,/>(?:✎ )?900</);
- assert.match(doorSvg,/>(?:✎ )?2050</);
+ assert.match(doorSvg,/font-size="(?:8[0-9]|9[0-9]|10[0-9]|11[0-2])"/);
+ assert.match(doorSvg,/>900</);
+ assert.match(doorSvg,/>2050</);
+ assert.doesNotMatch(doorSvg,/✎/);
 });
 test.after(()=>{globalThis.fetch=originalFetch;dom.window.close();});
 

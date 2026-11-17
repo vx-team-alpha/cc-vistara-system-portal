@@ -26,7 +26,25 @@ function ensureViewBoxFits(doc, minX, minY, maxX, maxY, pad = 40) {
   root.setAttribute('viewBox', `${next.x} ${next.y} ${next.width} ${next.height}`);
 }
 
+function dimensionMetrics(doc) {
+  const box = parseViewBox(doc.documentElement.getAttribute('viewBox'));
+  if (!box) return { fontSize: 72, offset: 84, tick: 18, pad: 54 };
+
+  // SVG CSS pixels are viewBox units, so a literal 16px font can render at only
+  // 2–4 screen pixels once a tall elevation is fitted into the preview. Size
+  // annotations relative to the drawing instead, targeting roughly 17px in the
+  // 420px-high desktop preview while keeping unusually large catalogues bounded.
+  const fontSize = Math.round(Math.max(56, Math.min(112, box.height / 24)));
+  return {
+    fontSize,
+    offset: Math.round(fontSize * 1.05),
+    tick: Math.round(fontSize * 0.22),
+    pad: Math.round(fontSize * 0.72),
+  };
+}
+
 function dimensionLabel(doc, { x, y, rotate = 0, value, editable, title }) {
+  const { fontSize } = dimensionMetrics(doc);
   const group = make(doc, 'g', {
     transform: `translate(${x} ${y}) rotate(${rotate})`,
     'data-dimension': title || '',
@@ -34,19 +52,19 @@ function dimensionLabel(doc, { x, y, rotate = 0, value, editable, title }) {
   });
   const text = make(doc, 'text', {
     x: 0,
-    y: 5,
+    y: Math.round(fontSize * 0.34),
     'text-anchor': 'middle',
-    // Colour and screen size come from portal CSS so themes stay readable.
+    'font-size': fontSize,
+    // Colour comes from portal CSS so both themes stay readable.
     fill: 'currentColor',
   });
-  // Pencil lives in the text so it inherits the CSS screen font-size.
-  text.textContent = editable ? `✎ ${value}` : String(value);
+  text.textContent = String(value);
   group.append(text);
   return group;
 }
 
 function dimensionLine(doc, x1, y1, x2, y2) {
-  const tick = 20;
+  const { tick } = dimensionMetrics(doc);
   const horizontal = Math.abs(y2 - y1) < 0.01;
   const attrs = {
     fill: 'none',
@@ -96,10 +114,11 @@ function ensureLayer(doc) {
 }
 
 function drawOverallDimensions(doc, layer, { x0, y0, width, height }) {
+  const metrics = dimensionMetrics(doc);
   const x1 = x0 + width;
   const y1 = y0 + height;
-  const topY = y0 - 90;
-  const leftX = x0 - 90;
+  const topY = y0 - metrics.offset;
+  const leftX = x0 - metrics.offset;
 
   layer.append(dimensionLine(doc, x0, topY, x1, topY));
   layer.append(dimensionLabel(doc, {
@@ -121,13 +140,14 @@ function drawOverallDimensions(doc, layer, { x0, y0, width, height }) {
   heightLabel.setAttribute('transform', `translate(${leftX} ${(y0 + y1) / 2}) rotate(270)`);
   layer.append(heightLabel);
 
-  ensureViewBoxFits(doc, leftX, topY, x1, y1);
+  ensureViewBoxFits(doc, leftX, topY, x1, y1, metrics.pad);
 }
 
 function drawSpanDimensions(doc, layer, spans, { x0, y0, width, height }) {
   if (!spans.length) return;
+  const metrics = dimensionMetrics(doc);
   const y1 = y0 + height;
-  const spanY = y1 + 90;
+  const spanY = y1 + metrics.offset;
   for (const span of spans) {
     const sx0 = span.x;
     const sx1 = span.x + span.w;
@@ -142,12 +162,12 @@ function drawSpanDimensions(doc, layer, spans, { x0, y0, width, height }) {
   }
   layer.append(dimensionLabel(doc, {
     x: x0 + width / 2,
-    y: spanY + 50,
+    y: spanY + Math.round(metrics.fontSize * 0.7),
     value: width,
     editable: false,
     title: 'Overall width',
   }));
-  ensureViewBoxFits(doc, x0, y0, x0 + width, spanY + 50);
+  ensureViewBoxFits(doc, x0, y0, x0 + width, spanY + Math.round(metrics.fontSize * 0.7), metrics.pad);
 }
 
 /** Replace catalogue foreignObject controls with safe SVG labels; keep dimension lines. */

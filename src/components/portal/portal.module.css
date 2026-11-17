@@ -164,7 +164,7 @@
 .elevation { display: grid; place-items: center; min-height: 420px; }
 .elevation > div { width: 100%; }
 .elevation svg { display: block; width: 100%; height: 420px; }
-/* Screen-sized type + theme tokens: SVG user-unit fonts vanish when the elevation scales down. */
+/* dimensions.js scales type in viewBox units so it resolves to readable screen type. */
 .elevation :global(g[layertype='Dimensions']) { color: var(--dimension); }
 .elevation :global(g[layertype='Dimensions'] path) {
   stroke: var(--dimension-line);
@@ -174,15 +174,14 @@
 .elevation :global(g[layertype='Dimensions'] text) {
   fill: var(--dimension);
   stroke: var(--page-bg);
-  stroke-width: 5px;
+  stroke-width: .12em;
   paint-order: stroke fill;
-  font: 600 16px/1 var(--font-body);
+  font-family: var(--font-body);
+  font-weight: 650;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 .elevation :global(g[layertype='Dimensions'] [data-dimension-kind='readonly'] text) { fill: var(--dimension-accent); }
-@media (max-width: 860px) {
-  .elevation :global(g[layertype='Dimensions'] text) { font-size: 15px; stroke-width: 4px; }
-}
 .optionList { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr)); align-items: stretch; gap: 10px; max-height: 440px; overflow: auto; margin-top: 16px; padding: 4px; overscroll-behavior: contain; scrollbar-color: var(--border-hover) transparent; }
 .optionTile { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 52px; padding: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--ink-soft); text-align: left; font: 12px/1.4 var(--font-body); cursor: pointer; }
 /* Paint the selection above both child surfaces so neither can cover it. */
@@ -255,7 +254,7 @@
 }
 
 /* Admin dialog — shared with create-user-dialog */
-.adminDialog { display: block; width: min(520px, calc(100vw - 32px)); max-width: 520px; max-height: calc(100dvh - 48px); overflow-y: auto; overscroll-behavior: contain; padding: 0; border-radius: 16px; background: var(--page-bg); color: var(--ink-soft); box-shadow: 0 0 0 1px var(--line), 0 16px 48px rgb(0 0 0 / .14); border: none; }
+.adminDialog { position: fixed; inset: 0; width: min(520px, calc(100vw - 32px)); max-width: 520px; max-height: calc(100dvh - 48px); margin: auto; overflow-y: auto; overscroll-behavior: contain; padding: 0; border-radius: 16px; background: var(--page-bg); color: var(--ink-soft); box-shadow: 0 0 0 1px var(--line), 0 16px 48px rgb(0 0 0 / .14); border: none; }
 .adminDialog::backdrop { background: rgb(0 0 0 / .4); backdrop-filter: blur(2px); }
 .adminDialogInner { padding: 24px; }
 .adminDialogHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
