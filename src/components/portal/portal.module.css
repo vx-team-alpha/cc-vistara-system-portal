@@ -122,6 +122,11 @@
 .chartLabel { color: var(--soft); font-size: 11px; }
 .mobileMenu { display: none; }
 .embed { display: block; min-height: 100dvh; padding: 28px; }
+.designerEmbed { padding: 8px 22px 22px; }
+.designerEmbed .hint:last-child { margin-top: 16px; }
+@media (min-width: 861px) {
+  .designerEmbed .embedConfig { height: calc(100dvh - 240px); }
+}
 .preview { display: block; width: 100%; max-height: 320px; object-fit: contain; margin: 20px 0; }
 .honeypot { display: none; }
 .app :is(button, a, input, select, textarea):not([data-slot='input-group-control']):focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 3px; }

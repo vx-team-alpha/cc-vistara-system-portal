@@ -2,11 +2,12 @@
 import { useSyncExternalStore, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { DashboardSquare01Icon, CodeIcon, Mail01Icon, Settings01Icon, Menu01Icon, Moon02Icon, Sun01Icon, Logout01Icon, Cancel01Icon, UserMultiple02Icon, ChartAverageIcon } from '@hugeicons/core-free-icons';
+import { DashboardSquare01Icon, CodeIcon, Mail01Icon, Settings01Icon, Menu01Icon, Moon02Icon, Sun01Icon, Logout01Icon, Cancel01Icon, UserMultiple02Icon, ChartAverageIcon, ArtboardIcon } from '@hugeicons/core-free-icons';
 import { Icon } from './icon';
 import s from './portal.module.css';
 const links = [
   { href: '/home', label: 'Overview', icon: DashboardSquare01Icon },
+  { href: '/home/designer', label: 'Designer', icon: ArtboardIcon },
   { href: '/home/widgets', label: 'Embed components', icon: CodeIcon },
   { href: '/home/quotes', label: 'Quote enquiries', icon: Mail01Icon },
   { href: '/home/settings', label: 'Settings', icon: Settings01Icon },

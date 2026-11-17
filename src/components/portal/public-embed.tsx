@@ -10,11 +10,14 @@ import s from './portal.module.css';
 
 type Product = { id: string; name: string; range_id: string; image: string };
 
-export function PublicEmbed({ publicKey, name, ranges, products }: {
+export function PublicEmbed({ publicKey, name, ranges, products, trackViews = true, note, showHeader = true }: {
   publicKey: string;
   name: string;
   ranges: { id: string; name: string }[];
   products: Product[];
+  trackViews?: boolean;
+  note?: string;
+  showHeader?: boolean;
 }) {
   const [configuration, setConfiguration] = useState<Configuration | null>(null);
   const [step, setStep] = useState<'category' | 'layout' | 'questions'>('category');
@@ -39,11 +42,12 @@ export function PublicEmbed({ publicKey, name, ranges, products }: {
       sessionStorage.setItem(key, id);
     } catch {}
     session.current = id;
+    if (!trackViews) return;
     void fetch(`/api/embed/${publicKey}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kind: 'view', session_id: id }),
     }).catch(() => {});
-  }, [publicKey]);
+  }, [publicKey, trackViews]);
 
   async function submit(form: FormData) {
     if (!product || !configuration || pending || done) return;
@@ -80,9 +84,9 @@ export function PublicEmbed({ publicKey, name, ranges, products }: {
       if (open) setMessage('');
     }}>
       <div ref={setDialogContainer} className={step === 'questions' ? s.embedConfig : undefined}>
-        <header className={s.pageHead}>
-          <div><h1 className={s.title}>{name}</h1><p className={s.note}>Explore the available products and send your selection to the team.</p></div>
-        </header>
+        {showHeader && <header className={s.pageHead}>
+          <div><h1 className={s.title}>{name}</h1><p className={s.note}>{note || 'Explore the available products and send your selection to the team.'}</p></div>
+        </header>}
         <div className={s.stack}>
           <nav className={s.embedSteps} aria-label="Configuration progress">
             {(['category', 'layout', 'questions'] as const).map((item, index) => (

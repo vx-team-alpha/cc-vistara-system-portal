@@ -7,6 +7,8 @@ The account ID is the auth user ID; RLS is the authorization boundary.
 
 - `/home`: views, quote enquiries, conversion rate, active components, recent
   enquiries and component setup. All totals come from stored records.
+- `/home/designer`: signed-in configurator for dealers; pick a live component and
+  walk the same product flow without leaving the portal (no view tracking).
 - `/home/widgets`: create separate door/window components and manage their status.
 - `/home/widgets/[id]`: name, website, public preview and copyable iframe snippet.
 - `/home/quotes`: filter and page through homeowner enquiries.
