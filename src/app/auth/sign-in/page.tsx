@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import {
   Card,
@@ -60,12 +59,6 @@ export default async function SignInPage({
           </>
         ) : null}
 
-        <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/auth/sign-up" className="underline underline-offset-4">
-            Sign up
-          </Link>
-        </p>
       </CardContent>
     </Card>
   );

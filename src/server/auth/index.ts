@@ -10,7 +10,6 @@ import {
   OAuthProviderSchema,
   RequestPasswordResetSchema,
   SignInSchema,
-  SignUpSchema,
   UpdatePasswordSchema,
   VerifyMfaSchema,
 } from "./schemas";
@@ -119,53 +118,14 @@ export async function signInAction(
 }
 
 export async function signUpAction(
-  raw: unknown,
+  _raw: unknown,
 ): Promise<ActionResult<{ redirectTo: string | null; needsEmailConfirmation: boolean }>> {
-  const parsed = SignUpSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid details." };
-  }
-
-  const supabase = await createClient();
-  const origin = await getOrigin();
-
-  const { data, error } = await supabase.auth.signUp({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    options: {
-      // Points at the PKCE route, NOT /auth/confirm. @supabase/ssr uses the PKCE
-      // flow, so GoTrue's emailed link resolves to `?code=` on this URL — a
-      // query param the server can read. Sending it to /auth/confirm instead
-      // would hand a `?code=` to a handler that only reads `token_hash`, and
-      // every confirmation would fail.
-      //
-      // The custom templates in supabase/templates hardcode /auth/confirm with
-      // `token_hash` and ignore this value's path, so both routes stay live:
-      // whichever template is in play, one of them handles the link.
-      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/home")}`,
-    },
-  });
-
-  if (error) {
-    return { ok: false, error: error.message, field: "email" };
-  }
-
-  // Two possible outcomes, depending on `enable_confirmations` in
-  // supabase/config.toml:
-  //   false (current) -> a session comes back immediately; go straight in.
-  //   true            -> no session; the user must click the emailed link.
-  // Handling both means flipping that setting does not break this action.
-  if (data.session) {
-    return {
-      ok: true,
-      data: {
-        redirectTo: postSignInDestination("/home", data.user),
-        needsEmailConfirmation: false,
-      },
-    };
-  }
-
-  return { ok: true, data: { redirectTo: null, needsEmailConfirmation: true } };
+  // Public self-serve sign-up is closed. New accounts are created from Admin →
+  // All users (`createUserAction`), which uses the service-role admin API.
+  return {
+    ok: false,
+    error: "Sign-up is disabled. Ask an administrator to create your account.",
+  };
 }
 
 export async function requestPasswordResetAction(raw: unknown): Promise<ActionOk> {
