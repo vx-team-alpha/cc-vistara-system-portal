@@ -1,11 +1,12 @@
 import { chosenLabel } from './windows.js';
+import { attachWindowDimensions, catalogueDimensions, hydrateWindowDimensions } from './dimensions.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 const XLINK = 'http://www.w3.org/1999/xlink';
 
 // Preserve the portal's profile geometry, clipping and shading. Replace only
 // the materials and glass decoration inside each captured component.
-export function renderWindow(markup, questions, picks, internal, materials = {}) {
+export function renderWindow(markup, questions, picks, internal, materials = {}, source = null) {
   if (!markup) return '';
   const doc = new DOMParser().parseFromString(markup, 'image/svg+xml');
   if (doc.querySelector('parsererror')) return '';
@@ -29,7 +30,13 @@ export function renderWindow(markup, questions, picks, internal, materials = {})
     }
     image.setAttributeNS(XLINK, 'xlink:href', materials.assets?.[next] || next);
   }
+  // Catalogue elevations already include dimension lines; swap HTML controls for
+  // safe SVG labels filled from the item's millimetre dimensions. Inside faces
+  // usually omit the layer, so synthesise the same catalogue sizes there.
+  const dimensions = catalogueDimensions(source);
+  hydrateWindowDimensions(doc, dimensions);
   for (const el of doc.querySelectorAll('script, foreignObject, style')) el.remove();
+  attachWindowDimensions(doc, dimensions);
   for (const el of doc.querySelectorAll('*')) {
     for (const attr of [...el.attributes]) if (/^on/i.test(attr.name) || attr.name === 'resize') el.removeAttribute(attr.name);
   }

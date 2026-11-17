@@ -16,6 +16,7 @@
   --muted-foreground: var(--soft); --secondary: var(--surface); --secondary-foreground: var(--ink-soft); --accent: var(--fill); --accent-foreground: var(--ink-soft);
   --primary-foreground: var(--on-primary); --destructive: var(--bad); --input: var(--border);
   --band-bg: #efefef; --band: repeating-linear-gradient(135deg, transparent 0 3px, var(--line) 3px 4px);
+  --dimension: var(--ink); --dimension-line: var(--text-2); --dimension-accent: #1d4ed8;
   --ease-out-quint: cubic-bezier(.33, 1, .68, 1);
   display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100dvh;
   background: var(--page-bg); color: var(--ink-soft); font: 14px/1.6 var(--font-body);
@@ -29,6 +30,7 @@
   --ok: #7fd1a0; --ok-bg: rgb(127 209 160 / .1); --bad: #f4a3a9; --bad-bg: rgb(244 163 169 / .1);
   --warn: #edc483; --warn-bg: rgb(237 196 131 / .1); --rule-highlight: #262626; --rule-shadow: #0b0b0b;
   --ring: #a499ff; --focus-shadow: 0 0 0 3px rgb(99 80 255 / .35); --band-bg: #191919;
+  --dimension: var(--ink); --dimension-line: var(--soft); --dimension-accent: #93c5fd;
 }
 .side { position: sticky; top: 0; display: flex; flex-direction: column; height: 100dvh; padding: 16px 12px 0; background: var(--side-bg); box-shadow: var(--hair-r); }
 .brand { display: flex; align-items: center; gap: 10px; padding: 8px 10px 24px; color: var(--ink); text-decoration: none; }
@@ -162,6 +164,25 @@
 .elevation { display: grid; place-items: center; min-height: 420px; }
 .elevation > div { width: 100%; }
 .elevation svg { display: block; width: 100%; height: 420px; }
+/* Screen-sized type + theme tokens: SVG user-unit fonts vanish when the elevation scales down. */
+.elevation :global(g[layertype='Dimensions']) { color: var(--dimension); }
+.elevation :global(g[layertype='Dimensions'] path) {
+  stroke: var(--dimension-line);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.elevation :global(g[layertype='Dimensions'] text) {
+  fill: var(--dimension);
+  stroke: var(--page-bg);
+  stroke-width: 5px;
+  paint-order: stroke fill;
+  font: 600 16px/1 var(--font-body);
+  letter-spacing: -0.02em;
+}
+.elevation :global(g[layertype='Dimensions'] [data-dimension-kind='readonly'] text) { fill: var(--dimension-accent); }
+@media (max-width: 860px) {
+  .elevation :global(g[layertype='Dimensions'] text) { font-size: 15px; stroke-width: 4px; }
+}
 .optionList { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr)); align-items: stretch; gap: 10px; max-height: 440px; overflow: auto; margin-top: 16px; padding: 4px; overscroll-behavior: contain; scrollbar-color: var(--border-hover) transparent; }
 .optionTile { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 52px; padding: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--ink-soft); text-align: left; font: 12px/1.4 var(--font-body); cursor: pointer; }
 /* Paint the selection above both child surfaces so neither can cover it. */

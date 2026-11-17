@@ -1,4 +1,5 @@
 import { glassUnits } from './glass-units.js';
+import { attachDoorDimensions } from './dimensions.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const XL = 'http://www.w3.org/1999/xlink';
@@ -288,7 +289,16 @@ export async function renderDoor({ data, layout, design, sideDesigns, questions,
       if (path) {
         const clip = path.cloneNode(true);
         clip.id = `pane-aperture-${index}`;
-        if (apertureGroup.hasAttribute('transform')) clip.setAttribute('transform', apertureGroup.getAttribute('transform'));
+        if (apertureGroup.hasAttribute('transform')) {
+          let transform = apertureGroup.getAttribute('transform');
+          // Inside-face paths are already mirrored by the catalogue. Their
+          // selector translation is not, so carrying its positive x offset
+          // across clips away half of a centred pane.
+          if (glassImages().some(image => /scale\(\s*-1[\s,]+1\s*\)/.test(image.getAttribute('transform') || ''))) {
+            transform = transform.replace(/translate\(\s*(-?\d+(?:\.\d+)?)\s*[ ,]\s*(-?\d+(?:\.\d+)?)\s*\)/, (_, x, y) => `translate(${-Number(x)} ${y})`);
+          }
+          clip.setAttribute('transform', transform);
+        }
         nested.querySelector('defs').append(clip);
         for (const image of glassImages()) {
           const group = make(base, 'g', { 'clip-path': `url(#${clip.id})` });
@@ -444,6 +454,7 @@ export async function renderDoor({ data, layout, design, sideDesigns, questions,
       if (/169,\s*169,\s*169/.test(rect.getAttribute('fill') || '')) rect.setAttribute('fill', `rgb(${thresholdRgb.join(',')})`);
     }
   }
+  attachDoorDimensions(base, layout);
   base.documentElement.setAttribute('aria-label', `${internal ? 'Internal' : 'External'} view of ${layout.layoutName}`);
   return new XMLSerializer().serializeToString(base.documentElement);
 }
