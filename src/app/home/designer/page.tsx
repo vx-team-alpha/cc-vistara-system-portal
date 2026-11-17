@@ -47,7 +47,7 @@ export default async function DesignerPage({
     <>
       <PageHead
         title="Designer"
-        note="Walk through product options for a live component. Enquiries you submit here still appear under Quote enquiries."
+        note="Walk through product options for a live component. Quote requests you submit here still appear under Quote queries."
       />
       <div className={s.stack}>
         <div className={s.toolbar}>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PageHead, Card, Badge, formatDate, portalStyles as s } from '@/components/portal/ui';
+import { PageHead, Card, Badge, Empty, formatDate, portalStyles as s } from '@/components/portal/ui';
 import { getAdminStats, getAllAccounts } from '@/server/admin/data';
 import { UserMultiple02Icon, CodeIcon, Mail01Icon, ViewIcon } from '@hugeicons/core-free-icons';
 import { Icon } from '@/components/portal/icon';
@@ -13,7 +13,7 @@ export default async function AdminOverviewPage() {
   const metrics = [
     { label: 'Total businesses', value: stats.totalAccounts.toLocaleString(), note: 'Registered accounts', icon: UserMultiple02Icon },
     { label: 'Embed components', value: stats.totalWidgets.toLocaleString(), note: 'Across all accounts', icon: CodeIcon },
-    { label: 'All-time enquiries', value: stats.totalLeads.toLocaleString(), note: 'Quote submissions', icon: Mail01Icon },
+    { label: 'All-time queries', value: stats.totalLeads.toLocaleString(), note: 'Quote submissions', icon: Mail01Icon },
     { label: 'All-time sessions', value: stats.totalViews.toLocaleString(), note: 'Widget impressions', icon: ViewIcon },
   ];
 
@@ -36,7 +36,7 @@ export default async function AdminOverviewPage() {
       <div className={s.stack}>
         <Card title="All businesses" note={`${accounts.length} registered ${accounts.length === 1 ? 'account' : 'accounts'}`} flush>
           {accounts.length === 0 ? (
-            <div style={{ padding: '32px 22px', color: 'var(--soft)', fontSize: 14 }}>No accounts yet.</div>
+            <Empty title="No accounts yet">New businesses will appear here after registration.</Empty>
           ) : (
             <div className={s.tableScroll}>
               <table className={s.table}>

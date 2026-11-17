@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { isLinkableProviderConfigured } from "@/lib/auth/oauth-providers";
 import { authAction } from "@/server/auth-wrapper";
 import {
@@ -54,6 +54,7 @@ export const updateNameAction = authAction(
       return { ok: false, error: "Could not update your name. Please try again." };
     }
 
+    revalidateTag("settings-data", "max");
     revalidatePath("/home/settings");
     return { ok: true };
   },
@@ -143,6 +144,7 @@ export const unlinkIdentityAction = authAction(
       return { ok: false, error: "Could not disconnect that account. Please try again." };
     }
 
+    revalidateTag("settings-data", "max");
     revalidatePath("/home/settings");
     return { ok: true };
   },

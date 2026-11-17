@@ -11,7 +11,7 @@ export async function loadPublicCatalogue(layoutId:string,typeId:number){
  const paths=await response.json() as Record<string,string>;
  const kind=layout.product_ranges.configurator_types.slug;
  const folder=layout.product_ranges.slug.replace(/^advance70-/,'');
- const read=async(key:string):Promise<Json>=>{if(!paths[key])throw new Error(`Catalogue source missing: ${key}`);const result=await fetch(paths[key],{cache:'no-store'});if(!result.ok)throw new Error('Could not load catalogue source.');return result.json();};
+ const read=async(key:string):Promise<Json>=>{if(!paths[key])throw new Error(`Catalogue source missing: ${key}`);const result=await fetch(paths[key],{cache:'force-cache'});if(!result.ok)throw new Error('Could not load catalogue source.');return result.json();};
  const source=(layout.features as Record<string,Json>).source;
  return {layout,kind,source,paths,urls:kind==='door'?{manifest:paths['/catalogue/manifest.json']}:{shared:paths[`/window-data/${folder}/questions.json`],overrides:paths[`/window-data/${folder}/questions-by-style.json`],materials:paths['/window-data/render-materials.json'],images:paths[`/window-data/${folder}/option-images.json`]},read};
 }

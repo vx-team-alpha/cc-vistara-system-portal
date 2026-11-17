@@ -75,6 +75,30 @@ export function PublicEmbed({ publicKey, name, ranges, products, trackViews = tr
     }
   }
 
+  function resetExperience() {
+    const initialRange = ranges.find(r => products.some(p => p.range_id === r.id))?.id || '';
+    const nextSession = crypto.randomUUID();
+
+    setConfiguration(null);
+    setStep('category');
+    setRange(initialRange);
+    setSelected(products.find(p => p.range_id === initialRange)?.id || '');
+    setMessage('');
+    setDone(false);
+    session.current = nextSession;
+
+    try {
+      sessionStorage.setItem(`frontage-session:${publicKey}`, nextSession);
+    } catch {}
+
+    if (trackViews) {
+      void fetch(`/api/embed/${publicKey}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'view', session_id: nextSession }),
+      }).catch(() => {});
+    }
+  }
+
   if (!products.length) return <section className={s.empty}><h1>No products available</h1><p>Please contact the website owner for help.</p></section>;
 
   return (
@@ -82,6 +106,7 @@ export function PublicEmbed({ publicKey, name, ranges, products, trackViews = tr
       if (pending) return;
       setDialogOpen(open);
       if (open) setMessage('');
+      if (!open && done) resetExperience();
     }}>
       <div ref={setDialogContainer} className={step === 'questions' ? s.embedConfig : undefined}>
         {showHeader && <header className={s.pageHead}>

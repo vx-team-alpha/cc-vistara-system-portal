@@ -45,19 +45,18 @@ export function RoleSelect({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div className={s.roleControl}>
       <select
         className={s.select}
         value={role}
         onChange={handleChange}
         disabled={pending}
-        style={{ width: 'auto', minWidth: 90 }}
         aria-label="Change user role"
       >
         <option value="user">user</option>
         <option value="admin">admin</option>
       </select>
-      {error && <small style={{ color: 'var(--bad)' }}>{error}</small>}
+      {error && <small className={s.fieldError}>{error}</small>}
     </div>
   );
 }

@@ -10,6 +10,22 @@ import s from './portal.module.css';
 import { ConfiguratorSkeleton, DrawingSkeleton } from './loading-skeletons';
 const empty={style:'',design_id:'',side_designs:{},picks:{},texts:{}};
 async function read(url,signal){const response=await fetch(url,{signal});if(!response.ok)throw new Error('The catalogue could not be loaded.');return response.json();}
+const runtimeCache=new Map();
+function runtimeKey(publicKey,layoutId){return `${publicKey}:${layoutId}`;}
+function loadRuntime(publicKey,layoutId){
+ const key=runtimeKey(publicKey,layoutId);
+ if(runtimeCache.has(key))return runtimeCache.get(key);
+ const promise=read(`/api/embed/${publicKey}/config?layout=${layoutId}`).then(async config=>{
+  installAssets(config.paths);
+  if(config.kind==='door')return {...config,data:hydrate(await read(config.urls.manifest))};
+  const [shared,overrides,materials,images]=await Promise.all(['shared','overrides','materials','images'].map(name=>read(config.urls[name])));
+  const originals=Object.fromEntries(Object.entries({...config.paths,...materials.assets}).filter(([name])=>/^https?:/.test(name)&&!name.includes('/storage/v1/')).map(([name,value])=>[value,name]));
+  return {...config,shared,overrides,materials:{...materials,originals},images:imageMap(images)};
+ }).catch(error=>{runtimeCache.delete(key);throw error;});
+ runtimeCache.set(key,promise);
+ if(runtimeCache.size>12){const oldest=runtimeCache.keys().next().value;if(oldest!==key)runtimeCache.delete(oldest);}
+ return promise;
+}
 /** @param {{publicKey:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, completionAction?:import('react').ReactNode}} props */
 export function Configurator({publicKey,layoutId,onChange,completionAction=null}){
  const [runtime,setRuntime]=useState(null),[error,setError]=useState(''),[retry,setRetry]=useState(0);
@@ -18,15 +34,10 @@ export function Configurator({publicKey,layoutId,onChange,completionAction=null}
  const [moreOptions,setMoreOptions]=useState(false);
  const [drawing,setDrawing]=useState({request:'',markup:'',error:''});
  useEffect(()=>{
-  const controller=new AbortController();
-  read(`/api/embed/${publicKey}/config?layout=${layoutId}`,controller.signal).then(async config=>{
-   installAssets(config.paths);
-   if(config.kind==='door')return {...config,data:hydrate(await read(config.urls.manifest,controller.signal))};
-   const [shared,overrides,materials,images]=await Promise.all(['shared','overrides','materials','images'].map(key=>read(config.urls[key],controller.signal)));
-   const originals=Object.fromEntries(Object.entries({...config.paths,...materials.assets}).filter(([key])=>/^https?:/.test(key)&&!key.includes('/storage/v1/')).map(([key,value])=>[value,key]));
-   return {...config,shared,overrides,materials:{...materials,originals},images:imageMap(images)};
-  }).then(value=>{if(!controller.signal.aborted){setRuntime(value);setError('');}}).catch(e=>{if(e.name!=='AbortError')setError(e.message);});
-  return()=>controller.abort();
+  let active=true;
+  if(retry)runtimeCache.delete(runtimeKey(publicKey,layoutId));
+  loadRuntime(publicKey,layoutId).then(value=>{if(active){setRuntime(value);setError('');}}).catch(error=>{if(active)setError(error.message);});
+  return()=>{active=false;};
  },[publicKey,layoutId,retry]);
  const state=useMemo(()=>runtime?(runtime.kind==='door'?doorState(runtime.data,runtime.source,configuration):windowState(runtime.source,runtime.shared,runtime.overrides,configuration.picks,runtime.images)):null,[runtime,configuration]);
  const normalized=JSON.stringify(state?{...configuration,style:state.style||'',design_id:state.design?.designId||'',picks:state.picks}:null);

@@ -1,4 +1,5 @@
 import 'server-only';
+import { unstable_cache } from 'next/cache';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export type EmbedProduct = {
@@ -13,7 +14,7 @@ export type EmbedCatalogue = {
   products: EmbedProduct[];
 };
 
-export async function loadEmbedCatalogue(configuratorTypeId: number): Promise<EmbedCatalogue> {
+const cachedEmbedCatalogue = unstable_cache(async (configuratorTypeId: number): Promise<EmbedCatalogue> => {
   const db = getSupabaseAdminClient();
   const { data: ranges, error: rangeError } = await db
     .from('product_ranges')
@@ -68,4 +69,8 @@ export async function loadEmbedCatalogue(configuratorTypeId: number): Promise<Em
   });
 
   return { ranges: ranges || [], products };
+}, ['embed-catalogue'], { revalidate: 3600, tags: ['catalogue'] });
+
+export async function loadEmbedCatalogue(configuratorTypeId: number): Promise<EmbedCatalogue> {
+  return cachedEmbedCatalogue(configuratorTypeId);
 }

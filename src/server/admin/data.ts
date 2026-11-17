@@ -1,5 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { portalContext } from '@/server/portal/data';
@@ -25,8 +26,7 @@ export type AdminAccount = {
 };
 
 /** Platform-wide totals for the admin overview. */
-export async function getAdminStats() {
-  await adminContext();
+const cachedAdminStats = unstable_cache(async () => {
   const admin = getSupabaseAdminClient();
 
   const [accounts, widgets, leads, views] = await Promise.all([
@@ -42,11 +42,15 @@ export async function getAdminStats() {
     totalLeads: leads.count ?? 0,
     totalViews: views.count ?? 0,
   };
+}, ['admin-stats'], { revalidate: 60, tags: ['admin-data'] });
+
+export async function getAdminStats() {
+  await adminContext();
+  return cachedAdminStats();
 }
 
 /** All registered accounts ordered by newest first. */
-export async function getAllAccounts(): Promise<AdminAccount[]> {
-  await adminContext();
+const cachedAccounts = unstable_cache(async (): Promise<AdminAccount[]> => {
   const admin = getSupabaseAdminClient();
 
   const { data, error } = await admin
@@ -56,6 +60,11 @@ export async function getAllAccounts(): Promise<AdminAccount[]> {
 
   if (error) throw new Error('Could not load accounts.');
   return data as AdminAccount[];
+}, ['admin-accounts'], { revalidate: 120, tags: ['admin-data'] });
+
+export async function getAllAccounts(): Promise<AdminAccount[]> {
+  await adminContext();
+  return cachedAccounts();
 }
 
 /** Per-account stats for the admin breakdown table. */

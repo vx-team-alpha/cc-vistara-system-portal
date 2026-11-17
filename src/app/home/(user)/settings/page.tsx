@@ -1,16 +1,16 @@
-import { redirect } from "next/navigation";
 import {
   getConfiguredLinkableProviders,
   getLinkableProviderOption,
   isKnownLinkableProvider,
 } from "@/lib/auth/oauth-providers";
-import { createClient } from "@/lib/supabase/server";
 import type { LinkableProvider } from "@/server/auth/schemas";
+import { getSettingsData } from "@/server/settings/data";
 import { UpdateNameCard } from "./_components/update-name-card";
 import { UpdateEmailCard } from "./_components/update-email-card";
 import { UpdatePasswordCard } from "./_components/update-password-card";
 import { ConnectedAccountsCard, type ConnectedIdentity } from "./_components/connected-accounts-card";
 import { DeleteAccountCard } from "./_components/delete-account-card";
+import { portalStyles as s } from "@/components/portal/ui";
 
 function isLinkableProvider(provider: string): provider is LinkableProvider {
   return isKnownLinkableProvider(provider);
@@ -25,21 +25,9 @@ function isLinkableProvider(provider: string): provider is LinkableProvider {
  * only thing standing between an anonymous caller and these mutations.
  */
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const { data: claims, error: claimsError } = await supabase.auth.getClaims();
+  const { account, user, identities: identitiesData } = await getSettingsData();
 
-  if (claimsError || !claims?.claims) {
-    redirect("/auth/sign-in?next=%2Fhome%2Fsettings");
-  }
-
-  const userId = claims.claims.sub;
-
-  const [{ data: account }, { data: identitiesData }] = await Promise.all([
-    supabase.from("accounts").select("id, name, email").eq("id", userId).maybeSingle(),
-    supabase.auth.getUserIdentities(),
-  ]);
-
-  const identities: ConnectedIdentity[] = (identitiesData?.identities ?? [])
+  const identities: ConnectedIdentity[] = identitiesData
     .filter((identity) => isLinkableProvider(identity.provider))
     .map((identity) => ({
       identityId: identity.identity_id,
@@ -58,12 +46,12 @@ export default async function SettingsPage() {
     }
   }
 
-  const totalIdentityCount = identitiesData?.identities.length ?? 0;
+  const totalIdentityCount = identitiesData.length;
 
   return (
-    <div className="grid gap-6">
-      <UpdateNameCard initialName={account?.name ?? ""} />
-      <UpdateEmailCard currentEmail={account?.email ?? claims.claims.email ?? ""} />
+    <div className={s.settingsStack}>
+      <UpdateNameCard initialName={account.name ?? ""} />
+      <UpdateEmailCard currentEmail={account.email ?? user.email ?? ""} />
       <UpdatePasswordCard />
       {linkableProviders.length > 0 ? (
         <ConnectedAccountsCard

@@ -1,5 +1,5 @@
 'use server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { authAction } from '@/server/auth-wrapper';
@@ -49,6 +49,7 @@ export const createUserAction = authAction(
       .update({ name: input.name, role: 'user' })
       .eq('id', userData.user.id);
 
+    revalidateTag('admin-data', 'max');
     revalidatePath('/home/admin', 'layout');
     return { ok: true as const, id: userData.user.id };
   },
@@ -94,6 +95,7 @@ export const updateRoleAction = authAction(
       return { ok: false as const, error: authError.message };
     }
 
+    revalidateTag('admin-data', 'max');
     revalidatePath('/home/admin', 'layout');
     return { ok: true as const };
   },

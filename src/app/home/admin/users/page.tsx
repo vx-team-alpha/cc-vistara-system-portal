@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { PageHead, Card, formatDate, portalStyles as s } from '@/components/portal/ui';
+import { PageHead, Card, Empty, formatDate, portalStyles as s } from '@/components/portal/ui';
 import { getAllAccounts, adminContext } from '@/server/admin/data';
 import { CreateUserDialog } from '../_components/create-user-dialog';
 import { RoleSelect } from '../_components/role-select';
@@ -26,9 +26,7 @@ export default async function AdminUsersPage() {
           flush
         >
           {accounts.length === 0 ? (
-            <div style={{ padding: '32px 22px', color: 'var(--soft)', fontSize: 14 }}>
-              No accounts yet.
-            </div>
+            <Empty title="No accounts yet">Create the first account to begin managing users.</Empty>
           ) : (
             <div className={s.tableScroll}>
               <table className={s.table}>
@@ -43,7 +41,7 @@ export default async function AdminUsersPage() {
                   {accounts.map(account => (
                     <tr key={account.id}>
                       <td>
-                        <strong style={{ display: 'block' }}>{account.name}</strong>
+                        <strong className={s.cellTitle}>{account.name}</strong>
                         <small>{account.email ?? '—'}</small>
                       </td>
                       <td>
