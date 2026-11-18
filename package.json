@@ -68,8 +68,11 @@
     "typescript": "^6.0.3"
   },
   "lint-staged": {
-    "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}": [
+    "*.{js,mjs,cjs,ts,tsx,mts,cts}": [
       "oxlint --fix",
+      "oxfmt"
+    ],
+    "*.jsx": [
       "oxfmt"
     ],
     "*.{css,json,jsonc,md,mdx,yml,yaml,html}": [

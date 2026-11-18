@@ -274,6 +274,13 @@
   gap: 16px;
   margin-bottom: 28px;
 }
+.pageActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
 .titleRow {
   display: flex;
   align-items: center;
@@ -1108,27 +1115,44 @@
 .configurator {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
   gap: 20px;
   margin-top: 20px;
+  /* Cap height so option scrolling stays in-panel and step actions stay visible. */
+  height: min(720px, calc(100svh - 160px));
+  max-height: min(720px, calc(100svh - 160px));
 }
 .elevationPanel,
 .optionPanel {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   padding: 20px 22px;
   box-shadow: var(--hair-t), var(--hair-b), var(--hair-l), var(--hair-r);
+}
+.elevationPanel > .toolbar,
+.elevationPanel > .hint {
+  flex-shrink: 0;
 }
 .elevation {
   display: grid;
   place-items: center;
-  min-height: 420px;
+  flex: 1;
+  min-height: 0;
 }
 .elevation > div {
   width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 .elevation svg {
   display: block;
   width: 100%;
-  height: 420px;
+  height: 100%;
+  max-height: 420px;
 }
 /* dimensions.js scales type in viewBox units so it resolves to readable screen type. */
 .elevation :global(g[layertype="Dimensions"]) {
@@ -1223,12 +1247,22 @@
 @media (max-width: 860px) {
   .configurator {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    height: auto;
+    max-height: none;
+  }
+  .elevationPanel {
+    overflow: visible;
   }
   .elevation {
     min-height: 300px;
   }
   .elevation svg {
     height: 300px;
+    max-height: none;
+  }
+  .optionPanel {
+    max-height: min(520px, calc(100svh - 8rem));
   }
 }
 .enquiryOverlay.enquiryOverlay {
@@ -1477,11 +1511,6 @@
 }
 
 /* Let the option content scroll while the step controls remain in view. */
-.optionPanel {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
 .optionHeader {
   display: grid;
   gap: 12px;
@@ -1502,8 +1531,12 @@
   position: relative;
   min-height: 0;
   flex: 1;
+  overflow: hidden;
 }
 .optionScroll {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
   padding: 4px;
 }
 .optionScroll:focus-visible {
@@ -1517,16 +1550,13 @@
   align-items: start;
 }
 .optionPanel > .actions {
-  margin-top: 16px;
-}
-@media (max-width: 860px) {
-  .optionPanel > .actions {
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
-    padding: 12px 0;
-    background: var(--page-bg);
-  }
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin-top: 12px;
+  padding: 12px 0 0;
+  background: var(--page-bg);
+  box-shadow: 0 -10px 14px -12px color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
 .brandingFields {

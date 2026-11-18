@@ -77,9 +77,7 @@ export function Configurator({
     [internal, setInternal] = useState(false),
     [index, setIndex] = useState(0),
     [query, setQuery] = useState("");
-  const optionScroll = useRef(null),
-    optionContent = useRef(null);
-  const [moreOptions, setMoreOptions] = useState(false);
+  const optionScroll = useRef(null);
   const [drawing, setDrawing] = useState({ request: "", markup: "", error: "" });
   useEffect(() => {
     let active = true;
@@ -176,21 +174,7 @@ export function Configurator({
     return () => controller.abort();
   }, [runtime, state, configuration.texts, internal, request]);
   useEffect(() => {
-    const viewport = optionScroll.current,
-      content = optionContent.current;
-    if (!viewport || !content) return;
-    viewport.scrollTop = 0;
-    const update = () =>
-      setMoreOptions(viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop > 2);
-    const observer = new ResizeObserver(update);
-    observer.observe(viewport);
-    observer.observe(content);
-    viewport.addEventListener("scroll", update, { passive: true });
-    update();
-    return () => {
-      observer.disconnect();
-      viewport.removeEventListener("scroll", update);
-    };
+    if (optionScroll.current) optionScroll.current.scrollTop = 0;
   }, [runtime, index, query, state?.questions.length]);
   if (error)
     return (
@@ -287,7 +271,7 @@ export function Configurator({
               </select>
             </div>
             <h2 className={s.cardTitle}>{question.name.replace(" (Door)", "")}</h2>
-            <div className={s.optionScrollFrame} data-more={moreOptions}>
+            <div className={s.optionScrollFrame}>
               <div
                 ref={optionScroll}
                 className={s.optionScroll}
@@ -295,7 +279,7 @@ export function Configurator({
                 role="region"
                 aria-label="Available options"
               >
-                <div ref={optionContent}>
+                <div>
                   {(question.options || []).length > 12 && (
                     <div className={s.field}>
                       <label className={s.label} htmlFor="option-search">
