@@ -1,0 +1,8 @@
+{
+  "elevationBlack": "https://media.quotila.com/images%2f578%2fsharedhardware_handles%2fexternal_image_black_1200_inline_bar.png",
+  "thumbnailBlack": "https://media.quotila.com/images%2f578%2fsharedhardware_handles%2fthumbnail_black_1200_inline_bar.png",
+  "geometry": { "x": 726, "y": 400, "width": 39, "height": 1200 },
+  "pixelSize": { "width": 31, "height": 1200 },
+  "chromeElevation": null,
+  "note": "Only black external_image_*_1200_inline_bar.png is publicly fetchable (200). Chrome/satin variants return 403."
+}

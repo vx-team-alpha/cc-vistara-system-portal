@@ -902,6 +902,9 @@
   margin: 28px;
 }
 .embedExperience {
+  /* Media wells stay light so product SVGs / photos remain readable. */
+  --media-well: #fff;
+  --media-well-edge: color-mix(in srgb, var(--ink) 8%, transparent);
   container-name: embed-gallery;
   container-type: inline-size;
   min-width: 0;
@@ -910,8 +913,11 @@
 }
 .embedTheme {
   --page-bg: var(--brand-background);
-  --surface: color-mix(in srgb, var(--brand-background) 96%, var(--brand-text));
-  --surface-hover: color-mix(in srgb, var(--brand-background) 91%, var(--brand-text));
+  /* Lift surfaces toward white instead of darkening toward brand text. */
+  --surface: color-mix(in srgb, var(--brand-background) 78%, #fff);
+  --surface-hover: color-mix(in srgb, var(--brand-background) 64%, #fff);
+  --media-well: color-mix(in srgb, var(--brand-background) 22%, #fff);
+  --media-well-edge: color-mix(in srgb, var(--brand-text) 10%, transparent);
   --ink: var(--brand-text);
   --ink-soft: var(--brand-text);
   --text-2: color-mix(in srgb, var(--brand-text) 82%, var(--brand-background));
@@ -1223,7 +1229,11 @@
   height: 124px;
   padding: 12px;
   overflow: hidden;
-  background: var(--surface-hover);
+  background: var(--media-well, var(--surface-hover));
+  box-shadow: inset 0 -1px 0 var(--media-well-edge, transparent);
+}
+.embedExperience .optionMedia {
+  background: var(--media-well);
 }
 .optionImage {
   display: block;
@@ -1357,7 +1367,8 @@
   grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
   padding: 20px;
-  background: var(--surface-hover);
+  background: var(--media-well);
+  box-shadow: inset 0 -1px 0 var(--media-well-edge);
 }
 .embedCategoryBody {
   display: grid;
@@ -1399,7 +1410,8 @@
   grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
   padding: 24px;
-  background: var(--surface-hover);
+  background: var(--media-well);
+  box-shadow: inset 0 -1px 0 var(--media-well-edge);
 }
 .embedSvg {
   display: block;
