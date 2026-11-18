@@ -1,11 +1,12 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { PageHead, Card, Empty, portalStyles as s } from '@/components/portal/ui';
-import { PublicEmbed } from '@/components/portal/public-embed';
-import { getWidgets } from '@/server/portal/data';
-import { loadEmbedCatalogue } from '@/server/portal/embed-products';
+import type { Metadata } from "next";
+import Link from "next/link";
 
-export const metadata: Metadata = { title: 'Designer' };
+import { PublicEmbed } from "@/components/portal/public-embed";
+import { PageHead, Card, Empty, portalStyles as s } from "@/components/portal/ui";
+import { getWidgets } from "@/server/portal/data";
+import { loadEmbedCatalogue } from "@/server/portal/embed-products";
+
+export const metadata: Metadata = { title: "Designer" };
 
 export default async function DesignerPage({
   searchParams,
@@ -14,8 +15,7 @@ export default async function DesignerPage({
 }) {
   const [widgets, query] = await Promise.all([getWidgets(), searchParams]);
   const live = widgets.filter((w) => w.enabled);
-  const selected =
-    live.find((w) => w.id === query.widget) || live[0] || null;
+  const selected = live.find((w) => w.id === query.widget) || live[0] || null;
 
   if (!live.length) {
     return (
@@ -33,8 +33,8 @@ export default async function DesignerPage({
               </Link>
             }
           >
-            The designer uses one of your live embed components. Create a door or
-            window component first, then return here to walk through the options.
+            The designer uses one of your live embed components. Create a door or window component
+            first, then return here to walk through the options.
           </Empty>
         </Card>
       </>
@@ -57,7 +57,7 @@ export default async function DesignerPage({
                 key={w.id}
                 className={s.tab}
                 href={`/home/designer?widget=${w.id}`}
-                aria-current={selected!.id === w.id ? 'page' : undefined}
+                aria-current={selected!.id === w.id ? "page" : undefined}
               >
                 {w.name}
                 <span className={s.hint}> · {w.configurator_types.label}</span>
@@ -77,11 +77,17 @@ export default async function DesignerPage({
             <PublicEmbed
               key={selected!.public_key}
               publicKey={selected!.public_key}
-              name={selected!.name}
               ranges={catalogue.ranges}
               products={catalogue.products}
               trackViews={false}
-              showHeader={false}
+              branding={{
+                name: selected!.brand_name,
+                logoUrl: selected!.brand_logo_url,
+                phone: selected!.brand_phone,
+                primaryColor: selected!.brand_primary_color,
+                backgroundColor: selected!.brand_background_color,
+                textColor: selected!.brand_text_color,
+              }}
             />
           </div>
         </Card>

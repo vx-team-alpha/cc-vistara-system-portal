@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Creates a new git worktree and spins up its own dedicated Supabase VM,
-# writing the resulting credentials into that worktree's .env.local.
+# Creates a new git worktree and spins up its own dedicated Supabase VM
+# without modifying that worktree's project environment files.
 #
 # Usage: scripts/supabase-vm/worktree-add.sh <name> [base-branch]
 set -euo pipefail

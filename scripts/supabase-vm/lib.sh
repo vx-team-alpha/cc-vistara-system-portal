@@ -32,7 +32,6 @@ TEMPLATE_VM_NAME="${SUPABASE_VM_TEMPLATE:-sb-template}"
 # directory was committed won't have its own copy on disk.
 CLOUD_INIT_FILE="$SCRIPT_DIR/cloud-init.yaml"
 PROVISION_FILE="$SCRIPT_DIR/provision.sh"
-ENV_FILE="$REPO_ROOT/.env.local"
 
 # Host-side, per-worktree state for the idle-shutdown watcher (PID + last
 # activity timestamp). Not committed — see .gitignore.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Ensures this worktree's dedicated OrbStack VM exists and is running, starts
-# Supabase inside it, and writes the resulting credentials to .env.local.
+# Ensures this worktree's dedicated OrbStack VM exists and is running, then
+# starts Supabase inside it without modifying project environment files.
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/lib.sh"
 
@@ -58,42 +58,7 @@ log "Starting Supabase inside '$VM_NAME'..."
 vm_run "supabase start --workdir '$REPO_ROOT'" \
   || die "'supabase start' failed inside '$VM_NAME' (see error above)."
 
-log "Reading credentials..."
-RAW_ENV_OUTPUT="$(vm_run "supabase status --workdir '$REPO_ROOT' -o env \
-  --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
-  --override-name auth.publishable_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
-  --override-name auth.secret_key=SUPABASE_SERVICE_ROLE_KEY \
-  --override-name db.url=SUPABASE_DB_URL \
-  --override-name studio.url=SUPABASE_STUDIO_URL")" \
-  || die "'supabase status' failed inside '$VM_NAME' (see error above)."
-
-# `-o env` always emits every field under its default name too (JWT_SECRET,
-# ANON_KEY, FUNCTIONS_URL, ...) — --override-name only adds renamed
-# duplicates, it doesn't suppress the rest. Filter down to just the keys
-# we actually want in .env.local.
-ENV_OUTPUT="$(echo "$RAW_ENV_OUTPUT" | grep -E '^(NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_DB_URL|SUPABASE_STUDIO_URL)=')"
-
-# `supabase status` reports 127.0.0.1/localhost because that's correct from
-# inside the VM — but every worktree VM binds the same config.toml ports, and
-# OrbStack does not forward them to the host's loopback (unlike Docker
-# Desktop). The only host-routable address for a given VM's ports is its
-# OrbStack domain, so rewrite the host in every emitted URL before this
-# reaches .env.local — otherwise pnpm dev (which runs on the host) and
-# tooling like `supabase:diff` silently point at whichever VM happens to
-# own that port on 127.0.0.1, if any.
-ENV_OUTPUT="$(echo "$ENV_OUTPUT" | sed -E "s#(127\.0\.0\.1|localhost)#${VM_NAME}.orb.local#g")"
-
-touch "$ENV_FILE"
-while IFS= read -r line; do
-  [ -z "$line" ] && continue
-  key="${line%%=*}"
-  # Drop any existing line for this key, then append the fresh value.
-  grep -v -E "^${key}=" "$ENV_FILE" > "$ENV_FILE.tmp" || true
-  mv "$ENV_FILE.tmp" "$ENV_FILE"
-  echo "$line" >> "$ENV_FILE"
-done <<< "$ENV_OUTPUT"
-
-log "Credentials written to $ENV_FILE"
+log "Project environment files were left unchanged."
 log "VM: $VM_NAME"
 
 start_idle_watcher

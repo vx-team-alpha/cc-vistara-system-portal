@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:oxlint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck",
     "supabase:template": "scripts/supabase-vm/template.sh",
     "supabase:template-refresh": "scripts/supabase-vm/template.sh --force",
     "supabase:template-destroy": "scripts/supabase-vm/template-destroy.sh",
@@ -21,7 +26,8 @@
     "worktree:remove": "scripts/supabase-vm/worktree-remove.sh",
     "catalogue:prepare": "node scripts/catalogue/seed.mjs prepare",
     "catalogue:upload": "node scripts/catalogue/seed.mjs upload",
-    "catalogue:seed": "node scripts/catalogue/seed.mjs seed"
+    "catalogue:seed": "node scripts/catalogue/seed.mjs seed",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.5",
@@ -53,8 +59,21 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.5",
+    "husky": "^9.1.7",
     "jsdom": "^31.0.0",
+    "lint-staged": "^17.6.1",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
     "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}": [
+      "oxlint --fix",
+      "oxfmt"
+    ],
+    "*.{css,json,jsonc,md,mdx,yml,yaml,html}": [
+      "oxfmt"
+    ]
   }
 }

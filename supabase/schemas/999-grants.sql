@@ -179,7 +179,7 @@ grant usage, select on sequence public.configurator_types_id_seq to service_role
 
 revoke all on public.embed_widgets from public, anon, authenticated, service_role;
 grant select, insert on public.embed_widgets to authenticated;
-grant update (name, website_url, enabled) on public.embed_widgets to authenticated;
+grant update (name, website_url, brand_name, brand_logo_url, brand_phone, brand_primary_color, brand_background_color, brand_text_color, enabled) on public.embed_widgets to authenticated;
 grant all on public.embed_widgets to service_role;
 revoke all on public.widget_views from public, anon, authenticated, service_role;
 grant select on public.widget_views to authenticated;
