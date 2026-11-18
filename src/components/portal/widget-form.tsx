@@ -2,7 +2,7 @@
 import { ImageUploadIcon } from "@hugeicons/core-free-icons";
 import Image, { type ImageLoaderProps } from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { createWidget, updateWidget } from "@/server/portal/actions";
 import { WidgetSchema, UpdateWidgetSchema } from "@/server/portal/schemas";
@@ -21,6 +21,7 @@ function directImageLoader({ src }: ImageLoaderProps) {
 type Widget = {
   id: string;
   name: string;
+  public_key: string;
   website_url: string;
   enabled: boolean;
   brand_name: string;
@@ -48,12 +49,24 @@ export function WidgetForm({
   const [logoDragging, setLogoDragging] = useState(false);
   const [logoMessage, setLogoMessage] = useState("");
   const [logoError, setLogoError] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const previewDialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     return () => {
       if (logoPreviewUrl.startsWith("blob:")) URL.revokeObjectURL(logoPreviewUrl);
     };
   }, [logoPreviewUrl]);
+
+  function openPreview() {
+    setPreviewOpen(true);
+    requestAnimationFrame(() => previewDialogRef.current?.showModal());
+  }
+
+  function closePreview() {
+    previewDialogRef.current?.close();
+    setPreviewOpen(false);
+  }
 
   function stageLogo(file: File) {
     setLogoDragging(false);
@@ -163,246 +176,297 @@ export function WidgetForm({
     });
   }
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        submit(new FormData(event.currentTarget));
-      }}
-    >
-      <div className={s.field}>
-        <label className={s.label} htmlFor="widget-name">
-          Component name
-        </label>
-        <input
-          className={s.input}
-          id="widget-name"
-          name="name"
-          required
-          maxLength={80}
-          defaultValue={widget?.name}
-          placeholder="e.g. Main website doors"
-        />
-      </div>
-      {!widget && (
+    <>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          submit(new FormData(event.currentTarget));
+        }}
+      >
         <div className={s.field}>
-          <label className={s.label} htmlFor="widget-type">
-            Product type
-          </label>
-          <select id="widget-type" name="type" className={s.select} defaultValue={initialType}>
-            <option value="door">Doors</option>
-            <option value="window">Windows</option>
-          </select>
-          <span className={s.hint}>Door and window components have separate embed codes.</span>
-        </div>
-      )}
-      <div className={s.field}>
-        <label className={s.label} htmlFor="widget-website">
-          Website URL <span className={s.hint}>(optional)</span>
-        </label>
-        <input
-          className={s.input}
-          type="url"
-          id="widget-website"
-          name="website_url"
-          defaultValue={widget?.website_url}
-          placeholder="https://your-website.com"
-          maxLength={500}
-        />
-        <span className={s.hint}>
-          For your records. This does not restrict where the component can be embedded.
-        </span>
-      </div>
-      <fieldset className={s.brandingFields}>
-        <legend>Component branding</legend>
-        <p className={s.hint}>
-          These settings only affect this component, so every embed can match the website where it
-          appears.
-        </p>
-        <div className={s.field}>
-          <label className={s.label} htmlFor="widget-brand-name">
-            Brand name
+          <label className={s.label} htmlFor="widget-name">
+            Component name
           </label>
           <input
             className={s.input}
-            id="widget-brand-name"
-            name="brand_name"
+            id="widget-name"
+            name="name"
             required
             maxLength={80}
-            defaultValue={widget?.brand_name}
-            placeholder="Your company"
+            defaultValue={widget?.name}
+            placeholder="e.g. Main website doors"
           />
         </div>
-        <div className={s.logoField}>
-          <span className={s.label}>Logo</span>
-          <label
-            className={s.logoDropzone}
-            data-dragging={logoDragging || undefined}
-            data-uploading={pending || undefined}
-            htmlFor="widget-brand-logo"
-            onDragEnter={(event) => {
-              event.preventDefault();
-              setLogoDragging(true);
-            }}
-            onDragOver={(event) => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "copy";
-              setLogoDragging(true);
-            }}
-            onDragLeave={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                setLogoDragging(false);
-              }
-            }}
-            onDrop={(event) => {
-              event.preventDefault();
-              const file = event.dataTransfer.files[0];
-              if (file) stageLogo(file);
-            }}
-          >
-            <input
-              className={s.fileInput}
-              type="file"
-              id="widget-brand-logo"
-              accept="image/png,image/jpeg,image/webp"
-              required={!logoUrl && !logoFile}
-              disabled={pending}
-              aria-describedby="widget-brand-logo-help widget-brand-logo-status"
-              data-test="upload-widget-logo"
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0];
-                if (file) stageLogo(file);
-              }}
-            />
-            {logoPreviewUrl ? (
-              <span className={s.logoPreview}>
-                <Image
-                  loader={directImageLoader}
-                  unoptimized
-                  width={180}
-                  height={72}
-                  src={logoPreviewUrl}
-                  alt=""
-                />
-              </span>
-            ) : (
-              <span className={s.logoUploadIcon}>
-                <Icon icon={ImageUploadIcon} size={20} />
-              </span>
-            )}
-            <span className={s.logoDropCopy}>
-              <strong>
-                {logoUploading
-                  ? "Uploading logo…"
-                  : logoFile
-                    ? "Logo ready to save"
-                    : logoUrl
-                      ? "Replace logo"
-                      : "Choose a logo"}
-              </strong>
-              <span>{logoDragging ? "Drop it here" : "or drag and drop"}</span>
-            </span>
-          </label>
-          <input type="hidden" name="brand_logo_url" value={logoUrl} />
-          <div className={s.logoUploadFoot}>
-            <span className={s.hint} id="widget-brand-logo-help">
-              PNG, JPG or WebP · 1 MB maximum
-            </span>
+        {!widget && (
+          <div className={s.field}>
+            <label className={s.label} htmlFor="widget-type">
+              Product type
+            </label>
+            <select id="widget-type" name="type" className={s.select} defaultValue={initialType}>
+              <option value="door">Doors</option>
+              <option value="window">Windows</option>
+            </select>
+            <span className={s.hint}>Door and window components have separate embed codes.</span>
           </div>
-          {logoMessage && (
-            <p
-              id="widget-brand-logo-status"
-              className={s.logoStatus}
-              data-error={logoError || undefined}
-              role={logoError ? "alert" : "status"}
-            >
-              {logoMessage}
-            </p>
-          )}
-        </div>
+        )}
         <div className={s.field}>
-          <label className={s.label} htmlFor="widget-brand-phone">
-            Phone number
+          <label className={s.label} htmlFor="widget-website">
+            Website URL <span className={s.hint}>(optional)</span>
           </label>
           <input
             className={s.input}
-            id="widget-brand-phone"
-            name="brand_phone"
-            type="tel"
-            required
-            maxLength={50}
-            autoComplete="tel"
-            defaultValue={widget?.brand_phone}
-            placeholder="e.g. 0113 460 2305"
-            aria-describedby="widget-brand-phone-help"
+            type="url"
+            id="widget-website"
+            name="website_url"
+            defaultValue={widget?.website_url}
+            placeholder="https://your-website.com"
+            maxLength={500}
           />
-          <span className={s.hint} id="widget-brand-phone-help">
-            Shown in the component header so visitors can call for help.
+          <span className={s.hint}>
+            For your records. This does not restrict where the component can be embedded.
           </span>
         </div>
-        <div className={s.brandColors}>
-          <ColorField
-            id="widget-brand-primary"
-            name="brand_primary_color"
-            label="Action colour"
-            defaultValue={widget?.brand_primary_color || "#191919"}
-          />
-          <ColorField
-            id="widget-brand-background"
-            name="brand_background_color"
-            label="Background"
-            defaultValue={widget?.brand_background_color || "#f5f5f5"}
-          />
-          <ColorField
-            id="widget-brand-text"
-            name="brand_text_color"
-            label="Text"
-            defaultValue={widget?.brand_text_color || "#191919"}
-          />
-        </div>
-      </fieldset>
-      {widget && (
-        <div className={s.field}>
-          <label className={s.label} htmlFor="widget-enabled">
-            Availability
-          </label>
-          <select
-            className={s.select}
-            id="widget-enabled"
-            name="enabled"
-            defaultValue={String(widget.enabled)}
-          >
-            <option value="true">Live — accept visitors and enquiries</option>
-            <option value="false">Paused — hide the public component</option>
-          </select>
-        </div>
-      )}
-      {message && (
-        <p className={s.notice} data-error={error || undefined} role="status">
-          {message}
-        </p>
-      )}
-      <div className={s.actions}>
-        <button
-          className={`${s.btn} ${s.btnPrimary}`}
-          type="submit"
-          disabled={pending}
-          data-test="save-widget"
-        >
-          {logoUploading
-            ? "Uploading logo…"
-            : pending
-              ? "Saving…"
-              : widget
-                ? "Save changes"
-                : "Create component"}
-        </button>
-        {created && (
-          <Link href={`/home/widgets/${created}`} className={s.btn}>
-            Open component
-          </Link>
+        <fieldset className={s.brandingFields}>
+          <legend>Component branding</legend>
+          <p className={s.hint}>
+            These settings only affect this component, so every embed can match the website where it
+            appears.
+          </p>
+          <div className={s.field}>
+            <label className={s.label} htmlFor="widget-brand-name">
+              Brand name
+            </label>
+            <input
+              className={s.input}
+              id="widget-brand-name"
+              name="brand_name"
+              required
+              maxLength={80}
+              defaultValue={widget?.brand_name}
+              placeholder="Your company"
+            />
+          </div>
+          <div className={s.logoField}>
+            <span className={s.label}>Logo</span>
+            <label
+              className={s.logoDropzone}
+              data-dragging={logoDragging || undefined}
+              data-uploading={pending || undefined}
+              htmlFor="widget-brand-logo"
+              onDragEnter={(event) => {
+                event.preventDefault();
+                setLogoDragging(true);
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "copy";
+                setLogoDragging(true);
+              }}
+              onDragLeave={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                  setLogoDragging(false);
+                }
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                const file = event.dataTransfer.files[0];
+                if (file) stageLogo(file);
+              }}
+            >
+              <input
+                className={s.fileInput}
+                type="file"
+                id="widget-brand-logo"
+                accept="image/png,image/jpeg,image/webp"
+                required={!logoUrl && !logoFile}
+                disabled={pending}
+                aria-describedby="widget-brand-logo-help widget-brand-logo-status"
+                data-test="upload-widget-logo"
+                onChange={(event) => {
+                  const file = event.currentTarget.files?.[0];
+                  if (file) stageLogo(file);
+                }}
+              />
+              {logoPreviewUrl ? (
+                <span className={s.logoPreview}>
+                  <Image
+                    loader={directImageLoader}
+                    unoptimized
+                    width={180}
+                    height={72}
+                    src={logoPreviewUrl}
+                    alt=""
+                  />
+                </span>
+              ) : (
+                <span className={s.logoUploadIcon}>
+                  <Icon icon={ImageUploadIcon} size={20} />
+                </span>
+              )}
+              <span className={s.logoDropCopy}>
+                <strong>
+                  {logoUploading
+                    ? "Uploading logo…"
+                    : logoFile
+                      ? "Logo ready to save"
+                      : logoUrl
+                        ? "Replace logo"
+                        : "Choose a logo"}
+                </strong>
+                <span>{logoDragging ? "Drop it here" : "or drag and drop"}</span>
+              </span>
+            </label>
+            <input type="hidden" name="brand_logo_url" value={logoUrl} />
+            <div className={s.logoUploadFoot}>
+              <span className={s.hint} id="widget-brand-logo-help">
+                PNG, JPG or WebP · 1 MB maximum
+              </span>
+            </div>
+            {logoMessage && (
+              <p
+                id="widget-brand-logo-status"
+                className={s.logoStatus}
+                data-error={logoError || undefined}
+                role={logoError ? "alert" : "status"}
+              >
+                {logoMessage}
+              </p>
+            )}
+          </div>
+          <div className={s.field}>
+            <label className={s.label} htmlFor="widget-brand-phone">
+              Phone number
+            </label>
+            <input
+              className={s.input}
+              id="widget-brand-phone"
+              name="brand_phone"
+              type="tel"
+              required
+              maxLength={50}
+              autoComplete="tel"
+              defaultValue={widget?.brand_phone}
+              placeholder="e.g. 0113 460 2305"
+              aria-describedby="widget-brand-phone-help"
+            />
+            <span className={s.hint} id="widget-brand-phone-help">
+              Shown in the component header so visitors can call for help.
+            </span>
+          </div>
+          <div className={s.brandColors}>
+            <ColorField
+              id="widget-brand-primary"
+              name="brand_primary_color"
+              label="Action colour"
+              defaultValue={widget?.brand_primary_color || "#191919"}
+            />
+            <ColorField
+              id="widget-brand-background"
+              name="brand_background_color"
+              label="Background"
+              defaultValue={widget?.brand_background_color || "#f5f5f5"}
+            />
+            <ColorField
+              id="widget-brand-text"
+              name="brand_text_color"
+              label="Text"
+              defaultValue={widget?.brand_text_color || "#191919"}
+            />
+          </div>
+        </fieldset>
+        {widget && (
+          <div className={s.field}>
+            <label className={s.label} htmlFor="widget-enabled">
+              Availability
+            </label>
+            <select
+              className={s.select}
+              id="widget-enabled"
+              name="enabled"
+              defaultValue={String(widget.enabled)}
+            >
+              <option value="true">Live — accept visitors and enquiries</option>
+              <option value="false">Paused — hide the public component</option>
+            </select>
+          </div>
         )}
-      </div>
-    </form>
+        {message && (
+          <p className={s.notice} data-error={error || undefined} role="status">
+            {message}
+          </p>
+        )}
+        <div className={s.actions}>
+          <button
+            className={`${s.btn} ${s.btnPrimary}`}
+            type="submit"
+            disabled={pending}
+            data-test="save-widget"
+          >
+            {logoUploading
+              ? "Uploading logo…"
+              : pending
+                ? "Saving…"
+                : widget
+                  ? "Save changes"
+                  : "Create component"}
+          </button>
+          {widget && (
+            <button
+              type="button"
+              className={s.btn}
+              onClick={openPreview}
+              data-test="preview-widget"
+            >
+              Preview
+            </button>
+          )}
+          {created && (
+            <Link href={`/home/widgets/${created}`} className={s.btn}>
+              Open component
+            </Link>
+          )}
+        </div>
+      </form>
+      {widget && (
+        <dialog
+          ref={previewDialogRef}
+          className={`${s.adminDialog} ${s.previewDialog}`}
+          onClose={() => setPreviewOpen(false)}
+          onClick={(event) => {
+            if (event.target === previewDialogRef.current) closePreview();
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") closePreview();
+          }}
+        >
+          <div className={s.previewDialogInner}>
+            <header className={s.adminDialogHead}>
+              <div>
+                <h2 className={s.cardTitle}>Component preview</h2>
+                <p className={s.hint}>
+                  Live product options, elevations, and enquiry flow for this component.
+                </p>
+              </div>
+              <button
+                type="button"
+                className={s.iconBtn}
+                aria-label="Close preview"
+                onClick={closePreview}
+              >
+                ✕
+              </button>
+            </header>
+            {previewOpen && (
+              <iframe
+                className={s.previewDialogFrame}
+                src={`/embed/${widget.public_key}`}
+                title={`${widget.name} preview`}
+              />
+            )}
+          </div>
+        </dialog>
+      )}
+    </>
   );
 }
 

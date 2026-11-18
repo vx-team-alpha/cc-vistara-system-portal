@@ -1770,6 +1770,40 @@
   gap: 12px;
   margin-bottom: 20px;
 }
+.previewDialog {
+  width: min(1100px, calc(100vw - 24px));
+  max-width: none;
+  height: min(860px, calc(100dvh - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+}
+.previewDialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.previewDialogInner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 20px;
+}
+.previewDialogInner .adminDialogHead {
+  flex-shrink: 0;
+  margin-bottom: 16px;
+}
+.previewDialogInner .adminDialogHead .hint {
+  margin: 6px 0 0;
+}
+.previewDialogFrame {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
 .hint {
   color: var(--soft);
   font-size: 12px;
