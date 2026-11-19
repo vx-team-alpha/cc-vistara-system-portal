@@ -48,3 +48,61 @@ pnpm catalogue:seed
 See [the catalogue import guide](scripts/catalogue/README.md) for migration
 prerequisites, environment configuration, generated seed files, storage URL
 rewriting, and how to safely rerun an import.
+
+## Git Worktrees
+
+This project supports isolated git worktrees inside `.worktrees/<name>`, each optionally backed by its own Supabase OrbStack VM and `.env.local` configuration.
+
+### Creating a Worktree
+
+```bash
+# Create a worktree and start dedicated Supabase VM (default)
+pnpm worktree:add <name> [base-branch]
+
+# Create git worktree only (without starting Supabase VM)
+pnpm worktree:add <name> --no-vm
+```
+
+### Listing Worktrees
+
+```bash
+pnpm worktree:list
+```
+
+### Deleting a Worktree
+
+```bash
+# Remove worktree and its Supabase VM
+pnpm worktree:delete <name>
+
+# Remove worktree, VM, and delete the associated local git branch
+pnpm worktree:delete <name> --delete-branch
+
+# Force remove dirty worktree and force delete branch
+pnpm worktree:delete <name> -f -D
+
+# Delete all worktrees under .worktrees/
+pnpm worktree:delete --all
+
+# Prune stale/broken worktrees
+pnpm worktree:prune
+```
+
+#### Native Git Commands to Delete a Worktree
+
+If you prefer to delete a worktree directly with git:
+
+```bash
+# 1. Remove the worktree folder and git registration
+git worktree remove .worktrees/<name>
+
+# Or force-remove if modified or untracked files exist
+git worktree remove --force .worktrees/<name>
+
+# 2. Prune any stale worktree references
+git worktree prune -v
+
+# 3. (Optional) Delete the local git branch
+git branch -d <name>   # safe delete
+git branch -D <name>   # force delete
+```
