@@ -1,3 +1,4 @@
+import doorPositions from "./door-letterplate-positions.js";
 import { glassPanes } from "./glass-panes.js";
 
 // Catalogue state is local. Backend IDs remain evidence; UI keys include the
@@ -162,14 +163,116 @@ export function questionList(data, layout, design, sideDesigns, picks) {
   const numeral = option(enabled("Numeral"), picks);
   const glass = option(enabled("Glass Design (Door)"), picks);
   const knocker = option(enabled("Knocker"), picks);
+  const handle = option(enabled("Handle"), picks);
   const knockerHasSpy = /spy|peep/i.test(knocker?.description ?? "");
+
+  const designName = design?.description || design?.designName || "";
+  const normalizeDesign = (s) =>
+    (s || "")
+      .replace(/\s+(?:Farmhouse|Flush|Cottage|Standard|Solid)\b/gi, "")
+      .trim()
+      .toLowerCase();
+
+  const findPositions = (name) => {
+    if (!name) return null;
+    const direct =
+      data.letterplatePositions?.[name]?.positions ?? doorPositions?.designs?.[name]?.positions;
+    if (direct) return direct;
+    const norm = normalizeDesign(name);
+    const all = { ...doorPositions?.designs, ...data.letterplatePositions };
+    for (const [key, val] of Object.entries(all)) {
+      if (normalizeDesign(key) === norm) return val.positions;
+    }
+    for (const [key, val] of Object.entries(all)) {
+      const kNorm = normalizeDesign(key);
+      if (norm && (kNorm.startsWith(norm) || norm.startsWith(kNorm))) return val.positions;
+    }
+    return null;
+  };
+  const positionsForDesign = findPositions(designName);
+
+  if (Array.isArray(positionsForDesign)) {
+    const existing = list.find((q) => q.originalName === "Letterplate Position");
+    if (existing) {
+      existing.options = positionsForDesign.map((p) => ({
+        id: p.id,
+        description: p.description,
+        isCurrentOption: p.isCurrentOption,
+        src: "",
+      }));
+    } else if (positionsForDesign.length > 0 && letter?.description === "Letterplate") {
+      add({
+        id: "6e9d2424-7f85-4ccb-b225-5730408b6697",
+        name: "Letterplate Position",
+        originalName: "Letterplate Position",
+        consumerListOrder: 11.5,
+        components: [],
+        drawingType: 1,
+        options: positionsForDesign.map((p) => ({
+          id: p.id,
+          description: p.description,
+          isCurrentOption: p.isCurrentOption,
+          src: "",
+        })),
+      });
+    }
+  } else if (letter?.description === "Letterplate") {
+    for (const probe of data.probes) {
+      for (const q of probe.questions) {
+        if (q.name === "Letterplate Position") add(q);
+      }
+    }
+  }
+
   for (const probe of data.probes) {
     for (const q of probe.questions) {
-      if (q.name === "Letterplate Position" && letter?.description === "Letterplate") add(q);
       if (q.name === "House Number" && numeral?.description === "Numerals") add(q);
       if (q.name === "Glass Pattern" && glass?.description.includes("Obscure")) add(q);
     }
   }
+
+  const isInlineBarOrNoHandle =
+    /inline bar/i.test(handle?.description || "") || /no handle/i.test(handle?.description || "");
+
+  if (isInlineBarOrNoHandle) {
+    const hwQuestion = list.find((q) => q.originalName === "Hardware Colour");
+    const hwChoice = option(hwQuestion, picks);
+    const hwName = hwChoice?.description || "Black";
+    const escId =
+      hwName === "Black"
+        ? "7741aa74-3f90-495c-a559-63b58aa5893e"
+        : hwName === "Chrome"
+          ? "dae040a2-c4e6-40d6-9e99-041057e69589"
+          : `escutcheon-${hwName.toLowerCase().replace(/\s+/g, "-")}`;
+    const escSrc =
+      hwName === "Chrome"
+        ? "/catalogue/assets/070549ff031eb199f54d.png"
+        : "/catalogue/assets/40752e83b0e81293b3a3.png";
+
+    add({
+      id: "a3db4591-9e7b-4ea4-8e3d-ec1b7a952671",
+      name: "Escutcheon (Slab)",
+      originalName: "Escutcheon (Slab)",
+      consumerListOrder: 8.5,
+      components: [],
+      drawingType: 1,
+      options: [
+        {
+          id: escId,
+          description: `Escutcheon (${hwName})`,
+          src: escSrc,
+          isCurrentOption: true,
+        },
+        {
+          id: "d56c69e4-97c9-4ef9-aece-21611f3ab300",
+          description: "None",
+          src: "/catalogue/assets/28685d2c609fa865bc51.png",
+          isCurrentOption: false,
+        },
+      ],
+    });
+  }
+
   const hardwareQuestion = list.find((q) => q.originalName === "Hardware Colour");
   const hardware = option(hardwareQuestion, picks);
   const finishState = data.hardware?.[layout.range]?.[hardware?.id];
@@ -201,11 +304,14 @@ export function questionList(data, layout, design, sideDesigns, picks) {
   }
   const diagramFor = {
     "Letterplate Position": (description) => {
-      if (/bottom rail/i.test(description)) return "/diagrams/letter-34.svg";
-      if (/between cassette/i.test(description)) return "/diagrams/letter-26.svg";
-      if (/position 49/i.test(description)) return "/diagrams/letter-49.svg";
-      if (/position 7/i.test(description)) return "/diagrams/letter-7.svg";
-      return "";
+      if (/bottom rail|\bposition 34\b/i.test(description)) return "/diagrams/letter-34.svg";
+      if (/between cassette|\bposition (?:26|30|17)\b/i.test(description))
+        return "/diagrams/letter-26.svg";
+      if (/midrail|\bposition (?:14|7|1|2|3|25|27)\b/i.test(description))
+        return "/diagrams/letter-7.svg";
+      if (/\bposition (?:49|47|48|35|8|9|10|15|16|28|29|60)\b/i.test(description))
+        return "/diagrams/letter-49.svg";
+      return "/diagrams/letter-34.svg";
     },
     Threshold: (description) => {
       if (/gold/i.test(description)) return "/diagrams/threshold-gold.svg";
@@ -235,7 +341,9 @@ export function questionList(data, layout, design, sideDesigns, picks) {
     .filter((q) => {
       if (!q.options?.length && !q.hasText) return false;
       if (/split position/i.test(q.originalName)) return false;
-      if (q.originalName === "Letterplate Position") return letter?.description === "Letterplate";
+      if (q.originalName === "Letterplate Position")
+        return letter?.description === "Letterplate" && q.options?.length > 0;
+      if (q.originalName === "Escutcheon (Slab)") return isInlineBarOrNoHandle;
       if (q.originalName === "House Number") return numeral?.description === "Numerals";
       if (q.originalName === "Glass Pattern") return glass?.description.includes("Obscure");
       if (q.originalName === "Spyhole") return !knockerHasSpy;

@@ -101,9 +101,32 @@ const INLINE_BAR_ASSETS = {
 // Quotila elevation slot on a ~914×2013 slab: x≈726 y≈400 w≈39 h≈1200
 const INLINE_BAR_FX = { w: 39 / 914, h: 1200 / 2013, y: 400 / 2013 };
 
+const ESCUTCHEON_ASSETS = {
+  chrome: "/hardware/escutcheon-chrome.png",
+  black: "/hardware/escutcheon-black.png",
+  steel: "/hardware/escutcheon-steel.png",
+};
+
+// Quotila elevation slot on a ~914×2013 slab: w≈32, h≈72, y≈607.5, xRight≈786, xLeft≈64
+const ESCUTCHEON_FX = {
+  w: 32 / 914,
+  h: 72 / 2013,
+  y: 607.5 / 2013,
+  xRight: 786 / 914,
+  xLeft: 64 / 914,
+};
+
 function ensureInlineBarAssets(data) {
   for (const [tone, src] of Object.entries(INLINE_BAR_ASSETS)) {
     const key = `handle_(slab)/inline_bar_${tone}.png`;
+    if (!data.assets[key]) data.assets[key] = { src };
+  }
+}
+
+function ensureEscutcheonAssets(data) {
+  if (!data.assets) data.assets = {};
+  for (const [tone, src] of Object.entries(ESCUTCHEON_ASSETS)) {
+    const key = `hardware/escutcheon_${tone}.png`;
     if (!data.assets[key]) data.assets[key] = { src };
   }
 }
@@ -503,14 +526,21 @@ export async function renderDoor({
     const tint = HARDWARE_TINT[hardware?.description] ?? null;
     const handle = choice("Handle");
     ensureInlineBarAssets(data);
+    ensureEscutcheonAssets(data);
     const slabForHandle = localImages().find(
       (el) =>
         /slab_blank/i.test(decodeURIComponent(assetUrl(data, el))) &&
         !/side_panel/i.test(decodeURIComponent(assetUrl(data, el))),
     );
+    let handleOnLeft = Boolean(internal);
     for (const el of localImages().filter((el) =>
       /handle_/i.test(decodeURIComponent(assetUrl(data, el))),
     )) {
+      const ox = Number(el.getAttribute("x") || 0);
+      const ow = Number(el.getAttribute("width") || 0);
+      const cx = ox + ow / 2;
+      const sw = Number(slabForHandle?.getAttribute("width") || 914);
+      handleOnLeft = cx <= sw / 2;
       if (handle && handle.description.startsWith("No ")) {
         el.remove();
         continue;
@@ -532,8 +562,10 @@ export async function renderDoor({
       if (tint) tintFlat(base, tint, el);
     }
     if (section.role === "door") {
-      for (const el of localImages().filter((el) =>
-        /letterplate|spyhole|knocker/i.test(decodeURIComponent(assetUrl(data, el))),
+      for (const el of localImages().filter(
+        (el) =>
+          /letterplate|spyhole|knocker|escutcheon/i.test(decodeURIComponent(assetUrl(data, el))) ||
+          el.getAttribute("data-hardware") === "escutcheon",
       ))
         el.remove();
       const slab =
@@ -567,14 +599,14 @@ export async function renderDoor({
       if (letter && !letter.description.startsWith("No ")) {
         const position = choice("Letterplate Position")?.description || "";
         const fy =
-          /bottom rail/i.test(position) || !position
+          /bottom rail|\bposition 34\b/i.test(position) || !position
             ? 1860 / 2013
-            : /between cassette/i.test(position)
+            : /between cassette|\bposition (?:26|30|17)\b/i.test(position)
               ? 1699 / 2013
-              : /position 49/i.test(position)
-                ? 760 / 2013
-                : /position 7/i.test(position)
-                  ? 1045.5 / 2013
+              : /midrail|\bposition (?:14|7|1|2|3|25|27)\b/i.test(position)
+                ? 1045.5 / 2013
+                : /\bposition (?:49|47|48|35|8|9|10|15|16|28|29|60)\b/i.test(position)
+                  ? 760 / 2013
                   : 1860 / 2013;
         place(
           tone === "black" ? "black_letterplate" : "chrome_letterplate",
@@ -669,6 +701,34 @@ export async function renderDoor({
           );
         nested.append(number);
       }
+      const escutcheon = choice("Escutcheon (Slab)");
+      if (escutcheon && !/^None$/i.test(escutcheon.description) && slab) {
+        const escFx = handleOnLeft ? ESCUTCHEON_FX.xLeft : ESCUTCHEON_FX.xRight;
+        const escHref =
+          tone === "black"
+            ? srcNamed(data, "fingerpull_black") || ESCUTCHEON_ASSETS.black
+            : tone === "chrome"
+              ? srcNamed(data, "hardexchrome_finger_pull") || ESCUTCHEON_ASSETS.chrome
+              : srcNamed(data, "escutcheon_(slab)_steel") ||
+                srcNamed(data, "hardexchrome_finger_pull") ||
+                ESCUTCHEON_ASSETS.chrome;
+        const sx = Number(slab.getAttribute("x") || 0);
+        const sy = Number(slab.getAttribute("y") || 0);
+        const sw = Number(slab.getAttribute("width") || 1);
+        const sh = Number(slab.getAttribute("height") || 1);
+        const el = make(base, "image", {
+          x: sx + escFx * sw,
+          y: sy + ESCUTCHEON_FX.y * sh,
+          width: ESCUTCHEON_FX.w * sw,
+          height: ESCUTCHEON_FX.h * sh,
+          preserveAspectRatio: "xMidYMid",
+          opacity: "1",
+          "data-hardware": "escutcheon",
+        });
+        el.setAttributeNS(XL, "href", escHref);
+        if (tint) tintFlat(base, tint, el);
+        (slab.parentElement ?? nested).append(el);
+      }
     }
     const mirror =
       section.role === "door" && /^Door Right Hand|^Right Hand Door/.test(layout.layoutName);
@@ -750,6 +810,273 @@ export async function renderDoor({
       .append(...[...donor.querySelector("defs").children].map((e) => base.importNode(e, true)));
     old.replaceWith(replacement);
   }
+  // DoorCo changes the whole bottom frame geometry with the cill/threshold pair.
+  // Aluminium thresholds are a 13mm strip; Standard PVC is a 70mm mitred member.
+  const cillChoice = choice("Cill");
+  const thresholdChoice = choice("Threshold");
+  const width = layout.size?.["Overall width"] ?? 900;
+  const height = layout.size?.["Overall height"] ?? 2050;
+  const cillFitted = Boolean(cillChoice && !/^No Cill$/i.test(cillChoice.description));
+  const frameBottom = height - (cillFitted ? 30 : 0);
+  const standardThreshold = /pvc|standard/i.test(thresholdChoice?.description || "");
+  const thresholdMemberId = "fc745b90-0fc1-4f76-b31b-9aab1ee78035";
+  const topMemberId = "9f4f121d-f1a5-4da9-b817-f9aaae4633e8";
+  const rightMemberId = "a42e2e4f-9907-4c66-9bcc-db46ef4838f5";
+  const leftMemberId = "403b32be-67a4-4cf3-8ddf-723a52d5e16e";
+  const cillMemberId = "1f5d5ec6-2776-4c6f-a10c-e4a49c11a3f5";
+  const findProfileContainer = (doc, id) =>
+    [...doc.querySelectorAll("g")].find((g) =>
+      [...g.childNodes].some(
+        (c) => c.nodeType === 8 && c.textContent.trim() === `Profile_member_${id}`,
+      ),
+    );
+  const profileInner = (container, id) => {
+    const comment = [...(container?.childNodes || [])].find(
+      (node) => node.nodeType === 8 && node.textContent.trim() === `Profile_member_${id}`,
+    );
+    let node = comment?.nextSibling;
+    while (node && node.nodeType !== 1) node = node.nextSibling;
+    return node;
+  };
+  const thresholdMember = findProfileContainer(base, thresholdMemberId);
+  const thresholdInner = profileInner(thresholdMember, thresholdMemberId);
+  const topInner = profileInner(thresholdMember, topMemberId);
+  const rightInner = profileInner(thresholdMember, rightMemberId);
+  const leftInner = profileInner(thresholdMember, leftMemberId);
+
+  if (thresholdInner && rightInner && leftInner) {
+    const thresholdRects = [...thresholdInner.querySelectorAll(":scope > rect")];
+    const lightEdge =
+      thresholdRects
+        .find((rect) => /inverted-light/.test(rect.getAttribute("fill") || ""))
+        ?.getAttribute("fill") || "white";
+    const setRect = (rect, attributes) => {
+      if (!rect) return;
+      for (const [name, value] of Object.entries(attributes)) {
+        if (value === null) rect.removeAttribute(name);
+        else rect.setAttribute(name, String(value));
+      }
+    };
+    const setPath = (group, path) => group.querySelector("path")?.setAttribute("d", path);
+    const setProfileWidths = (group, value) => {
+      for (const rect of group.querySelectorAll(":scope > rect")) {
+        if (rect.getAttribute("width") !== "6500") rect.setAttribute("width", String(value));
+      }
+    };
+
+    thresholdInner.setAttribute("transform", `translate(${width} ${frameBottom}) rotate(180)`);
+    if (standardThreshold) {
+      setPath(thresholdInner, `M 70 70 L -0 0 L ${width} -0 L ${width - 70} 70 Z`);
+      setRect(thresholdRects[0], { fill: "rgba(255, 255, 255, 1)" });
+      setRect(thresholdRects[1], {
+        x: 0,
+        y: 50,
+        width,
+        height: 20,
+        fill: "white",
+        opacity: 0.25,
+      });
+    } else {
+      setPath(thresholdInner, `M 0 13 L -0 0 L ${width} -0 L ${width} 13 Z`);
+      setRect(thresholdRects[0], {
+        fill: /gold/i.test(thresholdChoice?.description || "")
+          ? "rgba(150, 150, 24, 1)"
+          : "rgba(169, 169, 169, 1)",
+      });
+      setRect(thresholdRects[1], {
+        x: 0,
+        y: 11,
+        width,
+        height: 2,
+        fill: lightEdge,
+        opacity: null,
+      });
+    }
+    setRect(thresholdRects[2], { x: 0, y: 0, width, height: 2, opacity: null });
+
+    rightInner.setAttribute("transform", `translate(${width} 0) rotate(90)`);
+    if (standardThreshold) {
+      setPath(rightInner, `M 70 70 L 0 -0 L ${frameBottom} -0 L ${frameBottom - 70} 70 Z`);
+      leftInner.setAttribute("transform", `translate(0 ${frameBottom}) rotate(270)`);
+      setPath(leftInner, `M 70 70 L -0 0 L ${frameBottom} 0 L ${frameBottom - 70} 70 Z`);
+    } else {
+      const sideLength = frameBottom - 13;
+      setPath(
+        rightInner,
+        `M 70 70 L 0 -0 L ${sideLength} -0 L ${sideLength} 50 L ${sideLength} 70 Z`,
+      );
+      leftInner.setAttribute("transform", `translate(-0 ${sideLength}) rotate(270)`);
+      setPath(leftInner, `M -0 70 L -0 50 L -0 0 L ${sideLength} 0 L ${sideLength - 70} 70 Z`);
+    }
+    setProfileWidths(rightInner, frameBottom);
+    setProfileWidths(leftInner, frameBottom);
+
+    const interfaceComments = [...thresholdMember.childNodes].filter(
+      (node) =>
+        node.nodeType === 8 &&
+        /^Profile_(?:start|end)_joint_interface$/.test(node.textContent.trim()),
+    );
+    const diagramId = interfaceComments
+      .map((comment) => {
+        let node = comment.nextSibling;
+        while (node && node.nodeType !== 1) node = node.nextSibling;
+        return node?.querySelector("path")?.getAttribute("diagramid");
+      })
+      .find(Boolean);
+    for (const comment of interfaceComments) {
+      let node = comment.nextSibling;
+      while (node && node.nodeType !== 1) node = node.nextSibling;
+      node?.remove();
+      comment.remove();
+    }
+    const pairs = [
+      [topMemberId, topInner],
+      [rightMemberId, rightInner],
+      [thresholdMemberId, thresholdInner],
+      [leftMemberId, leftInner],
+    ];
+    if (!standardThreshold) pairs.unshift(pairs.splice(2, 1)[0]);
+    for (const [id, inner] of pairs) {
+      const comment = [...thresholdMember.childNodes].find(
+        (node) => node.nodeType === 8 && node.textContent.trim() === `Profile_member_${id}`,
+      );
+      if (comment && inner) thresholdMember.append(comment, inner);
+    }
+    const appendJoint = (kind, transform, d) => {
+      thresholdMember.appendChild(base.createComment(`\nProfile_${kind}_joint_interface\n`));
+      const group = make(base, "g", { transform });
+      const attributes = {
+        d,
+        fill: "transparent",
+        opacity: "1",
+        "stroke-width": "3",
+        stroke: "rgba(0, 0, 0, 0.1960784313725490196078431373)",
+      };
+      if (diagramId) attributes.diagramid = diagramId;
+      group.appendChild(make(base, "path", attributes));
+      thresholdMember.appendChild(group);
+    };
+    appendJoint("start", "translate(0 0) rotate(0)", "M70 70L0 0");
+    appendJoint("end", "translate(0 0) rotate(0)", `M${width} 0L${width - 70} 70`);
+    appendJoint("start", `translate(${width} 0) rotate(90)`, "M70 70L0 -0");
+    if (standardThreshold) {
+      appendJoint(
+        "end",
+        `translate(${width} 0) rotate(90)`,
+        `M${frameBottom} -0L${frameBottom - 70} 70`,
+      );
+      appendJoint("start", `translate(${width} ${frameBottom}) rotate(180)`, "M70 70L-0 0");
+      appendJoint(
+        "end",
+        `translate(${width} ${frameBottom}) rotate(180)`,
+        `M${width} -0L${width - 70} 70`,
+      );
+      appendJoint("start", `translate(0 ${frameBottom}) rotate(270)`, "M70 70L-0 0");
+      appendJoint(
+        "end",
+        `translate(0 ${frameBottom}) rotate(270)`,
+        `M${frameBottom} 0L${frameBottom - 70} 70`,
+      );
+    } else {
+      const sideLength = frameBottom - 13;
+      appendJoint(
+        "end",
+        `translate(-0 ${sideLength}) rotate(270)`,
+        `M${sideLength} 0L${sideLength - 70} 70`,
+      );
+    }
+  }
+
+  const existingCill = findProfileContainer(base, cillMemberId);
+
+  if (cillFitted) {
+    const cillWidth = width + 100;
+    marker.setAttribute("transform", "translate(0 -12.5)");
+    const grad = base.querySelector("defs linearGradient[id*='gradient-profile-edge']");
+    const layoutId = grad?.id
+      ? grad.id.replace(/^gradient-profile-edge-(?:inverted-)?(?:light|dark)-/, "")
+      : "cill";
+
+    if (!existingCill) {
+      const parentGroup =
+        thresholdMember?.parentElement ||
+        base.querySelector("#matrix-group") ||
+        base.querySelector("svg");
+
+      const cillG = make(base, "g", {
+        layertype: "Diagram",
+        filter: `url(#profile-shadow-${layoutId})`,
+      });
+      cillG.appendChild(base.createComment(`\nProfile_member_${cillMemberId}\n`));
+
+      const clipId = `clippath-${layoutId}-cill-member`;
+      const innerG = make(base, "g", {
+        "clip-path": `url(#${clipId})`,
+        transform: `translate(${width + 50} ${height}) rotate(180)`,
+      });
+
+      const clipPath = make(base, "clipPath", { id: clipId });
+      const clipShape = make(base, "path", {
+        d: `M 0 30 L -0 0 L ${cillWidth} -0 L ${cillWidth} 30 Z`,
+      });
+      clipPath.appendChild(clipShape);
+      (base.querySelector("defs") || parentGroup).appendChild(clipPath);
+
+      const rectMain = make(base, "rect", {
+        x: "0",
+        y: "0",
+        width: "6500",
+        height: "150",
+        fill: "rgba(255, 255, 255, 1)",
+        class: "interact",
+        componentid: "62ea6a13-bca6-4054-89f6-020dc6e21f3b",
+        memberid: cillMemberId,
+      });
+      innerG.appendChild(rectMain);
+
+      const rectEdgeLight = make(base, "rect", {
+        x: "0",
+        y: "28",
+        width: String(cillWidth),
+        height: "2",
+        fill: `url(#gradient-profile-edge-inverted-light-${layoutId})`,
+      });
+      innerG.appendChild(rectEdgeLight);
+
+      const rectEdgeDark = make(base, "rect", {
+        x: "0",
+        y: "0",
+        width: String(cillWidth),
+        height: "2",
+        fill: `url(#gradient-profile-edge-dark-${layoutId})`,
+      });
+      innerG.appendChild(rectEdgeDark);
+
+      cillG.appendChild(innerG);
+      if (thresholdMember) {
+        parentGroup.insertBefore(cillG, thresholdMember.nextSibling);
+      } else {
+        parentGroup.appendChild(cillG);
+      }
+    } else {
+      const innerG = existingCill.querySelector("g[transform]");
+      if (innerG) {
+        innerG.setAttribute("transform", `translate(${width + 50} ${height}) rotate(180)`);
+        const path =
+          base.querySelector(`#clippath-${layoutId}-cill-member path`) ||
+          innerG.querySelector("clipPath path");
+        if (path) path.setAttribute("d", `M 0 30 L -0 0 L ${cillWidth} -0 L ${cillWidth} 30 Z`);
+        for (const rect of innerG.querySelectorAll("rect")) {
+          if (rect.getAttribute("width") !== "6500") rect.setAttribute("width", String(cillWidth));
+        }
+      }
+      if (thresholdMember?.parentElement === existingCill.parentElement) {
+        existingCill.parentElement.insertBefore(existingCill, thresholdMember.nextSibling);
+      }
+    }
+  } else if (existingCill) {
+    existingCill.remove();
+  }
   const profile =
     choice(internal ? "Profile Colour (Internal)" : "Profile Colour (External)") ??
     choice("Profile Colour (External)");
@@ -766,20 +1093,6 @@ export async function renderDoor({
         if (fill === "white" || /^#fff(?:fff)?$/i.test(fill) || /255,\s*255,\s*255/.test(fill))
           rect.setAttribute("fill", `rgb(${profile.rgb.join(",")})`);
       }
-    }
-  }
-  const threshold = choice("Threshold");
-  const thresholdRgb = /gold/i.test(threshold?.description)
-    ? [198, 161, 91]
-    : /silver/i.test(threshold?.description)
-      ? [176, 180, 184]
-      : /pvc|standard/i.test(threshold?.description)
-        ? profile?.rgb || [248, 248, 248]
-        : null;
-  if (thresholdRgb) {
-    for (const rect of base.querySelectorAll("rect")) {
-      if (/169,\s*169,\s*169/.test(rect.getAttribute("fill") || ""))
-        rect.setAttribute("fill", `rgb(${thresholdRgb.join(",")})`);
     }
   }
   attachDoorDimensions(base, layout);

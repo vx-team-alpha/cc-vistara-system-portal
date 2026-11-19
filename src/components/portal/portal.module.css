@@ -1451,35 +1451,104 @@
   flex-shrink: 0;
 }
 .embedCategory:hover,
-.embedLayout:hover {
+.embedLayout:hover,
+.embedSystemCard:hover {
   background: var(--surface);
   box-shadow: 0 12px 28px color-mix(in srgb, var(--brand-text, #191919) 12%, transparent);
 }
 .embedCategory:hover .embedCardAction,
-.embedLayout:hover .embedCardAction {
+.embedLayout:hover .embedCardAction,
+.embedSystemCard:hover .embedCardAction {
   background: var(--primary-hover);
 }
+
+/* System picker */
+.embedSystems {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.embedSystemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.embedSystemCardActive {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+.embedSystemBadge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--fill);
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.embedSystemLabel {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+.embedSystemSub {
+  flex: 1;
+  color: var(--soft);
+  font-size: 14px;
+}
+
+/* Completion actions: Print PDF + Submit side by side */
+.completionActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 @container embed-gallery (max-width: 1500px) {
   .embedCategories,
-  .embedLayouts {
+  .embedLayouts,
+  .embedSystems {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .embedSystems {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @container embed-gallery (max-width: 1160px) {
   .embedCategories,
-  .embedLayouts {
+  .embedLayouts,
+  .embedSystems {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .embedSystems {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @container embed-gallery (max-width: 860px) {
   .embedCategories,
-  .embedLayouts {
+  .embedLayouts,
+  .embedSystems {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @container embed-gallery (max-width: 560px) {
   .embedCategories,
-  .embedLayouts {
+  .embedLayouts,
+  .embedSystems {
     grid-template-columns: minmax(0, 1fr);
   }
 }

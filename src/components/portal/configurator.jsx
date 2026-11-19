@@ -111,19 +111,40 @@ export function Configurator({
         : null,
     [runtime, configuration],
   );
-  const normalized = JSON.stringify(
-    state
-      ? {
-          ...configuration,
-          style: state.style || "",
-          design_id: state.design?.designId || "",
-          picks: state.picks,
-        }
-      : null,
-  );
+  const normalized = useMemo(() => {
+    if (!state) return null;
+    const particulars = (state.questions || []).map((q) => {
+      const selected = (q.options || []).find((o) => o.id === state.picks[q.key]);
+      const text = configuration.texts[q.key] || "";
+      return {
+        question: q.name?.replace(/\s*\((Door|Side|Internal|Casement)\)/g, "") || q.name,
+        answer: text || selected?.description || "—",
+      };
+    });
+    return JSON.stringify({
+      ...configuration,
+      style: state.style || "",
+      design_id: state.design?.designId || "",
+      design_name: state.design?.title || state.design?.name || state.design?.design || "",
+      picks: state.picks,
+      particulars,
+    });
+  }, [state, configuration]);
+
   useEffect(() => {
-    onChange(JSON.parse(normalized));
+    if (normalized) {
+      onChange(JSON.parse(normalized));
+    }
   }, [normalized, onChange]);
+
+  useEffect(() => {
+    if (drawing.markup && typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("frontage:last-door-drawing", drawing.markup);
+      } catch {}
+    }
+  }, [drawing.markup]);
+
   const request = JSON.stringify([layoutId, configuration, internal, runtime?.kind, retry]);
   useEffect(() => {
     if (!runtime || !state) return;

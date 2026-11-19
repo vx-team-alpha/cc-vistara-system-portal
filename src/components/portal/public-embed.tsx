@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Printer } from "lucide-react";
 import Image, { type ImageLoaderProps } from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
@@ -19,6 +19,28 @@ import { Configurator } from "./configurator";
 import { LayoutPreview } from "./layout-preview";
 
 import s from "./portal.module.css";
+
+type DoorSystem = "doorco" | "eurocell" | "rehau";
+const SYSTEMS: { id: DoorSystem; label: string; subtitle: string; badge: string }[] = [
+  {
+    id: "doorco",
+    label: "DoorCo",
+    subtitle: "ORiGINAL & GRiPCORE composite door systems",
+    badge: "DoorCo",
+  },
+  {
+    id: "eurocell",
+    label: "Eurocell Composite",
+    subtitle: "Dales GRP and Peak timber-core systems",
+    badge: "Eurocell",
+  },
+  {
+    id: "rehau",
+    label: "REHAU AGILA",
+    subtitle: "REHAU composite door and profile systems",
+    badge: "REHAU",
+  },
+];
 
 type Product = { id: string; name: string; range_id: string; image: string };
 export type EmbedBranding = {
@@ -69,7 +91,8 @@ export function PublicEmbed({
   branding?: EmbedBranding;
 }) {
   const [configuration, setConfiguration] = useState<Configuration | null>(null);
-  const [step, setStep] = useState<"category" | "layout" | "questions">("category");
+  const [step, setStep] = useState<"category" | "layout" | "system" | "questions">("category");
+  const [system, setSystem] = useState<DoorSystem>("doorco");
   const stepHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     stepHeading.current?.focus();
@@ -164,7 +187,7 @@ export function PublicEmbed({
           phone: form.get("phone") || "",
           message: form.get("message") || "",
           company: form.get("company") || "",
-          configuration,
+          configuration: configuration ? { ...configuration, system } : undefined,
         }),
       });
       if (!response.ok) {
@@ -189,6 +212,7 @@ export function PublicEmbed({
 
     setConfiguration(null);
     setStep("category");
+    setSystem("doorco");
     setRange(initialRange);
     setSelected(products.find((p) => p.range_id === initialRange)?.id || "");
     setMessage("");
@@ -206,6 +230,31 @@ export function PublicEmbed({
         body: JSON.stringify({ kind: "view", session_id: nextSession }),
       }).catch(() => {});
     }
+  }
+
+  function printPdf() {
+    if (!product || !configuration) return;
+    const selectedSystem = SYSTEMS.find((sys) => sys.id === system);
+    const rangeName = ranges.find((r) => r.id === range)?.name || "";
+    const printPayload = {
+      layout_id: product.id,
+      layout_name: product.name,
+      range: rangeName,
+      system: selectedSystem?.label || "DoorCo",
+      brand: branding?.name || "Excel Composite Doors Ltd",
+      brand_phone: branding?.phone || "",
+      config: configuration,
+    };
+    try {
+      sessionStorage.setItem("frontage:print-quote", JSON.stringify(printPayload));
+    } catch {}
+    const params = new URLSearchParams({
+      layout_name: product.name,
+      range: rangeName,
+      system: selectedSystem?.label || "DoorCo",
+      brand: branding?.name || "Excel Composite Doors Ltd",
+    });
+    window.open(`/print/quote?${params.toString()}`, "_blank", "noopener");
   }
 
   if (!products.length)
@@ -269,18 +318,30 @@ export function PublicEmbed({
                     tabIndex={-1}
                     className={s.embedHeading}
                   >
-                    {step === "category" ? "Choose your product range" : "Choose your layout"}
+                    {step === "category"
+                      ? "Choose your product range"
+                      : step === "layout"
+                        ? "Choose your layout"
+                        : "Choose your door system"}
                   </h2>
                   <p className={s.note}>
                     {step === "category"
                       ? "Select a category to explore the available layouts."
-                      : `${ranges.find((r) => r.id === range)?.name || ""} · Select a layout to start designing.`}
+                      : step === "layout"
+                        ? `${ranges.find((r) => r.id === range)?.name || ""} · Select a layout to start designing.`
+                        : `${product?.name || ""} · Select the door system for your Works Order.`}
                   </p>
                 </div>
                 {step === "layout" && (
                   <button type="button" className={s.btn} onClick={() => setStep("category")}>
                     <ArrowLeft size={16} aria-hidden="true" />
                     All categories
+                  </button>
+                )}
+                {step === "system" && (
+                  <button type="button" className={s.btn} onClick={() => setStep("layout")}>
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    Change layout
                   </button>
                 )}
               </div>
@@ -335,7 +396,7 @@ export function PublicEmbed({
                           setConfiguration(null);
                           setSelected(p.id);
                         }
-                        setStep("questions");
+                        setStep("system");
                       }}
                     >
                       <span className={s.embedLayoutImage}>
@@ -352,6 +413,29 @@ export function PublicEmbed({
                   ))}
                 </div>
               )}
+              {step === "system" && (
+                <div className={s.embedSystems}>
+                  {SYSTEMS.map((sys) => (
+                    <button
+                      type="button"
+                      key={sys.id}
+                      className={`${s.embedSystemCard} ${system === sys.id ? s.embedSystemCardActive : ""}`}
+                      onClick={() => {
+                        setSystem(sys.id);
+                        setStep("questions");
+                      }}
+                    >
+                      <span className={s.embedSystemBadge}>{sys.badge}</span>
+                      <span className={s.embedSystemLabel}>{sys.label}</span>
+                      <span className={s.embedSystemSub}>{sys.subtitle}</span>
+                      <span className={s.embedCardAction}>
+                        Select {sys.label}
+                        <ArrowRight size={18} aria-hidden="true" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </section>
           )}
           {step === "questions" && product && (
@@ -361,22 +445,34 @@ export function PublicEmbed({
               layoutId={product.id}
               onChange={setConfiguration}
               headerAction={
-                <button type="button" className={s.btn} onClick={() => setStep("layout")}>
+                <button type="button" className={s.btn} onClick={() => setStep("system")}>
                   <ArrowLeft size={16} aria-hidden="true" />
-                  Change layout
+                  Change system
                 </button>
               }
               completionAction={
-                <DialogTrigger asChild>
+                <div className={s.completionActions}>
                   <button
                     type="button"
                     className={`${s.btn} ${s.btnPrimary}`}
                     disabled={!configuration}
-                    data-test="submit-configuration"
+                    onClick={printPdf}
+                    data-test="print-pdf"
                   >
-                    Submit
+                    <Printer size={16} aria-hidden="true" />
+                    Print PDF
                   </button>
-                </DialogTrigger>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      className={s.btn}
+                      disabled={!configuration}
+                      data-test="submit-configuration"
+                    >
+                      Submit enquiry
+                    </button>
+                  </DialogTrigger>
+                </div>
               }
             />
           )}
