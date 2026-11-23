@@ -131,6 +131,20 @@
   justify-content: center;
 }
 
+.previewUnavailable {
+  width: 130px;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px dashed #9ca3af;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #4b5563;
+  font-size: 11px;
+  text-align: center;
+}
+
 .svgFrame svg {
   width: 100%;
   height: auto;
@@ -175,6 +189,59 @@
   font-size: 12px;
   font-weight: 700;
   color: #000;
+}
+
+.manufacturingSection {
+  margin: 14px 0;
+  break-inside: avoid;
+}
+
+.manufacturingMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 24px;
+  padding: 8px 10px;
+  border: 1px solid var(--box-border);
+  border-bottom: 0;
+  font-size: 11px;
+}
+
+.partsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.partsTable th,
+.partsTable td {
+  padding: 5px 6px;
+  border: 1px solid var(--box-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.partsTable th {
+  background: #d7dcff;
+  font-weight: 700;
+}
+
+.partsTable th:nth-child(3),
+.partsTable td:nth-child(3),
+.partsTable th:nth-child(4),
+.partsTable td:nth-child(4),
+.partsTable th:nth-child(5),
+.partsTable td:nth-child(5) {
+  width: 7%;
+  text-align: center;
+}
+
+.manufacturingWarning {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border: 1px solid #b66b00;
+  background: #fff6df;
+  color: #6e4300;
+  font-size: 11px;
 }
 
 /* ── Sign-off Box ──────────────────────────────────────── */

@@ -1,0 +1,51 @@
+export const EUROCELL_NEW_STYLE_1 = {
+  id: "eurocell-new-style-1",
+  version: 1,
+  name: "Eurocell Composite (NEW)",
+  supportedStyle: "Style 1",
+  limits: {
+    widthMm: { min: 300, max: 2800 },
+    heightMm: { min: 1750, max: 2500 },
+  },
+  frame: {
+    partCode: "EWS 7031",
+    description: "EWS 7031 O/frame",
+    weldAllowanceMm: 5,
+  },
+  cills: {
+    "85mm cill": { partCode: "AS 85", description: "85mm cill", heightMm: 30 },
+    "150mm cill": { partCode: "AC 150", description: "150mm cill", heightMm: 30 },
+    "180mm cill": { partCode: "AC 180", description: "180mm cill", heightMm: 30 },
+    "225mm cill": { partCode: "225mm", description: "225mm cill", heightMm: 40 },
+  },
+  cillExtensionMm: 100,
+  slab: {
+    widthDeductionMm: 120,
+    heightDeductionMm: 150,
+  },
+} as const;
+
+export const EUROCELL_FINISH_SUFFIX: Record<string, string> = {
+  "white/white": "W",
+  "cream/cream": "CO",
+  "golden oak/golden oak": "CM",
+  "irish oak/irish oak": "CIO",
+  "rosewood/rosewood": "BRO",
+  "anthracite grey/anthracite grey": "AGY",
+  "slate grey/slate grey": "SGY",
+  "black/black": "BK",
+  "cream/white": "WOLF",
+  "white/cream": "WORF",
+  "golden oak/white": "CMLF",
+  "white/golden oak": "CMRF",
+  "irish oak/white": "WIOLF",
+  "white/irish oak": "WIORF",
+  "rosewood/white": "WROLF",
+  "white/rosewood": "WRORF",
+  "anthracite grey/white": "AGYLF",
+  "white/anthracite grey": "AGYRF",
+  "slate grey/white": "SGYLF",
+  "white/slate grey": "SGYRF",
+  "black/white": "BKLF",
+  "white/black": "BKRF",
+};

@@ -11,10 +11,11 @@
  */
 
 import { useDatabase } from "@/lib/db";
+
 import { saveSettings } from "../actions";
+import { FormModal } from "../Modal";
 import { SectionNav } from "../Sections";
 import { StickySave } from "../StickySave";
-import { FormModal } from "../Modal";
 import {
   PageHead,
   Card,
@@ -24,7 +25,6 @@ import {
   Check,
   Empty,
   SaveButton,
-  DeleteButton,
   Actions,
   adminStyles as s,
 } from "../ui";
@@ -32,23 +32,51 @@ import {
 /* ── demo data ─────────────────────────────────────────────────────────── */
 
 const DEMO_NOTIFICATIONS = [
-  { id: "1", type: "Email", recipient: "john@example.com", subject: "Welcome aboard!", sentAt: "2 hours ago", status: "delivered" },
-  { id: "2", type: "SMS",   recipient: "+1 555-0100",      subject: "Booking confirmed", sentAt: "5 hours ago", status: "delivered" },
-  { id: "3", type: "Email", recipient: "sara@example.com", subject: "Intro Call reminder", sentAt: "1 day ago", status: "bounced" },
-  { id: "4", type: "Email", recipient: "mike@example.com", subject: "Follow-up", sentAt: "3 days ago", status: "pending" },
+  {
+    id: "1",
+    type: "Email",
+    recipient: "john@example.com",
+    subject: "Welcome aboard!",
+    sentAt: "2 hours ago",
+    status: "delivered",
+  },
+  {
+    id: "2",
+    type: "SMS",
+    recipient: "+1 555-0100",
+    subject: "Booking confirmed",
+    sentAt: "5 hours ago",
+    status: "delivered",
+  },
+  {
+    id: "3",
+    type: "Email",
+    recipient: "sara@example.com",
+    subject: "Intro Call reminder",
+    sentAt: "1 day ago",
+    status: "bounced",
+  },
+  {
+    id: "4",
+    type: "Email",
+    recipient: "mike@example.com",
+    subject: "Follow-up",
+    sentAt: "3 days ago",
+    status: "pending",
+  },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
   delivered: "Delivered",
-  bounced:   "Bounced",
-  pending:   "Pending",
+  bounced: "Bounced",
+  pending: "Pending",
 };
 
 /* status → data-stage mapping for the status badge dot colours */
 const STATUS_STAGE: Record<string, "upcoming" | "past" | "cancelled" | "unscheduled"> = {
-  delivered: "upcoming",   /* green */
-  bounced:   "cancelled",  /* red   */
-  pending:   "unscheduled",/* amber  */
+  delivered: "upcoming" /* green */,
+  bounced: "cancelled" /* red   */,
+  pending: "unscheduled" /* amber  */,
 };
 
 /* ── page ───────────────────────────────────────────────────────────────── */
@@ -83,7 +111,7 @@ export default function NotificationsPage() {
               name="test.channel"
               options={[
                 { value: "email", label: "Email" },
-                { value: "sms",   label: "SMS"   },
+                { value: "sms", label: "SMS" },
               ]}
             />
             <Actions>
@@ -96,17 +124,16 @@ export default function NotificationsPage() {
       {/* ---- section nav for long form ---------------------------------- */}
       <SectionNav
         items={[
-          { id: "email",    label: "Email"    },
-          { id: "sms",      label: "SMS"      },
+          { id: "email", label: "Email" },
+          { id: "sms", label: "SMS" },
           { id: "triggers", label: "Triggers" },
-          { id: "log",      label: "Log"      },
+          { id: "log", label: "Log" },
         ]}
       />
 
       {/* ---- settings form --------------------------------------------- */}
       <form action={saveSettings}>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
           {/* Email settings */}
           <Card title="Email" id="email">
             <div className={s.grid2}>
@@ -147,36 +174,37 @@ export default function NotificationsPage() {
                 label="Provider"
                 name="sms.provider"
                 options={[
-                  { value: "twilio",  label: "Twilio"  },
-                  { value: "vonage",  label: "Vonage"  },
-                  { value: "custom",  label: "Custom"  },
+                  { value: "twilio", label: "Twilio" },
+                  { value: "vonage", label: "Vonage" },
+                  { value: "custom", label: "Custom" },
                 ]}
               />
-              <Field
-                label="API key"
-                name="sms.apiKey"
-                type="password"
-                placeholder="sk_…"
-              />
-              <Field
-                label="API secret"
-                name="sms.apiSecret"
-                type="password"
-                placeholder="…"
-              />
+              <Field label="API key" name="sms.apiKey" type="password" placeholder="sk_…" />
+              <Field label="API secret" name="sms.apiSecret" type="password" placeholder="…" />
             </div>
           </Card>
 
           {/* Trigger settings */}
           <Card title="Triggers" id="triggers" note="Choose which events fire a notification.">
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <Check label="Booking confirmed — send confirmation to the client" name="trigger.bookingConfirm" defaultChecked />
-              <Check label="Booking reminder — 24 hours before the call"         name="trigger.bookingReminder" defaultChecked />
-              <Check label="Booking cancelled — notify the client"               name="trigger.bookingCancel" defaultChecked />
-              <Check label="New booking — notify me by email"                    name="trigger.ownerAlert" />
+              <Check
+                label="Booking confirmed — send confirmation to the client"
+                name="trigger.bookingConfirm"
+                defaultChecked
+              />
+              <Check
+                label="Booking reminder — 24 hours before the call"
+                name="trigger.bookingReminder"
+                defaultChecked
+              />
+              <Check
+                label="Booking cancelled — notify the client"
+                name="trigger.bookingCancel"
+                defaultChecked
+              />
+              <Check label="New booking — notify me by email" name="trigger.ownerAlert" />
             </div>
           </Card>
-
         </div>
 
         <StickySave />
@@ -219,16 +247,18 @@ export default function NotificationsPage() {
                           fontSize: 12,
                           fontWeight: 500,
                           whiteSpace: "nowrap",
-                          background: STATUS_STAGE[n.status] === "upcoming"
-                            ? "var(--ok-bg)"
-                            : STATUS_STAGE[n.status] === "cancelled"
-                            ? "var(--bad-bg)"
-                            : "var(--warn-bg)",
-                          color: STATUS_STAGE[n.status] === "upcoming"
-                            ? "var(--ok)"
-                            : STATUS_STAGE[n.status] === "cancelled"
-                            ? "var(--bad)"
-                            : "var(--warn)",
+                          background:
+                            STATUS_STAGE[n.status] === "upcoming"
+                              ? "var(--ok-bg)"
+                              : STATUS_STAGE[n.status] === "cancelled"
+                                ? "var(--bad-bg)"
+                                : "var(--warn-bg)",
+                          color:
+                            STATUS_STAGE[n.status] === "upcoming"
+                              ? "var(--ok)"
+                              : STATUS_STAGE[n.status] === "cancelled"
+                                ? "var(--bad)"
+                                : "var(--warn)",
                         }}
                       >
                         <i

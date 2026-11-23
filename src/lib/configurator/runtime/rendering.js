@@ -340,6 +340,7 @@ export async function renderDoor({
   picks,
   texts,
   internal,
+  frameDetails,
 }) {
   const face = internal ? "2" : "1";
   const base = parse(await loadSvg(layout.views[face].src));
@@ -540,7 +541,9 @@ export async function renderDoor({
       const ow = Number(el.getAttribute("width") || 0);
       const cx = ox + ow / 2;
       const sw = Number(slabForHandle?.getAttribute("width") || 914);
-      handleOnLeft = cx <= sw / 2;
+      // The catalogue provides a face-specific handle position. From the
+      // inside, the same physical handing appears on the opposite screen side.
+      handleOnLeft = cx <= sw / 2 !== Boolean(internal);
       if (handle && handle.description.startsWith("No ")) {
         el.remove();
         continue;
@@ -1095,7 +1098,10 @@ export async function renderDoor({
       }
     }
   }
-  attachDoorDimensions(base, layout);
+  attachDoorDimensions(base, layout, {
+    width: frameDetails?.width_mm,
+    height: frameDetails?.height_mm,
+  });
   base.documentElement.setAttribute(
     "aria-label",
     `${internal ? "Internal" : "External"} view of ${layout.layoutName}`,

@@ -43,6 +43,15 @@ export const QuoteStatusSchema = z.object({
   status: z.enum(["new", "viewed", "contacted", "closed"]),
 });
 export const ConfigurationSchema = z.object({
+  system: z.enum(["eurocell", "rehau", "doorco"]).default("eurocell"),
+  frame: z
+    .object({
+      width_mm: z.number().int().min(300).max(2800),
+      height_mm: z.number().int().min(1750).max(2500),
+      quantity: z.number().int().min(1).max(999),
+      location: z.string().trim().max(120),
+    })
+    .default({ width_mm: 900, height_mm: 2100, quantity: 1, location: "" }),
   style: z.string().max(80).default(""),
   design_id: z.union([z.uuid(), z.literal("")]).default(""),
   side_designs: z

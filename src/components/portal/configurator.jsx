@@ -62,13 +62,15 @@ function loadRuntime(publicKey, layoutId) {
   }
   return promise;
 }
-/** @param {{publicKey:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, headerAction?:import('react').ReactNode, completionAction?:import('react').ReactNode}} props */
+/** @param {{publicKey:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, onDrawingChange?:(value:string)=>void, headerAction?:import('react').ReactNode, completionAction?:import('react').ReactNode, frameDetails?:import('@/server/portal/schemas').Configuration['frame']}} props */
 export function Configurator({
   publicKey,
   layoutId,
   onChange,
+  onDrawingChange,
   headerAction = null,
   completionAction = null,
+  frameDetails = null,
 }) {
   const [runtime, setRuntime] = useState(null),
     [error, setError] = useState(""),
@@ -117,7 +119,9 @@ export function Configurator({
       const selected = (q.options || []).find((o) => o.id === state.picks[q.key]);
       const text = configuration.texts[q.key] || "";
       return {
-        question: q.name?.replace(/\s*\((Door|Side|Internal|Casement)\)/g, "") || q.name,
+        question: q.name?.replace(/\s*\((Door|Side|Casement)\)$/g, "") || q.name,
+        original_name: q.originalName || q.name,
+        section: q.section || "",
         answer: text || selected?.description || "—",
       };
     });
@@ -147,6 +151,9 @@ export function Configurator({
 
   const request = JSON.stringify([layoutId, configuration, internal, runtime?.kind, retry]);
   useEffect(() => {
+    onDrawingChange?.(drawing.request === request ? drawing.markup : "");
+  }, [drawing.markup, drawing.request, onDrawingChange, request]);
+  useEffect(() => {
     if (!runtime || !state) return;
     const controller = new AbortController();
     const render = async () => {
@@ -160,6 +167,7 @@ export function Configurator({
           picks: state.picks,
           texts: configuration.texts,
           internal,
+          frameDetails,
         });
       const face =
         runtime.source.images?.find((image) => image.type === (internal ? 2 : 1)) ||
@@ -193,7 +201,7 @@ export function Configurator({
         if (!controller.signal.aborted) setDrawing({ request, markup: "", error: e.message });
       });
     return () => controller.abort();
-  }, [runtime, state, configuration.texts, internal, request]);
+  }, [runtime, state, configuration.texts, internal, request, frameDetails]);
   useEffect(() => {
     if (optionScroll.current) optionScroll.current.scrollTop = 0;
   }, [runtime, index, query, state?.questions.length]);

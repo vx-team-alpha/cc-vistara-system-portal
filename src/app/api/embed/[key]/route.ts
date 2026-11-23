@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { validateConfiguration } from "@/lib/configurator/runtime/validate.js";
+import { calculateManufacturing } from "@/lib/manufacturing";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { loadPublicCatalogue } from "@/server/portal/catalogue";
 import { PublicSubmissionSchema } from "@/server/portal/schemas";
@@ -55,7 +56,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ key
     if (error) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
     if (!layout) return NextResponse.json({ error: "Product unavailable" }, { status: 400 });
     let configuration: Json | null = null;
-    const submittedSystem = (payload.configuration as Record<string, unknown> | undefined)?.system;
+    let manufacturing: Json | null = null;
+    const submittedSystem = payload.configuration?.system;
     const systemLabel =
       submittedSystem === "eurocell"
         ? "Eurocell Composite"
@@ -63,17 +65,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ key
           ? "REHAU AGILA"
           : "DoorCo";
     if (payload.configuration) {
-      // Strip system from the configuration before passing to validator (not a catalogue field)
-      const { system: _system, ...configWithoutSystem } = payload.configuration as Record<
-        string,
-        unknown
-      >;
+      const { system, frame, ...catalogueConfiguration } = payload.configuration;
       try {
         const runtime = await loadPublicCatalogue(layout.id, w.configurator_type_id);
         if (!runtime) return NextResponse.json({ error: "Product unavailable" }, { status: 400 });
-        configuration = JSON.parse(
-          JSON.stringify(await validateConfiguration(runtime, configWithoutSystem)),
-        ) as Json;
+        const validated = await validateConfiguration(runtime, catalogueConfiguration);
+        configuration = JSON.parse(JSON.stringify({ ...validated, system, frame })) as Json;
+        const snapshot = calculateManufacturing({
+          system,
+          style: /Door (Left|Right) Hand/i.test(layout.name) ? "Style 1" : layout.name,
+          designName: validated.design_name || layout.name,
+          frame,
+          particulars: Array.isArray(validated.particulars) ? validated.particulars : [],
+        });
+        manufacturing = snapshot ? (JSON.parse(JSON.stringify(snapshot)) as Json) : null;
       } catch (error) {
         return NextResponse.json(
           { error: error instanceof Error ? error.message : "Please review your configuration" },
@@ -99,7 +104,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ key
         system: systemLabel,
         layout_id: layout.id,
         layout_slug: layout.slug,
-        dimensions: features.dimensions || null,
+        dimensions: payload.configuration?.frame || features.dimensions || null,
+        manufacturing,
         message: payload.message,
         preview: configuration ? "Configured indicative elevation" : "captured catalogue elevation",
       },

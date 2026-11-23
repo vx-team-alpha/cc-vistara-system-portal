@@ -3,13 +3,26 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useSyncExternalStore } from "react";
 
+import {
+  calculateManufacturing,
+  resolveFinishSelections,
+  type FrameDetails,
+} from "@/lib/manufacturing";
+
 import s from "./print.module.css";
 
-type Particular = { question: string; answer: string };
+type Particular = {
+  question: string;
+  answer: string;
+  original_name?: string;
+  section?: string;
+};
 type DeliveryNoteData = {
   brandName: string;
   brandPhone: string;
   system: string;
+  systemId: "doorco" | "eurocell" | "rehau";
+  frame: FrameDetails;
   range: string;
   layoutName: string;
   designName: string;
@@ -22,15 +35,31 @@ const subscribeToStorage = (onStoreChange: () => void) => {
   return () => window.removeEventListener("storage", onStoreChange);
 };
 
-const getStoredQuote = () => sessionStorage.getItem("frontage:print-quote");
-const getStoredDrawing = () => sessionStorage.getItem("frontage:last-door-drawing") || "";
 const getServerQuote = () => null;
-const getServerDrawing = () => "";
 
 function DeliveryNoteContent() {
   const params = useSearchParams();
-  const storedQuote = useSyncExternalStore(subscribeToStorage, getStoredQuote, getServerQuote);
-  const drawing = useSyncExternalStore(subscribeToStorage, getStoredDrawing, getServerDrawing);
+  const printId = params.get("print_id");
+  const storedQuote = useSyncExternalStore(
+    subscribeToStorage,
+    () => {
+      try {
+        return printId ? localStorage.getItem(`frontage:print-quote:${printId}`) : null;
+      } catch {
+        return null;
+      }
+    },
+    getServerQuote,
+  );
+  const hasPrintData = useMemo(() => {
+    if (!storedQuote) return false;
+    try {
+      const payload = JSON.parse(storedQuote);
+      return Number.isFinite(payload.frame?.width_mm) && Number.isFinite(payload.frame?.height_mm);
+    } catch {
+      return false;
+    }
+  }, [storedQuote]);
   const queryBrandName = params.get("brand") || "Excel Composite Doors Ltd";
   const queryBrandPhone = params.get("brand_phone") || "";
   const querySystem = params.get("system") || "Eurocell Composite (NEW)";
@@ -42,11 +71,22 @@ function DeliveryNoteContent() {
       brandName: queryBrandName,
       brandPhone: queryBrandPhone,
       system: querySystem,
+      systemId: querySystem.toLowerCase().includes("eurocell")
+        ? "eurocell"
+        : querySystem.toLowerCase().includes("rehau")
+          ? "rehau"
+          : "doorco",
+      frame: {
+        width_mm: Number(params.get("width_mm")),
+        height_mm: Number(params.get("height_mm")),
+        quantity: Number(params.get("quantity")),
+        location: params.get("location") || "",
+      },
       range: queryRange,
       layoutName: queryLayoutName,
       designName: "Carnoustie",
       particulars: [],
-      svgMarkup: drawing,
+      svgMarkup: "",
     };
 
     if (!storedQuote) return fallback;
@@ -59,16 +99,19 @@ function DeliveryNoteContent() {
         brandName: parsed.brand || fallback.brandName,
         brandPhone: parsed.brand_phone || fallback.brandPhone,
         system: parsed.system || fallback.system,
+        systemId: config.system || fallback.systemId,
+        frame: parsed.frame || config.frame || fallback.frame,
         range: parsed.range || fallback.range,
         layoutName: parsed.layout_name || fallback.layoutName,
         designName: config.design_name || config.style || fallback.designName,
         particulars: Array.isArray(config.particulars) ? config.particulars : [],
+        svgMarkup: parsed.drawing || fallback.svgMarkup,
       };
     } catch {
       return fallback;
     }
   }, [
-    drawing,
+    params,
     queryBrandName,
     queryBrandPhone,
     queryLayoutName,
@@ -78,11 +121,12 @@ function DeliveryNoteContent() {
   ]);
 
   useEffect(() => {
+    if (!hasPrintData) return;
     const id = setTimeout(() => {
       window.print();
     }, 600);
     return () => clearTimeout(id);
-  }, []);
+  }, [hasPrintData]);
 
   // Map particulars into quick lookup
   const specMap = useMemo(() => {
@@ -94,8 +138,9 @@ function DeliveryNoteContent() {
     return map;
   }, [data.particulars]);
 
-  const frameColour = specMap.get("frame colour") || specMap.get("outer frame colour") || "Black";
-  const cillColour = specMap.get("cill colour") || frameColour || "Black";
+  const finishes = resolveFinishSelections(data.particulars);
+  const frameColour = finishes.profile.label;
+  const cillColour = finishes.cill.label;
   const cill = specMap.get("cill") || specMap.get("sill") || "150mm cill";
   const threshold = specMap.get("threshold") || "80mm PVCu threshold";
   const drainage = specMap.get("drainage") || "Concealed drainage";
@@ -112,19 +157,39 @@ function DeliveryNoteContent() {
   const glass = specMap.get("glass design") || specMap.get("glass") || "";
 
   // Dimensions formatted
-  const width = specMap.get("overall width") || "950";
-  const height = specMap.get("overall height") || "2100";
+  const width = String(data.frame.width_mm);
+  const height = String(data.frame.height_mm);
 
   // System label formatting e.g. "Eurocell Composite (NEW)"
   const systemDisplay = data.system.toLowerCase().includes("eurocell")
     ? "Eurocell Composite (NEW)"
     : data.system.toLowerCase().includes("rehau")
-      ? "REHAU AGILA Composite"
+      ? "Rehau Composite Door"
       : `${data.system} Composite`;
 
   // Slab line e.g. "Carnoustie slab (Black/Black)"
-  const slabColour = specMap.get("door colour") || specMap.get("external door colour") || "Black";
+  const slabColour = finishes.door.label;
   const slabName = data.designName || "Carnoustie";
+  let manufacturing = null;
+  try {
+    manufacturing = calculateManufacturing({
+      system: data.systemId,
+      style: "Style 1",
+      designName: slabName,
+      frame: data.frame,
+      particulars: data.particulars,
+    });
+  } catch {
+    manufacturing = null;
+  }
+
+  if (!hasPrintData) {
+    return (
+      <div className={s.page}>
+        Print details are unavailable. Return to the designer and open the PDF again.
+      </div>
+    );
+  }
 
   return (
     <div className={s.page}>
@@ -139,14 +204,14 @@ function DeliveryNoteContent() {
       {/* ── Title & Reference Bar ── */}
       <div className={s.docTitleBar}>
         <span className={s.customerCode}>AJK</span>
-        <h2 className={s.docTitle}>DELIVERY NOTE</h2>
+        <h2 className={s.docTitle}>WORKS ORDER</h2>
         <div className={s.jobMeta}>
           <div>Job No: EXCELRETAIL021522</div>
           <div>Ref: HUSSAIN</div>
         </div>
       </div>
 
-      <div className={s.sectionIntro}>Received the following items:-</div>
+      <div className={s.sectionIntro}>Manufacture the following item:-</div>
 
       {/* ── Main Door Item Card ── */}
       <div className={s.itemCard}>
@@ -160,7 +225,7 @@ function DeliveryNoteContent() {
             {data.svgMarkup ? (
               <div className={s.svgFrame} dangerouslySetInnerHTML={{ __html: data.svgMarkup }} />
             ) : (
-              <div style={{ width: 100, height: 210, background: "#1a1a1a", borderRadius: 2 }} />
+              <div className={s.previewUnavailable}>Door preview unavailable</div>
             )}
           </div>
 
@@ -232,30 +297,97 @@ function DeliveryNoteContent() {
 
         {/* Slab Description Line */}
         <div className={s.slabLine}>
-          {slabName} slab ({slabColour}/{slabColour})
+          {slabName} slab ({slabColour})
         </div>
       </div>
 
+      {manufacturing ? (
+        <section className={s.manufacturingSection}>
+          <div className={s.manufacturingMeta}>
+            <span>
+              <strong>Overall:</strong> {manufacturing.overallWidthMm}w ×{" "}
+              {manufacturing.overallHeightMm}h
+            </span>
+            <span>
+              <strong>Finished frame:</strong> {manufacturing.finishedFrameWidthMm}w ×{" "}
+              {manufacturing.finishedFrameHeightMm}h
+            </span>
+            <span>
+              <strong>Check diagonal:</strong> {manufacturing.checkDiagonalMm} mm
+            </span>
+            <span>
+              <strong>Quantity:</strong> {manufacturing.quantity}
+            </span>
+            {manufacturing.location && (
+              <span>
+                <strong>Location:</strong> {manufacturing.location}
+              </span>
+            )}
+          </div>
+          <table className={s.partsTable}>
+            <thead>
+              <tr>
+                <th>Part code</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Width</th>
+                <th>Height</th>
+                <th>End preps</th>
+              </tr>
+            </thead>
+            <tbody>
+              {manufacturing.parts.map((part) => (
+                <tr key={part.lineId}>
+                  <td>{part.partCode || "—"}</td>
+                  <td>{part.description}</td>
+                  <td>{part.totalQuantity}</td>
+                  <td>{part.widthMm ?? "—"}</td>
+                  <td>{part.heightMm ?? "—"}</td>
+                  <td>
+                    {part.leftEndPrep === "none"
+                      ? "—"
+                      : `${part.leftEndPrep} / ${part.rightEndPrep}`}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {manufacturing.warnings.map((warning) => (
+            <p className={s.manufacturingWarning} key={warning}>
+              {warning}
+            </p>
+          ))}
+        </section>
+      ) : (
+        <p className={s.manufacturingWarning}>
+          Manufacturing rules for this profile system have not been configured yet.
+        </p>
+      )}
+
       {/* ── Signature Block ── */}
       <div className={s.signBox}>
-        <div className={s.signTitle}>Received the above items</div>
-        <div className={s.signField}>Signed:</div>
-        <div className={s.signField}>Print Name:</div>
+        <div className={s.signTitle}>Production checks</div>
+        <div className={s.signField}>Cut by:</div>
+        <div className={s.signField}>Assembled by:</div>
+        <div className={s.signField}>Checked by:</div>
         <div className={s.signField}>Date:</div>
-        <div className={s.signField}>Paid:</div>
       </div>
 
       {/* ── Notes Box ── */}
       <div className={s.notesBox}>
         <div className={s.notesTitle}>Notes:</div>
         <p className={s.notesContent}>
-          {cill.toUpperCase()} - {cillColour.toUpperCase()} / {cillColour.toUpperCase()} - 1050
+          {cill.toUpperCase()} - {cillColour.toUpperCase()} / {cillColour.toUpperCase()} -{" "}
+          {manufacturing?.parts.find((part) => part.lineId === "cill")?.widthMm || "CHECK SIZE"}
         </p>
       </div>
 
       {/* ── Document Footer ── */}
       <footer className={s.docFooter}>
-        <span>Focus v10.64J © Windowlink Ltd 2000-2020 Revision:1.00.01</span>
+        <span>
+          Vistara manufacturing rules · {manufacturing?.ruleSetId || "not configured"} v
+          {manufacturing?.ruleSetVersion || "—"}
+        </span>
         <span>Page - 1 of 1</span>
       </footer>
     </div>

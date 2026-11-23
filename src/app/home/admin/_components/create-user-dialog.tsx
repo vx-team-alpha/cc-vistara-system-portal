@@ -1,16 +1,18 @@
-'use client';
-import { useTransition, useState, useRef } from 'react';
-import { createUserAction } from '@/server/admin/actions';
-import s from '@/components/portal/portal.module.css';
+"use client";
+import { useTransition, useState, useRef } from "react";
+
+import { createUserAction } from "@/server/admin/actions";
+
+import s from "@/components/portal/portal.module.css";
 
 export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
   const [pending, startTransition] = useTransition();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   function openDialog() {
-    setMessage('');
+    setMessage("");
     setIsError(false);
     requestAnimationFrame(() => dialogRef.current?.showModal());
   }
@@ -24,15 +26,15 @@ export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
     const form = e.currentTarget;
     const data = new FormData(form);
 
-    setMessage('');
+    setMessage("");
     setIsError(false);
 
     startTransition(async () => {
       try {
         const result = await createUserAction({
-          email: String(data.get('email') ?? ''),
-          password: String(data.get('password') ?? ''),
-          name: String(data.get('name') ?? ''),
+          email: String(data.get("email") ?? ""),
+          password: String(data.get("password") ?? ""),
+          name: String(data.get("name") ?? ""),
         });
 
         if (!result.ok) {
@@ -41,13 +43,15 @@ export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
           return;
         }
 
-        setMessage('User created successfully. They can now sign in with the provided credentials.');
+        setMessage(
+          "User created successfully. They can now sign in with the provided credentials.",
+        );
         setIsError(false);
         form.reset();
         onCreated?.();
       } catch {
         setIsError(true);
-        setMessage('Something went wrong. Please try again.');
+        setMessage("Something went wrong. Please try again.");
       }
     });
   }
@@ -61,25 +65,53 @@ export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
       <dialog
         ref={dialogRef}
         className={s.adminDialog}
-        onClick={e => { if (e.target === dialogRef.current) closeDialog(); }}
+        onClick={(e) => {
+          if (e.target === dialogRef.current) closeDialog();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") closeDialog();
+        }}
       >
         <div className={s.adminDialogInner}>
           <header className={s.adminDialogHead}>
             <h2 className={s.cardTitle}>Create new user</h2>
-            <button type="button" className={s.iconBtn} aria-label="Close dialog" onClick={closeDialog}>
+            <button
+              type="button"
+              className={s.iconBtn}
+              aria-label="Close dialog"
+              onClick={closeDialog}
+            >
               ✕
             </button>
           </header>
 
           <form onSubmit={handleSubmit} noValidate>
             <div className={s.field}>
-              <label className={s.label} htmlFor="cu-name">Full name</label>
-              <input className={s.input} id="cu-name" name="name" required maxLength={80} placeholder="e.g. Acme Windows Ltd" />
+              <label className={s.label} htmlFor="cu-name">
+                Full name
+              </label>
+              <input
+                className={s.input}
+                id="cu-name"
+                name="name"
+                required
+                maxLength={80}
+                placeholder="e.g. Acme Windows Ltd"
+              />
             </div>
 
             <div className={s.field}>
-              <label className={s.label} htmlFor="cu-email">Email address</label>
-              <input className={s.input} id="cu-email" name="email" type="email" required placeholder="user@example.com" />
+              <label className={s.label} htmlFor="cu-email">
+                Email address
+              </label>
+              <input
+                className={s.input}
+                id="cu-email"
+                name="email"
+                type="email"
+                required
+                placeholder="user@example.com"
+              />
             </div>
 
             <div className={s.field}>
@@ -87,7 +119,15 @@ export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
                 Temporary password
                 <span className={s.hint}> (min. 8 characters)</span>
               </label>
-              <input className={s.input} id="cu-password" name="password" type="password" required minLength={8} placeholder="••••••••" />
+              <input
+                className={s.input}
+                id="cu-password"
+                name="password"
+                type="password"
+                required
+                minLength={8}
+                placeholder="••••••••"
+              />
               <span className={s.hint}>The user can change this after signing in.</span>
             </div>
 
@@ -99,7 +139,7 @@ export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
 
             <div className={s.actions}>
               <button type="submit" className={`${s.btn} ${s.btnPrimary}`} disabled={pending}>
-                {pending ? 'Creating…' : 'Create user'}
+                {pending ? "Creating…" : "Create user"}
               </button>
               <button type="button" className={s.btn} onClick={closeDialog}>
                 Cancel

@@ -20,25 +20,20 @@ import { LayoutPreview } from "./layout-preview";
 
 import s from "./portal.module.css";
 
-type DoorSystem = "doorco" | "eurocell" | "rehau";
-const SYSTEMS: { id: DoorSystem; label: string; subtitle: string; badge: string }[] = [
+type DoorSystem = "rehau" | "eurocell" | "doorco";
+type FrameDetails = Configuration["frame"];
+const SYSTEMS: { id: "rehau" | "eurocell"; label: string; subtitle: string; badge: string }[] = [
   {
-    id: "doorco",
-    label: "DoorCo",
-    subtitle: "ORiGINAL & GRiPCORE composite door systems",
-    badge: "DoorCo",
+    id: "rehau",
+    label: "Rehau Composite Door",
+    subtitle: "REHAU 70mm composite door outer frame and profile system",
+    badge: "REHAU",
   },
   {
     id: "eurocell",
     label: "Eurocell Composite",
-    subtitle: "Dales GRP and Peak timber-core systems",
+    subtitle: "Eurocell 70mm composite door outer frame and profile system",
     badge: "Eurocell",
-  },
-  {
-    id: "rehau",
-    label: "REHAU AGILA",
-    subtitle: "REHAU composite door and profile systems",
-    badge: "REHAU",
   },
 ];
 
@@ -77,6 +72,13 @@ function directImageLoader({ src }: ImageLoaderProps) {
   return src;
 }
 
+const WIZARD_STEPS = [
+  { id: "style", label: "1. Door Style" },
+  { id: "system", label: "2. Frame System" },
+  { id: "details", label: "3. Frame Details" },
+  { id: "questions", label: "4. Door Options" },
+] as const;
+
 export function PublicEmbed({
   publicKey,
   ranges,
@@ -91,8 +93,22 @@ export function PublicEmbed({
   branding?: EmbedBranding;
 }) {
   const [configuration, setConfiguration] = useState<Configuration | null>(null);
-  const [step, setStep] = useState<"category" | "layout" | "system" | "questions">("category");
-  const [system, setSystem] = useState<DoorSystem>("doorco");
+  const [doorDrawing, setDoorDrawing] = useState("");
+  const [step, setStep] = useState<
+    "style" | "layout" | "system" | "details" | "questions" | "category"
+  >("style");
+  const [system, setSystem] = useState<DoorSystem>("eurocell");
+  const [frame, setFrame] = useState<FrameDetails>({
+    width_mm: 900,
+    height_mm: 2100,
+    quantity: 1,
+    location: "",
+  });
+  const [frameErrors, setFrameErrors] = useState<{
+    width?: string;
+    height?: string;
+    quantity?: string;
+  }>({});
   const stepHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     stepHeading.current?.focus();
@@ -187,7 +203,7 @@ export function PublicEmbed({
           phone: form.get("phone") || "",
           message: form.get("message") || "",
           company: form.get("company") || "",
-          configuration: configuration ? { ...configuration, system } : undefined,
+          configuration: configuration ? { ...configuration, system, frame } : undefined,
         }),
       });
       if (!response.ok) {
@@ -211,8 +227,10 @@ export function PublicEmbed({
     const nextSession = crypto.randomUUID();
 
     setConfiguration(null);
-    setStep("category");
-    setSystem("doorco");
+    setDoorDrawing("");
+    setStep("style");
+    setSystem("eurocell");
+    setFrame({ width_mm: 900, height_mm: 2100, quantity: 1, location: "" });
     setRange(initialRange);
     setSelected(products.find((p) => p.range_id === initialRange)?.id || "");
     setMessage("");
@@ -236,23 +254,35 @@ export function PublicEmbed({
     if (!product || !configuration) return;
     const selectedSystem = SYSTEMS.find((sys) => sys.id === system);
     const rangeName = ranges.find((r) => r.id === range)?.name || "";
+    const drawing = doorDrawing;
+    const systemName =
+      selectedSystem?.label || (system === "rehau" ? "Rehau Composite Door" : "Eurocell Composite");
     const printPayload = {
       layout_id: product.id,
       layout_name: product.name,
       range: rangeName,
-      system: selectedSystem?.label || "DoorCo",
+      system: systemName,
+      systemId: system,
       brand: branding?.name || "Excel Composite Doors Ltd",
       brand_phone: branding?.phone || "",
-      config: configuration,
+      config: { ...configuration, system, frame },
+      drawing,
+      frame,
     };
+    const printId = crypto.randomUUID();
     try {
-      sessionStorage.setItem("frontage:print-quote", JSON.stringify(printPayload));
+      localStorage.setItem(`frontage:print-quote:${printId}`, JSON.stringify(printPayload));
     } catch {}
     const params = new URLSearchParams({
+      print_id: printId,
       layout_name: product.name,
       range: rangeName,
-      system: selectedSystem?.label || "DoorCo",
+      system: systemName,
       brand: branding?.name || "Excel Composite Doors Ltd",
+      width_mm: String(frame.width_mm),
+      height_mm: String(frame.height_mm),
+      quantity: String(frame.quantity),
+      location: frame.location,
     });
     window.open(`/print/quote?${params.toString()}`, "_blank", "noopener");
   }
@@ -308,6 +338,38 @@ export function PublicEmbed({
           )}
         </header>
         <div className={s.stack}>
+          <nav className={s.embedStepper} aria-label="Configuration progress">
+            {WIZARD_STEPS.map((ws, idx) => {
+              const isCurrent =
+                ws.id === step || (ws.id === "style" && (step === "layout" || step === "category"));
+              const stepOrder = ["style", "system", "details", "questions"];
+              const currentIdx = stepOrder.indexOf(
+                step === "layout" || step === "category" ? "style" : step,
+              );
+              const isPast = idx < currentIdx;
+              return (
+                <span key={ws.id} className={s.embedStepWrapper}>
+                  {idx > 0 && (
+                    <span className={s.embedStepDivider} aria-hidden="true">
+                      /
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    disabled={!isPast}
+                    className={`${s.embedStepItem} ${isCurrent ? s.embedStepItemActive : ""} ${isPast ? s.embedStepItemClickable : ""}`}
+                    onClick={() => {
+                      if (isPast) {
+                        setStep(ws.id === "style" ? "style" : (ws.id as any));
+                      }
+                    }}
+                  >
+                    {ws.label}
+                  </button>
+                </span>
+              );
+            })}
+          </nav>
           {step !== "questions" && (
             <section aria-labelledby="embed-step-heading">
               <div className={s.toolbar}>
@@ -320,28 +382,43 @@ export function PublicEmbed({
                   >
                     {step === "category"
                       ? "Choose your product range"
-                      : step === "layout"
-                        ? "Choose your layout"
-                        : "Choose your door system"}
+                      : step === "system"
+                        ? "Select Profile/Frame System"
+                        : step === "details"
+                          ? "Frame Details"
+                          : "Choose the Door Style"}
                   </h2>
                   <p className={s.note}>
                     {step === "category"
-                      ? "Select a category to explore the available layouts."
-                      : step === "layout"
-                        ? `${ranges.find((r) => r.id === range)?.name || ""} · Select a layout to start designing.`
-                        : `${product?.name || ""} · Select the door system for your Works Order.`}
+                      ? "Select a category to explore the available door styles."
+                      : step === "system"
+                        ? `${product?.name || "Door"} · Select Rehau or Eurocell composite door frame system.`
+                        : step === "details"
+                          ? "Set the overall manufacturing size, quantity, and optional location."
+                          : `${ranges.find((r) => r.id === range)?.name ? `${ranges.find((r) => r.id === range)?.name} · ` : ""}Select a door style to start designing.`}
                   </p>
                 </div>
-                {step === "layout" && (
+                {(step === "style" || step === "layout") && ranges.length > 1 && (
                   <button type="button" className={s.btn} onClick={() => setStep("category")}>
-                    <ArrowLeft size={16} aria-hidden="true" />
                     All categories
                   </button>
                 )}
-                {step === "system" && (
-                  <button type="button" className={s.btn} onClick={() => setStep("layout")}>
+                {step === "category" && (
+                  <button type="button" className={s.btn} onClick={() => setStep("style")}>
                     <ArrowLeft size={16} aria-hidden="true" />
-                    Change layout
+                    Back to styles
+                  </button>
+                )}
+                {step === "system" && (
+                  <button type="button" className={s.btn} onClick={() => setStep("style")}>
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    Change door style
+                  </button>
+                )}
+                {step === "details" && (
+                  <button type="button" className={s.btn} onClick={() => setStep("system")}>
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    Change frame system
                   </button>
                 )}
               </div>
@@ -363,7 +440,7 @@ export function PublicEmbed({
                               setRange(r.id);
                               setSelected(products.find((p) => p.range_id === r.id)?.id || "");
                             }
-                            setStep("layout");
+                            setStep("style");
                           }}
                         >
                           <span className={s.embedCategoryImage}>
@@ -384,33 +461,69 @@ export function PublicEmbed({
                     })}
                 </div>
               )}
-              {step === "layout" && (
-                <div className={s.embedLayouts}>
-                  {available.map((p) => (
-                    <button
-                      type="button"
-                      key={p.id}
-                      className={s.embedLayout}
-                      onClick={() => {
-                        if (selected !== p.id) {
-                          setConfiguration(null);
-                          setSelected(p.id);
-                        }
-                        setStep("system");
+              {(step === "style" || step === "layout") && (
+                <div>
+                  {ranges.length > 1 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        marginBottom: "16px",
+                        flexWrap: "wrap",
                       }}
                     >
-                      <span className={s.embedLayoutImage}>
-                        <LayoutPreview src={p.image} />
-                      </span>
-                      <span className={s.embedLayoutName}>
-                        <span>{p.name}</span>
-                        <span className={s.embedCardAction}>
-                          Choose this design
-                          <ArrowRight size={18} aria-hidden="true" />
+                      {ranges.map((r) => (
+                        <button
+                          type="button"
+                          key={r.id}
+                          style={{
+                            padding: "6px 14px",
+                            borderRadius: "8px",
+                            border: "1px solid var(--border)",
+                            background: r.id === range ? "var(--primary)" : "var(--surface)",
+                            color: r.id === range ? "var(--on-primary)" : "var(--ink)",
+                            cursor: "pointer",
+                            fontWeight: 500,
+                            fontSize: "14px",
+                          }}
+                          onClick={() => {
+                            setRange(r.id);
+                            const firstIn = products.find((p) => p.range_id === r.id);
+                            if (firstIn) setSelected(firstIn.id);
+                          }}
+                        >
+                          {r.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className={s.embedLayouts}>
+                    {available.map((p) => (
+                      <button
+                        type="button"
+                        key={p.id}
+                        className={s.embedLayout}
+                        onClick={() => {
+                          if (selected !== p.id) {
+                            setConfiguration(null);
+                            setSelected(p.id);
+                          }
+                          setStep("system");
+                        }}
+                      >
+                        <span className={s.embedLayoutImage}>
+                          <LayoutPreview src={p.image} />
                         </span>
-                      </span>
-                    </button>
-                  ))}
+                        <span className={s.embedLayoutName}>
+                          <span>{p.name}</span>
+                          <span className={s.embedCardAction}>
+                            Choose this style
+                            <ArrowRight size={18} aria-hidden="true" />
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
               {step === "system" && (
@@ -422,7 +535,7 @@ export function PublicEmbed({
                       className={`${s.embedSystemCard} ${system === sys.id ? s.embedSystemCardActive : ""}`}
                       onClick={() => {
                         setSystem(sys.id);
-                        setStep("questions");
+                        setStep("details");
                       }}
                     >
                       <span className={s.embedSystemBadge}>{sys.badge}</span>
@@ -436,6 +549,119 @@ export function PublicEmbed({
                   ))}
                 </div>
               )}
+              {step === "details" && (
+                <form
+                  className={s.frameDetails}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const errors: typeof frameErrors = {};
+                    if (
+                      !Number.isInteger(frame.width_mm) ||
+                      frame.width_mm < 300 ||
+                      frame.width_mm > 2800
+                    )
+                      errors.width = "Enter a whole number from 300 to 2800 mm.";
+                    if (
+                      !Number.isInteger(frame.height_mm) ||
+                      frame.height_mm < 1750 ||
+                      frame.height_mm > 2500
+                    )
+                      errors.height = "Enter a whole number from 1750 to 2500 mm.";
+                    if (
+                      !Number.isInteger(frame.quantity) ||
+                      frame.quantity < 1 ||
+                      frame.quantity > 999
+                    )
+                      errors.quantity = "Enter a whole number from 1 to 999.";
+                    setFrameErrors(errors);
+                    if (Object.keys(errors).length) return;
+                    setStep("questions");
+                  }}
+                >
+                  <div className={s.frameDetailsGrid}>
+                    <label className={s.field}>
+                      <span className={s.label}>Overall width (mm)</span>
+                      <input
+                        className={s.input}
+                        type="number"
+                        min={300}
+                        max={2800}
+                        step={1}
+                        required
+                        value={frame.width_mm}
+                        aria-invalid={Boolean(frameErrors.width)}
+                        onChange={(event) => {
+                          const value = event.currentTarget.valueAsNumber;
+                          setFrame((previous) => ({ ...previous, width_mm: value }));
+                          setFrameErrors((previous) => ({ ...previous, width: undefined }));
+                        }}
+                      />
+                      {frameErrors.width && (
+                        <span className={s.fieldError}>{frameErrors.width}</span>
+                      )}
+                    </label>
+                    <label className={s.field}>
+                      <span className={s.label}>Overall height (mm)</span>
+                      <input
+                        className={s.input}
+                        type="number"
+                        min={1750}
+                        max={2500}
+                        step={1}
+                        required
+                        value={frame.height_mm}
+                        aria-invalid={Boolean(frameErrors.height)}
+                        onChange={(event) => {
+                          const value = event.currentTarget.valueAsNumber;
+                          setFrame((previous) => ({ ...previous, height_mm: value }));
+                          setFrameErrors((previous) => ({ ...previous, height: undefined }));
+                        }}
+                      />
+                      {frameErrors.height && (
+                        <span className={s.fieldError}>{frameErrors.height}</span>
+                      )}
+                    </label>
+                    <label className={s.field}>
+                      <span className={s.label}>Quantity</span>
+                      <input
+                        className={s.input}
+                        type="number"
+                        min={1}
+                        max={999}
+                        step={1}
+                        required
+                        value={frame.quantity}
+                        aria-invalid={Boolean(frameErrors.quantity)}
+                        onChange={(event) => {
+                          const value = event.currentTarget.valueAsNumber;
+                          setFrame((previous) => ({ ...previous, quantity: value }));
+                          setFrameErrors((previous) => ({ ...previous, quantity: undefined }));
+                        }}
+                      />
+                      {frameErrors.quantity && (
+                        <span className={s.fieldError}>{frameErrors.quantity}</span>
+                      )}
+                    </label>
+                    <label className={s.field}>
+                      <span className={s.label}>Location (optional)</span>
+                      <input
+                        className={s.input}
+                        maxLength={120}
+                        value={frame.location}
+                        placeholder="e.g. Front entrance"
+                        onChange={(event) =>
+                          setFrame((value) => ({ ...value, location: event.currentTarget.value }))
+                        }
+                      />
+                    </label>
+                  </div>
+                  <p className={s.note}>Allowed size: 300–2800 mm wide and 1750–2500 mm high.</p>
+                  <button type="submit" className={`${s.btn} ${s.btnPrimary}`}>
+                    Continue to door options
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </button>
+                </form>
+              )}
             </section>
           )}
           {step === "questions" && product && (
@@ -444,10 +670,12 @@ export function PublicEmbed({
               publicKey={publicKey}
               layoutId={product.id}
               onChange={setConfiguration}
+              onDrawingChange={setDoorDrawing}
+              frameDetails={frame}
               headerAction={
-                <button type="button" className={s.btn} onClick={() => setStep("system")}>
+                <button type="button" className={s.btn} onClick={() => setStep("details")}>
                   <ArrowLeft size={16} aria-hidden="true" />
-                  Change system
+                  Change frame details
                 </button>
               }
               completionAction={
