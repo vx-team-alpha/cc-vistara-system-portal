@@ -30,14 +30,14 @@ the catalogue, as the portal may otherwise observe an incomplete import.
 The scripts load `.env.local` without overriding exported environment variables.
 Never put credentials in the generated files or a browser bundle.
 
-| Environment variable | Default / purpose |
-| --- | --- |
-| `SUPABASE_URL` | Falls back to `NEXT_PUBLIC_SUPABASE_URL`; target API URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Required for upload and seed; server-only service key |
-| `FRONTAGE_SOURCE` | `cc-/web`; MVP web directory, relative to repo or absolute |
-| `FRONTAGE_SEED_DIR` | `.frontage-seed`; generated artifacts |
-| `FRONTAGE_ASSET_BUCKET` | `frontage-assets`; public catalogue assets only |
-| `FRONTAGE_ASSET_BASE_URL` | Supabase public bucket URL; override for a CDN |
+| Environment variable        | Default / purpose                                          |
+| --------------------------- | ---------------------------------------------------------- |
+| `SUPABASE_URL`              | Falls back to `NEXT_PUBLIC_SUPABASE_URL`; target API URL   |
+| `SUPABASE_SERVICE_ROLE_KEY` | Required for upload and seed; server-only service key      |
+| `FRONTAGE_SOURCE`           | `cc-/web`; MVP web directory, relative to repo or absolute |
+| `FRONTAGE_SEED_DIR`         | `.frontage-seed`; generated artifacts                      |
+| `FRONTAGE_ASSET_BUCKET`     | `frontage-assets`; public catalogue assets only            |
+| `FRONTAGE_ASSET_BASE_URL`   | Supabase public bucket URL; override for a CDN             |
 
 Preparing for a different host/bucket/CDN requires running all three steps again.
 The script rejects a changed target between steps. Credentials come only from the

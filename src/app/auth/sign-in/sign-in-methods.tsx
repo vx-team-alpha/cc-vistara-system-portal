@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { SignInForm } from "./sign-in-form";
+
 import { MagicLinkForm } from "./magic-link-form";
+import { SignInForm } from "./sign-in-form";
 
 /**
  * Toggles between password and magic-link sign-in. Kept client-side so
@@ -21,7 +22,9 @@ export function SignInMethods({ next }: { next?: string }) {
         className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
         onClick={() => setMode(mode === "password" ? "magic-link" : "password")}
       >
-        {mode === "password" ? "Sign in with a magic link instead" : "Sign in with a password instead"}
+        {mode === "password"
+          ? "Sign in with a magic link instead"
+          : "Sign in with a password instead"}
       </button>
     </div>
   );

@@ -8,13 +8,15 @@ shadcn `radix-nova` style (see `components.json`) under `@/components/ui/`. Path
 ```tsx
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import type { z } from "zod";
 
+import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/cusotm/password-input"; // sic — dir is misspelled
 import {
   Field,
   FieldDescription,
@@ -26,9 +28,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { PasswordInput } from "@/components/ui/cusotm/password-input"; // sic — dir is misspelled
-
 import { createPostAction } from "@/server/posts";
 import { CreatePostSchema } from "@/server/posts/schemas";
 ```
@@ -38,16 +37,16 @@ There is **no `@/components/ui/form`**. `Form`, `FormField`, `FormItem`, `FormCo
 
 ## Available today
 
-| Module | Exports |
-|---|---|
-| `@/components/ui/field` | `Field`, `FieldLabel`, `FieldDescription`, `FieldError`, `FieldGroup`, `FieldLegend`, `FieldSeparator`, `FieldSet`, `FieldContent`, `FieldTitle` |
-| `@/components/ui/input` | `Input` |
-| `@/components/ui/textarea` | `Textarea` |
-| `@/components/ui/input-group` | `InputGroup`, `InputGroupAddon`, `InputGroupButton`, `InputGroupText`, `InputGroupInput`, `InputGroupTextarea` |
-| `@/components/ui/button` | `Button`, `buttonVariants` |
-| `@/components/ui/label` | `Label` |
-| `@/components/ui/separator` | `Separator` |
-| `@/components/ui/cusotm/password-input` | `PasswordInput` |
+| Module                                  | Exports                                                                                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@/components/ui/field`                 | `Field`, `FieldLabel`, `FieldDescription`, `FieldError`, `FieldGroup`, `FieldLegend`, `FieldSeparator`, `FieldSet`, `FieldContent`, `FieldTitle` |
+| `@/components/ui/input`                 | `Input`                                                                                                                                          |
+| `@/components/ui/textarea`              | `Textarea`                                                                                                                                       |
+| `@/components/ui/input-group`           | `InputGroup`, `InputGroupAddon`, `InputGroupButton`, `InputGroupText`, `InputGroupInput`, `InputGroupTextarea`                                   |
+| `@/components/ui/button`                | `Button`, `buttonVariants`                                                                                                                       |
+| `@/components/ui/label`                 | `Label`                                                                                                                                          |
+| `@/components/ui/separator`             | `Separator`                                                                                                                                      |
+| `@/components/ui/cusotm/password-input` | `PasswordInput`                                                                                                                                  |
 
 **Not installed:** `Checkbox`, `Switch`, `Select`, `RadioGroup`, `Alert`, `Card`, `Dialog`, `Sonner`.
 Add before use: `pnpm dlx shadcn@latest add checkbox select`.
@@ -187,9 +186,7 @@ Note `aria-invalid` goes on the `SelectTrigger` — that's the focusable element
 ```tsx
 <FieldSet>
   <FieldLegend>Visibility</FieldLegend>
-  <FieldGroup>
-    {/* fields */}
-  </FieldGroup>
+  <FieldGroup>{/* fields */}</FieldGroup>
 </FieldSet>
 ```
 
@@ -202,24 +199,17 @@ Note `aria-invalid` goes on the `SelectTrigger` — that's the focusable element
 ```tsx
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import type { z } from "zod";
 
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-
 import { createPostAction } from "@/server/posts";
 import { CreatePostSchema } from "@/server/posts/schemas";
 
@@ -292,9 +282,7 @@ export function CreatePostForm() {
           <p
             role="status"
             className={
-              status.type === "error"
-                ? "text-sm text-destructive"
-                : "text-sm text-muted-foreground"
+              status.type === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"
             }
           >
             {status.text}

@@ -1,14 +1,10 @@
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveNextPath } from "@/lib/auth/config";
+import { createClient } from "@/lib/supabase/server";
+
 import { VerifyForm } from "./verify-form";
 
 export const metadata: Metadata = { title: "Two-factor authentication" };

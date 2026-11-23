@@ -1,13 +1,9 @@
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { redirect } from "next/navigation";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+
 import { UpdatePasswordForm } from "./update-password-form";
 
 export const metadata: Metadata = { title: "Choose a new password" };

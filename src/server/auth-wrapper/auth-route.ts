@@ -1,12 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ZodError, type ZodType } from "zod";
+
 import { resolveAuthContext } from "./context";
-import {
-  AccountNotFoundError,
-  AuthActionError,
-  ForbiddenError,
-  UnauthorizedError,
-} from "./errors";
+import { AccountNotFoundError, AuthActionError, ForbiddenError, UnauthorizedError } from "./errors";
 import type { AuthRouteHandler, AuthRouteOptions, RouteParams } from "./types";
 
 type NextRouteContext = {

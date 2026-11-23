@@ -21,7 +21,7 @@ Run this before both bootstrap and update. It takes a minute and prevents the wh
 of this skill, which is writing confident sentences about a product you have not actually looked at.
 
 1. **Find the doc.** `product_knowledge.md` at the repo root is the default. If
-   `PRODUCT_KNOWLEDGE.md` or `docs/product_knowledge.md` already exists, edit *that* — do not
+   `PRODUCT_KNOWLEDGE.md` or `docs/product_knowledge.md` already exists, edit _that_ — do not
    create a second one. If none exists, or it is an empty stub, you are in **bootstrap** mode.
 2. **Find the app root.** The directory holding the route tree. Single-package repos: `src/app/`
    or `app/`. Monorepos: something like `apps/web/app/` or `<package>/app/`. Never assume — `ls`
@@ -95,6 +95,7 @@ showing the value — not "users can do X". Name the persona, give them a goal a
 and show what the surface tells them.]
 
 **What the user can do:**
+
 - concrete user actions (bulleted, with depth — not three-word stubs)
 
 **Structure & screens:** tabs, filters, views, tables (where applicable).
@@ -160,7 +161,7 @@ Rules:
 
 1. Complete Step 0.
 2. Walk the full route tree. List every surface, then subtract the internal-only ones.
-3. For each surface, read its page far enough to understand *what it offers the user* — never far
+3. For each surface, read its page far enough to understand _what it offers the user_ — never far
    enough to understand its implementation.
 4. Write all five sections from scratch, every feature using the template.
 5. Confirm the entitlement model against code, not against the pricing page's marketing copy —
@@ -194,20 +195,20 @@ Rules:
 
 ## Red flags — stop and reconsider
 
-| Thought | What to do instead |
-|---|---|
-| "I'll describe the `x_items` table" | Don't. Describe what the user sees on the page. |
-| "I should mention the RPC / API endpoint" | Don't. Describe the action the user takes. |
-| "I'll say the engine is powerful and seamless" | Drop the adjectives. Say what it does, concretely. |
-| "I'll lead with bullets and skip the narrative" | Don't. Open with the descriptive paragraph and the concrete example. |
-| "I know what this product does from last time" | You don't. Re-read the code — that's the whole point of the skill. |
-| "These two terms mean the same thing" | Check. The pair that looks synonymous is usually the pair that isn't. |
-| "I'll write 'supports 12 integrations'" | Verify against whatever data drives that list, or phrase it without a number. |
-| "I'll introduce a term that fits better" | Use the existing glossary term. If none fits, add one to the glossary first. |
-| "I'll document the admin console" | Don't, if it's gated to an internal allowlist. Not product. |
-| "I'll fix that other entry while I'm here" | Only if the targeted change actually invalidates it. Otherwise do a separate sweep. |
-| "There's no entry for surface Y, but a route exists" | Add one with the full template. Read its page, then write in product language. |
-| "The repo is empty, I'll write something plausible" | Never invent a product. Ask the user what it is. |
+| Thought                                              | What to do instead                                                                  |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| "I'll describe the `x_items` table"                  | Don't. Describe what the user sees on the page.                                     |
+| "I should mention the RPC / API endpoint"            | Don't. Describe the action the user takes.                                          |
+| "I'll say the engine is powerful and seamless"       | Drop the adjectives. Say what it does, concretely.                                  |
+| "I'll lead with bullets and skip the narrative"      | Don't. Open with the descriptive paragraph and the concrete example.                |
+| "I know what this product does from last time"       | You don't. Re-read the code — that's the whole point of the skill.                  |
+| "These two terms mean the same thing"                | Check. The pair that looks synonymous is usually the pair that isn't.               |
+| "I'll write 'supports 12 integrations'"              | Verify against whatever data drives that list, or phrase it without a number.       |
+| "I'll introduce a term that fits better"             | Use the existing glossary term. If none fits, add one to the glossary first.        |
+| "I'll document the admin console"                    | Don't, if it's gated to an internal allowlist. Not product.                         |
+| "I'll fix that other entry while I'm here"           | Only if the targeted change actually invalidates it. Otherwise do a separate sweep. |
+| "There's no entry for surface Y, but a route exists" | Add one with the full template. Read its page, then write in product language.      |
+| "The repo is empty, I'll write something plausible"  | Never invent a product. Ask the user what it is.                                    |
 
 ## Commit workflow
 

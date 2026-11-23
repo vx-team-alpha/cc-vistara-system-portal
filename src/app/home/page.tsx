@@ -1,11 +1,154 @@
-import Link from 'next/link';
-import {PageHead,Card,Empty,Badge,portalStyles as s} from '@/components/portal/ui';
-import {QuoteTable} from '@/components/portal/quote-table';
-import {getStats,getWidgets,getRecentQuotes} from '@/server/portal/data';
-import {Door01Icon,AppWindowIcon,ViewIcon,Mail01Icon,CodeIcon,ArrowUpRight01Icon} from '@hugeicons/core-free-icons';
-import {Icon} from '@/components/portal/icon';
-export default async function HomePage(){
- const [stats,widgets,quotes]=await Promise.all([getStats(),getWidgets(),getRecentQuotes()]);
- const metrics=[{label:'Tracked sessions',value:stats.views.toLocaleString(),note:'Last 30 days',icon:ViewIcon},{label:'Quote queries',value:stats.quotes.toLocaleString(),note:`${stats.pending} awaiting review`,icon:Mail01Icon},{label:'Query rate',value:stats.views?`${(stats.quotes/stats.views*100).toFixed(1)}%`:'—',note:stats.views?'Queries ÷ tracked sessions':'Appears after your first session',icon:ArrowUpRight01Icon},{label:'Live components',value:String(stats.active),note:'Across doors and windows',icon:CodeIcon}];
- return <><PageHead title="Overview" note="Your components, their visitors, and the conversations they start."><Link href="/home/widgets#create" className={`${s.btn} ${s.btnPrimary}`}>Create component</Link></PageHead><div className={s.stats}>{metrics.map(m=><section className={s.stat} key={m.label}><h2 className={s.statLabel}><Icon icon={m.icon}/>{m.label}</h2><p className={s.statValue}>{m.value}</p><small>{m.note}</small></section>)}</div><div className={s.stack}><Card title="Your embed components" note="A separate experience for every product and website." actions={<Link className={s.link} href="/home/widgets">Manage components</Link>} flush>{!widgets.length?<Empty title="Bring your products to your website" action={<Link href="/home/widgets#create" className={s.btn}>Create your first component</Link>}>Add a door or window component, copy its embed code, and start receiving quote queries.</Empty>:<div className={s.cardBody}>{widgets.slice(0,5).map(w=><div className={s.row} key={w.id}><div className={s.topActions}><Icon icon={w.configurator_types.slug==='door'?Door01Icon:AppWindowIcon}/><div><Link className={s.link} href={`/home/widgets/${w.id}`}>{w.name}</Link><small>{w.configurator_types.label} · {w.website_url||'No website added'}</small></div></div><Badge state={w.enabled?'active':'paused'}>{w.enabled?'Live':'Paused'}</Badge></div>)}</div>}</Card><Card title="Recent quote queries" note="Follow up with customers who have found something they like." actions={<Link href="/home/quotes" className={s.link}>View all queries</Link>} flush><QuoteTable quotes={quotes}/></Card><div className={s.grid2}>{[{type:'door',title:'A new way to choose a front door',note:'Give visitors a clear starting point from your door catalogue.',icon:Door01Icon},{type:'window',title:'Windows, ready to explore',note:'Create a dedicated window component for your website.',icon:AppWindowIcon}].map(p=><Card title={p.title} key={p.type}><Icon icon={p.icon} size={20}/><p className={s.cardNote}>{p.note}</p><div className={s.actions}><Link href={`/home/widgets?type=${p.type}#create`} className={s.btn}>Create {p.type} component</Link></div></Card>)}</div></div></>;
+import {
+  Door01Icon,
+  AppWindowIcon,
+  ViewIcon,
+  Mail01Icon,
+  CodeIcon,
+  ArrowUpRight01Icon,
+} from "@hugeicons/core-free-icons";
+import Link from "next/link";
+
+import { Icon } from "@/components/portal/icon";
+import { QuoteTable } from "@/components/portal/quote-table";
+import { PageHead, Card, Empty, Badge, portalStyles as s } from "@/components/portal/ui";
+import { getStats, getWidgets, getRecentQuotes } from "@/server/portal/data";
+export default async function HomePage() {
+  const [stats, widgets, quotes] = await Promise.all([getStats(), getWidgets(), getRecentQuotes()]);
+  const metrics = [
+    {
+      label: "Tracked sessions",
+      value: stats.views.toLocaleString(),
+      note: "Last 30 days",
+      icon: ViewIcon,
+    },
+    {
+      label: "Quote queries",
+      value: stats.quotes.toLocaleString(),
+      note: `${stats.pending} awaiting review`,
+      icon: Mail01Icon,
+    },
+    {
+      label: "Query rate",
+      value: stats.views ? `${((stats.quotes / stats.views) * 100).toFixed(1)}%` : "—",
+      note: stats.views ? "Queries ÷ tracked sessions" : "Appears after your first session",
+      icon: ArrowUpRight01Icon,
+    },
+    {
+      label: "Live components",
+      value: String(stats.active),
+      note: "Across doors and windows",
+      icon: CodeIcon,
+    },
+  ];
+  return (
+    <>
+      <PageHead
+        title="Overview"
+        note="Your components, their visitors, and the conversations they start."
+      >
+        <Link href="/home/widgets#create" className={`${s.btn} ${s.btnPrimary}`}>
+          Create component
+        </Link>
+      </PageHead>
+      <div className={s.stats}>
+        {metrics.map((m) => (
+          <section className={s.stat} key={m.label}>
+            <h2 className={s.statLabel}>
+              <Icon icon={m.icon} />
+              {m.label}
+            </h2>
+            <p className={s.statValue}>{m.value}</p>
+            <small>{m.note}</small>
+          </section>
+        ))}
+      </div>
+      <div className={s.stack}>
+        <Card
+          title="Your embed components"
+          note="A separate experience for every product and website."
+          actions={
+            <Link className={s.link} href="/home/widgets">
+              Manage components
+            </Link>
+          }
+          flush
+        >
+          {!widgets.length ? (
+            <Empty
+              title="Bring your products to your website"
+              action={
+                <Link href="/home/widgets#create" className={s.btn}>
+                  Create your first component
+                </Link>
+              }
+            >
+              Add a door or window component, copy its embed code, and start receiving quote
+              queries.
+            </Empty>
+          ) : (
+            <div className={s.cardBody}>
+              {widgets.slice(0, 5).map((w) => (
+                <div className={s.row} key={w.id}>
+                  <div className={s.topActions}>
+                    <Icon
+                      icon={w.configurator_types.slug === "door" ? Door01Icon : AppWindowIcon}
+                    />
+                    <div>
+                      <Link className={s.link} href={`/home/widgets/${w.id}`}>
+                        {w.name}
+                      </Link>
+                      <small>
+                        {w.configurator_types.label} · {w.website_url || "No website added"}
+                      </small>
+                    </div>
+                  </div>
+                  <Badge state={w.enabled ? "active" : "paused"}>
+                    {w.enabled ? "Live" : "Paused"}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+        <Card
+          title="Recent quote queries"
+          note="Follow up with customers who have found something they like."
+          actions={
+            <Link href="/home/quotes" className={s.link}>
+              View all queries
+            </Link>
+          }
+          flush
+        >
+          <QuoteTable quotes={quotes} />
+        </Card>
+        <div className={s.grid2}>
+          {[
+            {
+              type: "door",
+              title: "A new way to choose a front door",
+              note: "Give visitors a clear starting point from your door catalogue.",
+              icon: Door01Icon,
+            },
+            {
+              type: "window",
+              title: "Windows, ready to explore",
+              note: "Create a dedicated window component for your website.",
+              icon: AppWindowIcon,
+            },
+          ].map((p) => (
+            <Card title={p.title} key={p.type}>
+              <Icon icon={p.icon} size={20} />
+              <p className={s.cardNote}>{p.note}</p>
+              <div className={s.actions}>
+                <Link href={`/home/widgets?type=${p.type}#create`} className={s.btn}>
+                  Create {p.type} component
+                </Link>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </>
+  );
 }

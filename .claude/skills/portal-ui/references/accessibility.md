@@ -3,6 +3,7 @@
 > Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
 
 ## Rules
+
 1. **Hugeicons are always `aria-hidden`.** The `<Icon>` wrapper adds `aria-hidden` automatically. Provide an `aria-label` on the surrounding button instead.
 2. **Interactive elements always have visible focus styles** — either `outline` or `box-shadow: var(--ring)`. Never suppress focus without a replacement.
 3. **`role="status"` and `aria-live="polite"`** on loading placeholders and the toast container.
@@ -14,6 +15,7 @@
 ## Focus States
 
 ### Inputs, textareas, selects
+
 ```css
 .input:focus,
 .textarea:focus,
@@ -23,9 +25,11 @@
   box-shadow: var(--ring);
 }
 ```
+
 `--ring` = `0 0 0 3px rgba(25,25,25,0.1)` (light) / `0 0 0 3px rgba(99,80,255,0.35)` (dark).
 
 ### Buttons (`.btn`, `.iconBtn`)
+
 ```css
 .btn:focus-visible,
 .iconBtn:focus-visible {
@@ -35,6 +39,7 @@
 ```
 
 ### Nav links, sidebar brand, sidebar toggle
+
 ```css
 .navLink:focus-visible,
 .brand:focus-visible,
@@ -45,6 +50,7 @@
 ```
 
 ### Tab buttons (table.module.css)
+
 ```css
 .tab:focus-visible {
   outline: 2px solid var(--ink-soft);
@@ -53,6 +59,7 @@
 ```
 
 ### Sort buttons, open-row buttons, link buttons (table.module.css)
+
 ```css
 .facet:focus-visible,
 .sort:focus-visible,
@@ -64,12 +71,15 @@
 ```
 
 ### Table rows (keyboard navigation)
+
 ```css
 .row:focus-visible td {
   background: var(--lift);
 }
 .row:focus-visible td:first-child {
-  box-shadow: inset 2px 0 0 var(--ink-soft), var(--hair-b);
+  box-shadow:
+    inset 2px 0 0 var(--ink-soft),
+    var(--hair-b);
 }
 ```
 
@@ -77,27 +87,29 @@
 
 ## Keyboard Behaviour
 
-| Component | Keyboard |
-|---|---|
-| Modal (`<dialog>`) | Esc closes; focus trapped inside; focus returns to opener |
-| Table rows (`tabIndex={0}`) | Enter / Space opens the detail panel |
-| Sortable list handles | Space picks up; arrows move; Space drops; Escape cancels |
-| Sidebar toggle (collapsed) | Shows tooltip on `:focus-visible` same as hover |
-| Search box | `/` key anywhere on the bookings page jumps focus to search |
-| Tab list | Uses `role="tablist"` / `role="tab"` / `aria-selected` |
+| Component                   | Keyboard                                                    |
+| --------------------------- | ----------------------------------------------------------- |
+| Modal (`<dialog>`)          | Esc closes; focus trapped inside; focus returns to opener   |
+| Table rows (`tabIndex={0}`) | Enter / Space opens the detail panel                        |
+| Sortable list handles       | Space picks up; arrows move; Space drops; Escape cancels    |
+| Sidebar toggle (collapsed)  | Shows tooltip on `:focus-visible` same as hover             |
+| Search box                  | `/` key anywhere on the bookings page jumps focus to search |
+| Tab list                    | Uses `role="tablist"` / `role="tab"` / `aria-selected`      |
 
 ---
 
 ## ARIA Conventions
 
 ### Buttons with only icons
+
 ```tsx
 <button className={s.iconBtn} aria-label="Delete photo">
   <Icon icon={TrashIcon} size={16} />
 </button>
 ```
 
-### Links with only icons  
+### Links with only icons
+
 ```tsx
 <a className={s.topIcon} href={url} aria-label="The code on GitHub" title="Code on GitHub">
   <Icon icon={GithubIcon} size={18} />
@@ -105,30 +117,37 @@
 ```
 
 ### Navigation landmark
+
 ```tsx
 <nav className={styles.nav} aria-label="Admin">…</nav>
 <nav className={styles.sectionNav} aria-label="On this page">…</nav>
 ```
 
 ### Active nav link
+
 ```tsx
 <Link aria-current={isActive ? 'page' : undefined} data-active={isActive || undefined} …>
 ```
 
 ### Dynamic regions
+
 ```tsx
 <div className={styles.toaster} role="status" aria-live="polite">…</div>
 <div className={styles.loginCard} role="status" aria-live="polite">…</div>
 ```
 
 ### Table sort headers
+
 ```tsx
-<th aria-sort={isActive ? (dir === 'asc' ? 'ascending' : 'descending') : undefined}>
-  <button className={t.sort}>Name <Icon icon={ArrowUpDownIcon} size={13} /></button>
+<th aria-sort={isActive ? (dir === "asc" ? "ascending" : "descending") : undefined}>
+  <button className={t.sort}>
+    Name <Icon icon={ArrowUpDownIcon} size={13} />
+  </button>
 </th>
 ```
 
 ### Drag-and-drop announcements (List.tsx)
+
 ```tsx
 accessibility={{
   screenReaderInstructions: { draggable: 'To reorder, press Space. Use the arrow keys to move, Space to drop, Escape to cancel.' },
@@ -142,12 +161,15 @@ accessibility={{
 ```
 
 ### Checkbox columns in tables
+
 ```tsx
 <input
   type="checkbox"
   aria-label="Select every booking on this page"
   checked={allOnPage}
-  ref={el => { if (el) el.indeterminate = !allOnPage && someOnPage; }}
+  ref={(el) => {
+    if (el) el.indeterminate = !allOnPage && someOnPage;
+  }}
 />
 ```
 
@@ -167,6 +189,7 @@ accessibility={{
 ## Do / Don't
 
 ✅ **Do**
+
 ```tsx
 // Icon button with aria-label
 <button className={s.iconBtn} aria-label="Close dialog" onClick={onClose}>
@@ -182,6 +205,7 @@ accessibility={{
 ```
 
 ❌ **Don't**
+
 ```tsx
 // Missing aria-label on icon-only buttons
 <button onClick={onClose}><Icon icon={CancelIcon} /></button>

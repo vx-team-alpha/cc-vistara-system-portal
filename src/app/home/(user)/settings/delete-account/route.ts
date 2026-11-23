@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { authRoute } from "@/server/auth-wrapper";
+
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { authRoute } from "@/server/auth-wrapper";
 
 /**
  * Deletes the caller's own account, permanently.

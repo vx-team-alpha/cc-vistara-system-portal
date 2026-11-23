@@ -5,8 +5,8 @@ added or removed — a stale inventory is worse than none, because it gets trust
 
 ## Tables
 
-| Table | Purpose |
-|---|---|
+| Table             | Purpose                                                                          |
+| ----------------- | -------------------------------------------------------------------------------- |
 | `public.accounts` | The only application table. 1:1 with `auth.users`; `id` **is** the auth user id. |
 
 Columns: `id uuid pk → auth.users(id) on delete cascade`, `name text not null`,
@@ -18,12 +18,12 @@ type. Authorization is entirely "is this your row?".
 
 ## Functions
 
-| Function | Kind | Grant |
-|---|---|---|
-| `public.current_account()` | `setof accounts`, stable, definer | `authenticated` |
-| `public.set_updated_at()` | trigger | none |
-| `public.handle_new_user()` | trigger | none |
-| `public.handle_user_email_change()` | trigger | none |
+| Function                            | Kind                              | Grant           |
+| ----------------------------------- | --------------------------------- | --------------- |
+| `public.current_account()`          | `setof accounts`, stable, definer | `authenticated` |
+| `public.set_updated_at()`           | trigger                           | none            |
+| `public.handle_new_user()`          | trigger                           | none            |
+| `public.handle_user_email_change()` | trigger                           | none            |
 
 All are `security definer` with `set search_path = ''`. Trigger functions are
 deliberately ungranted — EXECUTE is checked at `create trigger` time, not when
@@ -31,11 +31,11 @@ they fire, so revoking keeps them off the PostgREST `/rpc/` surface.
 
 ## Triggers
 
-| Trigger | Table | Fires | Function |
-|---|---|---|---|
-| `on_auth_user_created` | `auth.users` | AFTER INSERT | `handle_new_user()` |
-| `on_auth_user_email_updated` | `auth.users` | AFTER UPDATE OF `email`, `when old.email is distinct from new.email` | `handle_user_email_change()` |
-| `set_updated_at` | `public.accounts` | BEFORE UPDATE | `set_updated_at()` |
+| Trigger                      | Table             | Fires                                                                | Function                     |
+| ---------------------------- | ----------------- | -------------------------------------------------------------------- | ---------------------------- |
+| `on_auth_user_created`       | `auth.users`      | AFTER INSERT                                                         | `handle_new_user()`          |
+| `on_auth_user_email_updated` | `auth.users`      | AFTER UPDATE OF `email`, `when old.email is distinct from new.email` | `handle_user_email_change()` |
+| `set_updated_at`             | `public.accounts` | BEFORE UPDATE                                                        | `set_updated_at()`           |
 
 Triggers on `auth.users` live in `210-auth-triggers.sql`; triggers on public
 tables live in `200-triggers.sql` alongside the function bodies.
@@ -46,10 +46,10 @@ transaction and inserts the `accounts` row. If it raises, **signup fails** with
 
 ## Policies
 
-| Policy | Table | Command | Predicate |
-|---|---|---|---|
-| `accounts_select` | `accounts` | SELECT | `id = (select auth.uid())` |
-| `accounts_update` | `accounts` | UPDATE | `id = (select auth.uid())` (using + with check) |
+| Policy            | Table      | Command | Predicate                                       |
+| ----------------- | ---------- | ------- | ----------------------------------------------- |
+| `accounts_select` | `accounts` | SELECT  | `id = (select auth.uid())`                      |
+| `accounts_update` | `accounts` | UPDATE  | `id = (select auth.uid())` (using + with check) |
 
 No INSERT policy (definer trigger is the only creator) and no DELETE policy
 (cascade from `auth.users`). RLS enabled, **not** forced.

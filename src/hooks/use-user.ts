@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import { toJWTUserData, type JWTUserData } from "@/lib/auth/jwt-user";
+
 import { useSupabase } from "./use-supabase";
 
 export const USER_QUERY_KEY = ["supabase:user"] as const;

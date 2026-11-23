@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { resolveNextPath } from "@/lib/auth/config";
 import { getConfiguredOAuthProviders } from "@/lib/auth/oauth-providers";
+
 import { OAuthButtons } from "../_components/oauth-buttons";
 import { SignInMethods } from "./sign-in-methods";
 
@@ -58,7 +54,6 @@ export default async function SignInPage({
             <OAuthButtons next={next} providers={oauthProviders} />
           </>
         ) : null}
-
       </CardContent>
     </Card>
   );

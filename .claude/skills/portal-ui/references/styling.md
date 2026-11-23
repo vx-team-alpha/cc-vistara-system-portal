@@ -3,6 +3,7 @@
 > Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
 
 ## Table of Contents
+
 1. [Styling approach](#styling-approach)
 2. [Spacing scale](#spacing-scale)
 3. [Border radius](#border-radius)
@@ -28,22 +29,22 @@
 
 The portal does not use a rigid 4px/8px grid — it uses intentional fixed values. Common values seen:
 
-| Value | Usage |
-|---|---|
-| 2px | Tiny gap (nav items, badge padding) |
-| 4px | Small badge padding, nav section gap |
-| 6px | Button icon gap, small row gap |
-| 8px | Standard gap (actions row, tags, topbar gap) |
-| 10px | Nav link padding, sidebar padding, tooltip padding |
-| 12px | Sidebar padding, form actions margin-top (partial) |
-| 14px | Card header padding, table cell padding, button side padding |
-| 16px | Main section gap (page cards), card head gap, grid gap |
-| 20px | Main gap (cards stack), card body padding |
-| 22px | Card body/modal body padding |
-| 24px | Login padding, topbar/modal responsive padding |
-| 28px | Main area top padding (desktop) |
-| 32px | Main area side padding (desktop) |
-| 72px | Main area bottom padding |
+| Value | Usage                                                        |
+| ----- | ------------------------------------------------------------ |
+| 2px   | Tiny gap (nav items, badge padding)                          |
+| 4px   | Small badge padding, nav section gap                         |
+| 6px   | Button icon gap, small row gap                               |
+| 8px   | Standard gap (actions row, tags, topbar gap)                 |
+| 10px  | Nav link padding, sidebar padding, tooltip padding           |
+| 12px  | Sidebar padding, form actions margin-top (partial)           |
+| 14px  | Card header padding, table cell padding, button side padding |
+| 16px  | Main section gap (page cards), card head gap, grid gap       |
+| 20px  | Main gap (cards stack), card body padding                    |
+| 22px  | Card body/modal body padding                                 |
+| 24px  | Login padding, topbar/modal responsive padding               |
+| 28px  | Main area top padding (desktop)                              |
+| 32px  | Main area side padding (desktop)                             |
+| 72px  | Main area bottom padding                                     |
 
 **Page main padding:** `28px 32px 72px` (desktop), `24px 24px 64px` (≤1100px), `20px 16px 64px` (≤860px)
 
@@ -51,35 +52,36 @@ The portal does not use a rigid 4px/8px grid — it uses intentional fixed value
 
 ## Border Radius
 
-| Value | Used on |
-|---|---|
-| `6px` | Thumbnails, keyboard shortcut badge, tooltip |
-| `7px` | Open-row button, size select |
-| `8px` | Buttons (`.btn`, `.iconBtn`), inputs, selects, sidebar nav links, topbar icon buttons, filter facets, sidebar toggle |
-| `10px` | Menu panel popup, notice/error block, toast, sidebar toggle (modal on mobile: 0) |
-| `16px` | Modal dialog |
-| `50%` | Avatar, status dot |
-| `999px` | Pills, tags, status badges, demo tag |
+| Value   | Used on                                                                                                              |
+| ------- | -------------------------------------------------------------------------------------------------------------------- |
+| `6px`   | Thumbnails, keyboard shortcut badge, tooltip                                                                         |
+| `7px`   | Open-row button, size select                                                                                         |
+| `8px`   | Buttons (`.btn`, `.iconBtn`), inputs, selects, sidebar nav links, topbar icon buttons, filter facets, sidebar toggle |
+| `10px`  | Menu panel popup, notice/error block, toast, sidebar toggle (modal on mobile: 0)                                     |
+| `16px`  | Modal dialog                                                                                                         |
+| `50%`   | Avatar, status dot                                                                                                   |
+| `999px` | Pills, tags, status badges, demo tag                                                                                 |
 
 ---
 
 ## Shadows
 
-| Token / Value | Used on |
-|---|---|
-| `var(--ring)` | Focus ring on inputs and buttons |
-| `var(--raise)` | Active nav link |
-| `var(--pop-ring)` + `var(--pop-shadow)` | Modal, menu panel, toast |
-| `var(--hair-t/b/l/r)` | Engraved hairline dividers |
-| `0 0 0 2px var(--avatar-ring)` | Sidebar avatar ring |
-| `0 4px 12px rgba(0,0,0,0.15)` | Collapsed sidebar tooltip |
-| `20px 0 60px rgba(0,0,0,0.12)` | Mobile drawer shadow |
+| Token / Value                           | Used on                          |
+| --------------------------------------- | -------------------------------- |
+| `var(--ring)`                           | Focus ring on inputs and buttons |
+| `var(--raise)`                          | Active nav link                  |
+| `var(--pop-ring)` + `var(--pop-shadow)` | Modal, menu panel, toast         |
+| `var(--hair-t/b/l/r)`                   | Engraved hairline dividers       |
+| `0 0 0 2px var(--avatar-ring)`          | Sidebar avatar ring              |
+| `0 4px 12px rgba(0,0,0,0.15)`           | Collapsed sidebar tooltip        |
+| `20px 0 60px rgba(0,0,0,0.12)`          | Mobile drawer shadow             |
 
 ---
 
 ## Borders
 
 The portal **does not use `border: 1px solid`** as a divider. Instead:
+
 - **Engraved hairline** (`box-shadow: var(--hair-b)`) for horizontal rules between sections, table rows, card headers.
 - **`border: 1px solid var(--border)`** only on interactive elements: inputs, selects, buttons, `iconBtn`.
 - **`border: 1px solid transparent`** on nav links and sidebar toggle (becomes visible on hover via `border-color` transition).
@@ -92,15 +94,16 @@ The portal **does not use `border: 1px solid`** as a divider. Instead:
 All transitions use `var(--ease-out-quint)` = `cubic-bezier(0.33, 1, 0.68, 1)`.
 
 Common durations:
-| Duration | Used for |
-|---|---|
-| `160ms` | Color/bg hover on buttons, inputs, nav links, table rows |
-| `200ms` | Nav group label opacity |
-| `240ms` | Modal backdrop fade, toast icon |
-| `260ms` | Sidebar label slide |
-| `320ms` | Sidebar width, sidebar collapse animation, modal entrance, mobile drawer |
-| `340ms` | Side panel entrance |
-| `520ms` | Spring animations (sidebar toggle icon, theme toggle) — uses `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+
+| Duration | Used for                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| `160ms`  | Color/bg hover on buttons, inputs, nav links, table rows                                         |
+| `200ms`  | Nav group label opacity                                                                          |
+| `240ms`  | Modal backdrop fade, toast icon                                                                  |
+| `260ms`  | Sidebar label slide                                                                              |
+| `320ms`  | Sidebar width, sidebar collapse animation, modal entrance, mobile drawer                         |
+| `340ms`  | Side panel entrance                                                                              |
+| `520ms`  | Spring animations (sidebar toggle icon, theme toggle) — uses `cubic-bezier(0.34, 1.56, 0.64, 1)` |
 
 `prefers-reduced-motion: reduce` sets all animation and transition to `0.01ms`.
 
@@ -108,11 +111,11 @@ Common durations:
 
 ## Breakpoints
 
-| Breakpoint | Behaviour |
-|---|---|
-| `> 1100px` (default) | Sidebar 264px wide, main padding `28px 32px 72px` |
-| `≤ 1100px` | Main padding `24px 24px 64px`, topbar padding `0 24px` |
-| `≤ 860px` | Sidebar becomes a fixed drawer (slides from left), menu button appears in topbar, `grid2` becomes single column, modal goes full-screen |
+| Breakpoint           | Behaviour                                                                                                                               |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `> 1100px` (default) | Sidebar 264px wide, main padding `28px 32px 72px`                                                                                       |
+| `≤ 1100px`           | Main padding `24px 24px 64px`, topbar padding `0 24px`                                                                                  |
+| `≤ 860px`            | Sidebar becomes a fixed drawer (slides from left), menu button appears in topbar, `grid2` becomes single column, modal goes full-screen |
 
 ---
 
@@ -130,6 +133,7 @@ Common durations:
 ## Do / Don't
 
 ✅ **Do**
+
 ```tsx
 // Use module classes
 <div className={styles.card}>…</div>
@@ -142,6 +146,7 @@ Common durations:
 ```
 
 ❌ **Don't**
+
 ```tsx
 // No hardcoded colors
 <div style={{ background: '#efefef' }}>…</div>

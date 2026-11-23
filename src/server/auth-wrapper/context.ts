@@ -1,6 +1,8 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+
 import { toJWTUserData } from "@/lib/auth/jwt-user";
+import { createClient } from "@/lib/supabase/server";
+
 import { AccountNotFoundError, UnauthorizedError } from "./errors";
 import type { Account, AuthContext } from "./types";
 

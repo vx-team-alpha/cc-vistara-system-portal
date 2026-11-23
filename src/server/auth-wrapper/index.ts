@@ -1,12 +1,7 @@
 export { authAction } from "./auth-action";
 export { authRoute } from "./auth-route";
 export { getCurrentAccount, resolveAuthContext } from "./context";
-export {
-  AccountNotFoundError,
-  AuthActionError,
-  ForbiddenError,
-  UnauthorizedError,
-} from "./errors";
+export { AccountNotFoundError, AuthActionError, ForbiddenError, UnauthorizedError } from "./errors";
 export type {
   Account,
   AuthActionHandler,

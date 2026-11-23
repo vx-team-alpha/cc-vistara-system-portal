@@ -14,7 +14,6 @@ import {
   ForbiddenError,
   UnauthorizedError,
 } from "@/server/auth-wrapper";
-
 import type {
   Account,
   AuthActionHandler,
@@ -48,9 +47,9 @@ The returned function is the Server Function. `authAction` itself is not; it mus
 
 ### `options`
 
-| Key | Type | Required | Behavior |
-|---|---|---|---|
-| `schema` | `ZodType` | yes | `schema.parse(rawInput)` runs first. Throws `ZodError` on failure |
+| Key      | Type      | Required | Behavior                                                          |
+| -------- | --------- | -------- | ----------------------------------------------------------------- |
+| `schema` | `ZodType` | yes      | `schema.parse(rawInput)` runs first. Throws `ZodError` on failure |
 
 That is the entire option surface. Authorization is RLS.
 
@@ -58,9 +57,9 @@ That is the entire option surface. Authorization is RLS.
 
 ```typescript
 type AuthContext = {
-  user: JWTUserData;              // from verified JWT claims — never null inside a handler
-  account: Account;               // the caller's accounts row — never null inside a handler
-  supabase: TypedSupabaseClient;  // anon key + cookies → RLS enforced, Database-typed
+  user: JWTUserData; // from verified JWT claims — never null inside a handler
+  account: Account; // the caller's accounts row — never null inside a handler
+  supabase: TypedSupabaseClient; // anon key + cookies → RLS enforced, Database-typed
 };
 ```
 
@@ -82,11 +81,11 @@ on every action.
 
 ```typescript
 type JWTUserData = {
-  id: string;                            // the `sub` claim = auth.users.id
-  email?: string;                        // absent for phone-only / anonymous
+  id: string; // the `sub` claim = auth.users.id
+  email?: string; // absent for phone-only / anonymous
   phone?: string;
   is_anonymous: boolean;
-  aal: AuthenticatorAssuranceLevels;     // "aal2" = second factor verified
+  aal: AuthenticatorAssuranceLevels; // "aal2" = second factor verified
   amr: AMREntry[] | string[];
   app_metadata: UserAppMetadata;
   user_metadata: UserMetadata;
@@ -117,11 +116,11 @@ class AuthActionError extends Error {
 }
 ```
 
-| Class | `code` | Default message | Thrown when |
-|---|---|---|---|
-| `UnauthorizedError` | `UNAUTHORIZED` | `Unauthorized` | `getClaims()` errored or returned no claims |
+| Class                  | `code`              | Default message     | Thrown when                                            |
+| ---------------------- | ------------------- | ------------------- | ------------------------------------------------------ |
+| `UnauthorizedError`    | `UNAUTHORIZED`      | `Unauthorized`      | `getClaims()` errored or returned no claims            |
 | `AccountNotFoundError` | `ACCOUNT_NOT_FOUND` | `Account not found` | Authenticated, but `current_account()` returned no row |
-| `ForbiddenError` | `FORBIDDEN` | `Forbidden` | Never thrown by the wrapper — available for handlers |
+| `ForbiddenError`       | `FORBIDDEN`         | `Forbidden`         | Never thrown by the wrapper — available for handlers   |
 
 Plus `ZodError` from `schema.parse()`, which is not an `AuthActionError`.
 
@@ -148,9 +147,7 @@ Consequences:
 The wrapper returns `TResult` verbatim, so encode expected failures in it:
 
 ```typescript
-export type ActionResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string; field?: string };
+export type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string; field?: string };
 ```
 
 ```typescript
@@ -203,10 +200,10 @@ import { z } from "zod";
 
 export const UpdateAccountSchema = z.object({
   name: z.string().min(1).max(120),
-  email: z.email(),                       // v4: top-level, not z.string().email()
-  pictureUrl: z.url().optional(),         // v4: top-level, not z.string().url()
-  accountId: z.uuid(),                    // v4: top-level, not z.string().uuid()
-  age: z.coerce.number().int().min(13),   // coerce: form values arrive as strings
+  email: z.email(), // v4: top-level, not z.string().email()
+  pictureUrl: z.url().optional(), // v4: top-level, not z.string().url()
+  accountId: z.uuid(), // v4: top-level, not z.string().uuid()
+  age: z.coerce.number().int().min(13), // coerce: form values arrive as strings
   tags: z.array(z.string()).max(5).default([]),
 });
 ```
@@ -240,9 +237,9 @@ Next.js 16. The wrapper does none of this for you.
 ```typescript
 import { revalidatePath, revalidateTag } from "next/cache";
 
-revalidatePath("/home");                   // one route
-revalidatePath("/posts/[slug]", "page");   // a dynamic route's pages
-revalidateTag("posts");                    // everything tagged "posts"
+revalidatePath("/home"); // one route
+revalidatePath("/posts/[slug]", "page"); // a dynamic route's pages
+revalidateTag("posts"); // everything tagged "posts"
 ```
 
 Call these **after** the mutation succeeds and **before** you return. Revalidating on a failed
@@ -282,7 +279,7 @@ Same guarantees, for plain HTTP endpoints:
 ```typescript
 function authRoute<TSchema extends ZodType | undefined = undefined>(
   handler: AuthRouteHandler<TSchema>,
-  options?: AuthRouteOptions<TSchema>,     // { schema? }
+  options?: AuthRouteOptions<TSchema>, // { schema? }
 ): (request: NextRequest, context?: { params?: Promise<RouteParams> }) => Promise<Response>;
 ```
 

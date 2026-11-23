@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
+
 import { Button } from "@/components/ui/button";
 import { signInWithOAuthAction } from "@/server/auth";
 import type { OAuthProvider } from "@/server/auth/schemas";
@@ -74,9 +75,7 @@ export function OAuthButtons({
           data-test={`oauth-${provider.id}-button`}
           onClick={() => onClick(provider.id)}
         >
-          {pendingProvider === provider.id ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : null}
+          {pendingProvider === provider.id ? <Loader2 className="size-4 animate-spin" /> : null}
           Continue with {provider.label}
         </Button>
       ))}

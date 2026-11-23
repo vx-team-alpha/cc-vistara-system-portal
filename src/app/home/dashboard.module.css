@@ -42,10 +42,15 @@
   overflow: hidden;
   border-radius: 10px;
   background: var(--surface);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.035), 0 0 0 1px var(--line), var(--hair-b);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.035),
+    0 0 0 1px var(--line),
+    var(--hair-b);
 }
 
-.card + .card { margin-top: 16px; }
+.card + .card {
+  margin-top: 16px;
+}
 
 .cardHead {
   padding: 15px 22px 14px;
@@ -68,9 +73,14 @@
   line-height: 1.5;
 }
 
-.cardBody { padding: 20px 22px 22px; }
+.cardBody {
+  padding: 20px 22px 22px;
+}
 
-.rows { display: grid; gap: 12px; }
+.rows {
+  display: grid;
+  gap: 12px;
+}
 
 .row {
   display: flex;
@@ -82,37 +92,102 @@
   font-size: 13px;
 }
 
-.row:last-child { padding-bottom: 0; box-shadow: none; }
-.row dt { color: var(--soft); }
-.row dd { margin: 0; color: var(--ink-soft); font-weight: 500; text-align: right; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.row:last-child {
+  padding-bottom: 0;
+  box-shadow: none;
+}
+.row dt {
+  color: var(--soft);
+}
+.row dd {
+  margin: 0;
+  color: var(--ink-soft);
+  font-weight: 500;
+  text-align: right;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
 
-.settingsGrid { display: grid; gap: 16px; }
+.settingsGrid {
+  display: grid;
+  gap: 16px;
+}
 .settingsGrid :global([data-slot="card"]) {
   overflow: hidden;
   border: 0;
   border-radius: 10px;
   background: var(--surface);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.035), 0 0 0 1px var(--line), var(--hair-b);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.035),
+    0 0 0 1px var(--line),
+    var(--hair-b);
 }
-.settingsGrid :global([data-slot="card-header"]) { padding: 15px 22px 14px; box-shadow: var(--hair-b); }
+.settingsGrid :global([data-slot="card-header"]) {
+  padding: 15px 22px 14px;
+  box-shadow: var(--hair-b);
+}
 .settingsGrid :global([data-slot="card-title"]) {
-  color: var(--text-2); font-size: 15px; font-weight: 500; letter-spacing: -0.3px;
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
 }
-.settingsGrid :global([data-slot="card-description"]) { color: var(--soft); font-size: 13px; line-height: 1.5; }
-.settingsGrid :global([data-slot="card-content"]) { padding: 20px 22px 22px; }
-.settingsGrid :global([data-slot="button"]) { border-radius: 8px; font-size: 14px; font-weight: 500; letter-spacing: -0.28px; }
-.settingsGrid :global(input) { border-radius: 8px; font-size: 14px; }
-.settingsGrid :global(label) { color: var(--text-2); font-size: 13px; font-weight: 500; letter-spacing: -0.02em; }
-.settingsGrid :global([data-slot="button"]:hover:not(:disabled)) { transition-property: background-color, color, border-color, box-shadow; }
-.settingsGrid :global(input:focus-visible) { outline: none; box-shadow: var(--ring); }
-.settingsGrid :global(a:focus-visible) { outline: 2px solid var(--ink-soft); outline-offset: 3px; border-radius: 4px; }
+.settingsGrid :global([data-slot="card-description"]) {
+  color: var(--soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.settingsGrid :global([data-slot="card-content"]) {
+  padding: 20px 22px 22px;
+}
+.settingsGrid :global([data-slot="button"]) {
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.28px;
+}
+.settingsGrid :global(input) {
+  border-radius: 8px;
+  font-size: 14px;
+}
+.settingsGrid :global(label) {
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.settingsGrid :global([data-slot="button"]:hover:not(:disabled)) {
+  transition-property: background-color, color, border-color, box-shadow;
+}
+.settingsGrid :global(input:focus-visible) {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.settingsGrid :global(a:focus-visible) {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
 
 @media (max-width: 860px) {
-  .dashboard { padding: 24px 16px 64px; }
-  .title { font-size: 22px; }
+  .dashboard {
+    padding: 24px 16px 64px;
+  }
+  .title {
+    font-size: 22px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dashboard *, .dashboard *::before, .dashboard *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .dashboard *,
+  .dashboard *::before,
+  .dashboard *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

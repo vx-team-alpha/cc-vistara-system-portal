@@ -12,4 +12,4 @@ packages:
   - jq
 
 runcmd:
-  - [ sh, -c, "command -v docker >/dev/null || curl -fsSL https://get.docker.com | sh" ]
+  - [sh, -c, "command -v docker >/dev/null || curl -fsSL https://get.docker.com | sh"]

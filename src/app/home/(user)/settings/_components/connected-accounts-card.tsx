@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { linkIdentityAction, unlinkIdentityAction } from "@/server/settings";
 import type { LinkableProvider } from "@/server/auth/schemas";
+import { linkIdentityAction, unlinkIdentityAction } from "@/server/settings";
 
 export type ConnectedIdentity = {
   identityId: string;
@@ -106,7 +107,9 @@ export function ConnectedAccountsCard({
                   variant="outline"
                   size="sm"
                   disabled={isPending || !canUnlink}
-                  title={canUnlink ? undefined : "Connect another account before disconnecting this one."}
+                  title={
+                    canUnlink ? undefined : "Connect another account before disconnecting this one."
+                  }
                   data-test={`disconnect-${provider.id}-button`}
                   onClick={() => onDisconnect(identity.identityId)}
                 >

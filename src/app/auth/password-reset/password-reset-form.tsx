@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MailCheck } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import type { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -54,8 +55,7 @@ export function PasswordResetForm() {
             reports success for the same reason. Saying "we couldn't find that
             account" would let anyone probe which emails are registered. */}
         <p className="text-sm">
-          If an account exists for that address, we&apos;ve sent a link to reset the
-          password.
+          If an account exists for that address, we&apos;ve sent a link to reset the password.
         </p>
       </div>
     );

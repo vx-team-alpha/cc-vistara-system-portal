@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import type { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -22,9 +23,7 @@ type Values = z.infer<typeof UpdateNameSchema>;
  */
 export function UpdateNameCard({ initialName }: { initialName: string }) {
   const [isPending, startTransition] = useTransition();
-  const [status, setStatus] = useState<{ tone: "success" | "error"; message: string } | null>(
-    null,
-  );
+  const [status, setStatus] = useState<{ tone: "success" | "error"; message: string } | null>(null);
 
   const {
     register,
@@ -79,7 +78,9 @@ export function UpdateNameCard({ initialName }: { initialName: string }) {
               <p
                 role="status"
                 className={
-                  status.tone === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"
+                  status.tone === "error"
+                    ? "text-sm text-destructive"
+                    : "text-sm text-muted-foreground"
                 }
               >
                 {status.message}

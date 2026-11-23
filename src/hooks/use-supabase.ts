@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 /**

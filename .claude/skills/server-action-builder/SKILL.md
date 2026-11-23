@@ -19,8 +19,8 @@ functions, and that file exports a synchronous generic factory.
 // src/server/auth-wrapper/auth-action.ts
 export function authAction<TSchema extends ZodType, TResult>(
   handler: AuthActionHandler<TSchema, TResult>,
-  options: AuthActionOptions<TSchema>,      // { schema }
-): (rawInput: unknown) => Promise<TResult>
+  options: AuthActionOptions<TSchema>, // { schema }
+): (rawInput: unknown) => Promise<TResult>;
 ```
 
 It does three things, in order:
@@ -39,12 +39,12 @@ arguments — there is no scope to declare.
 
 ### What it hands you
 
-| Field | Type | Notes |
-|---|---|---|
-| `user` | `JWTUserData` | **Guaranteed non-null.** Read from verified JWT claims. `user.id` and `user.aal` are always present; `user.email` is `string \| undefined` (absent for phone-only/anonymous users) |
-| `account` | `Account` | **Guaranteed non-null.** The caller's `accounts` row. `account.id === user.id` — the PK *is* the auth user id |
-| `supabase` | `SupabaseClient<Database>` | Anon key, cookie-bound, **fully typed**. RLS applies to every query |
-| `input` | `z.infer<TSchema>` | Already parsed and typed. Second positional arg, not part of ctx |
+| Field      | Type                       | Notes                                                                                                                                                                              |
+| ---------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user`     | `JWTUserData`              | **Guaranteed non-null.** Read from verified JWT claims. `user.id` and `user.aal` are always present; `user.email` is `string \| undefined` (absent for phone-only/anonymous users) |
+| `account`  | `Account`                  | **Guaranteed non-null.** The caller's `accounts` row. `account.id === user.id` — the PK _is_ the auth user id                                                                      |
+| `supabase` | `SupabaseClient<Database>` | Anon key, cookie-bound, **fully typed**. RLS applies to every query                                                                                                                |
+| `input`    | `z.infer<TSchema>`         | Already parsed and typed. Second positional arg, not part of ctx                                                                                                                   |
 
 `account.id === user.id` is worth internalizing: you never need to look up an account id from a
 user id, and a foreign key to `public.accounts(id)` can be satisfied with `user.id` directly.
@@ -115,7 +115,9 @@ Zod is **v4** (`zod@^4`). Import from `"zod"`, not `"zod/v4"`.
 "use server";
 
 import { revalidatePath } from "next/cache";
+
 import { authAction } from "@/server/auth-wrapper";
+
 import { UpdateAccountSchema } from "./schemas";
 
 export const updateAccountAction = authAction(
@@ -151,7 +153,7 @@ then feeds the sync trigger.
 
 3. **Let RLS do the row filtering.** The client is anon-key + cookie-bound, so RLS applies to every
    query. Writing `.eq("id", user.id)` on top of a self-scoped policy is redundant but harmless and
-   self-documenting. What RLS cannot do is validate your *input* — that's Zod's job, and it's why
+   self-documenting. What RLS cannot do is validate your _input_ — that's Zod's job, and it's why
    every action takes a schema.
 
 4. **Never construct an admin client inside a handler and shadow `supabase`.** That silently

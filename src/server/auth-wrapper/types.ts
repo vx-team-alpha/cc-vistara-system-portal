@@ -1,8 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import type { z, ZodType } from "zod";
-import type { Database, Tables } from "@/types/supabase";
+
 import type { JWTUserData } from "@/lib/auth/jwt-user";
+import type { Database, Tables } from "@/types/supabase";
 
 /** Cookie-bound, anon-key client. Every query it makes is subject to RLS. */
 export type TypedSupabaseClient = SupabaseClient<Database>;

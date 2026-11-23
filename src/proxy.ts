@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+
 import { authPaths, isProtectedPath } from "@/lib/auth/config";
 import { createProxyClient } from "@/lib/supabase/proxy-client";
 
@@ -55,10 +56,7 @@ export async function proxy(request: NextRequest) {
     // `searchParams.set` percent-encodes the value. The source interpolated
     // `next` into the query string raw, which mangled any path containing a
     // space, `&`, or `#`.
-    redirectUrl.searchParams.set(
-      "next",
-      `${request.nextUrl.pathname}${request.nextUrl.search}`,
-    );
+    redirectUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
 
     // A redirect is a different response object, so cookies written into
     // `response` above are not on it. Copy them across or a refresh that

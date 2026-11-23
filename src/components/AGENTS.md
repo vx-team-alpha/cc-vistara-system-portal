@@ -7,6 +7,7 @@ For dashboard UI work, use the repository's [`portal-ui` skill](../../.claude/sk
 ## Skills
 
 For forms:
+
 - `/react-form-builder` - Forms with validation and server actions
 
 ## Import Convention
@@ -14,10 +15,10 @@ For forms:
 Always use `@/components/ui/{component}`:
 
 ```tsx
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { toast } from '@/components/ui/sonner';
-import { cn } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { toast } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
 ```
 
 ## Styling
@@ -29,16 +30,15 @@ import { cn } from '@/lib/utils';
 
 ## Key Components
 
-| Component | Usage |
-|-----------|-------|
-| `toast` | Notifications |
-| `Form*` | Form fields |
-| `Button` | Actions |
-| `Card` | Content containers |
-| `Alert` | Error/info messages |
+| Component | Usage               |
+| --------- | ------------------- |
+| `toast`   | Notifications       |
+| `Form*`   | Form fields         |
+| `Button`  | Actions             |
+| `Card`    | Content containers  |
+| `Alert`   | Error/info messages |
 
 ## Conditional Rendering
- 
 
 ## Testing Attributes
 

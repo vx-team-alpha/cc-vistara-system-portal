@@ -3,6 +3,7 @@
 > Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
 
 ## Table of Contents
+
 1. [Forms](#forms)
 2. [Tables](#tables)
 3. [Modals](#modals)
@@ -23,34 +24,41 @@
 
 ```tsx
 "use client";
-import { PageHead, Card, Field, TextArea, Select, adminStyles as s } from '../ui';
-import { SectionNav } from '../Sections';
-import { StickySave } from '../StickySave';
-import { saveSettings } from '../actions';
+import { saveSettings } from "../actions";
+import { SectionNav } from "../Sections";
+import { StickySave } from "../StickySave";
+import { PageHead, Card, Field, TextArea, Select, adminStyles as s } from "../ui";
 
 export default function SettingsPage() {
   return (
     <>
       <PageHead title="Text & labels" note="The one-off strings across the site." />
 
-      <SectionNav items={[
-        { id: 'brand', label: 'Brand' },
-        { id: 'seo', label: 'SEO' },
-      ]} />
+      <SectionNav
+        items={[
+          { id: "brand", label: "Brand" },
+          { id: "seo", label: "SEO" },
+        ]}
+      />
 
       <form action={saveSettings}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <Card title="Brand" id="brand">
             <div className={s.grid2}>
-              <Field label="Site name" name="brand.name" defaultValue={v['brand.name']} />
-              <Field label="Tagline" name="brand.tagline" defaultValue={v['brand.tagline']} />
+              <Field label="Site name" name="brand.name" defaultValue={v["brand.name"]} />
+              <Field label="Tagline" name="brand.tagline" defaultValue={v["brand.tagline"]} />
             </div>
           </Card>
 
           <Card title="Search & sharing" id="seo">
-            <Field label="Page title" name="seo.title" defaultValue={v['seo.title']} />
+            <Field label="Page title" name="seo.title" defaultValue={v["seo.title"]} />
             <div style={{ height: 14 }} />
-            <TextArea label="Description" name="seo.description" defaultValue={v['seo.description']} rows={3} />
+            <TextArea
+              label="Description"
+              name="seo.description"
+              defaultValue={v["seo.description"]}
+              rows={3}
+            />
           </Card>
         </div>
 
@@ -117,7 +125,7 @@ Used on simple pages (overview bookings preview).
         </tr>
       </thead>
       <tbody>
-        {rows.map(r => (
+        {rows.map((r) => (
           <tr key={r.id}>
             <td>{r.name}</td>
             <td>{r.email || <span className={s.muted}>—</span>}</td>
@@ -131,6 +139,7 @@ Used on simple pages (overview bookings preview).
 ```
 
 **Rules:**
+
 - Table always in a `Card` with `flush`.
 - Scroll wrapper: `div.tableScroll` (overflow-x auto).
 - `th`: `height: 38px`, `--band` background (cross-hatch), `11px` uppercase, `box-shadow: var(--hair-b), var(--hair-r)`. Last `th` has no right hair.
@@ -144,12 +153,13 @@ Used on simple pages (overview bookings preview).
 The `BookingsTable` pattern — tabs + search + filters + sort + paginate. Copy this pattern for any CRM-style page.
 
 Key pieces:
+
 ```tsx
 <div className={`${t.board} ${s.frame}`}>
   {/* tabs + tools */}
   <div className={t.bar}>
     <div className={t.tabs} role="tablist">
-      <button role="tab" aria-selected={tab === 'all'} className={t.tab}>
+      <button role="tab" aria-selected={tab === "all"} className={t.tab}>
         All <span className={t.tabCount}>{counts.all}</span>
       </button>
     </div>
@@ -162,9 +172,7 @@ Key pieces:
   </div>
 
   {/* filters */}
-  <div className={t.filters}>
-    {/* Facet buttons */}
-  </div>
+  <div className={t.filters}>{/* Facet buttons */}</div>
 
   {/* table */}
   <div className={t.scroll}>
@@ -175,9 +183,15 @@ Key pieces:
   <div className={t.foot}>
     <span>1–25 of 300</span>
     <span className={t.pager}>
-      <button className={s.iconBtn} disabled={page === 0}>←</button>
-      <span className={t.pageNo}>{page + 1} / {pages}</span>
-      <button className={s.iconBtn} disabled={page >= pages - 1}>→</button>
+      <button className={s.iconBtn} disabled={page === 0}>
+        ←
+      </button>
+      <span className={t.pageNo}>
+        {page + 1} / {pages}
+      </span>
+      <button className={s.iconBtn} disabled={page >= pages - 1}>
+        →
+      </button>
     </span>
   </div>
 </div>
@@ -275,9 +289,7 @@ Individual pages do not have loading skeletons — data arrives synchronously fr
 ### Notice (block error in a card)
 
 ```tsx
-<div className={s.notice}>
-  Could not load the media library. Please refresh.
-</div>
+<div className={s.notice}>Could not load the media library. Please refresh.</div>
 ```
 
 `background: var(--bad-bg); color: var(--bad); border-radius: 10px; padding: 12px 14px; font-size: 13px`.
@@ -287,9 +299,9 @@ Individual pages do not have loading skeletons — data arrives synchronously fr
 ## Toasts
 
 ```tsx
-import { toast } from '../Modal';
-toast('Project saved');    // success
-toast('Could not delete. Try again.');  // error (same style — plain text)
+import { toast } from "../Modal";
+toast("Project saved"); // success
+toast("Could not delete. Try again."); // error (same style — plain text)
 ```
 
 The `<Toaster />` in Shell.tsx handles rendering. Toasts auto-dismiss after 2.6s, max 3 visible at once.
@@ -361,6 +373,7 @@ The `<i>` renders a 6px coloured dot. Colours come from the data-stage attribute
 Available hues: `green`, `blue`, `violet`, `orange`, `cyan`, `yellow`, `lime`.
 
 Pill variant (generic, in admin.module.css):
+
 ```tsx
 <span className={s.pill}>3 projects</span>
 ```
@@ -378,15 +391,31 @@ Pill variant (generic, in admin.module.css):
   <span className={t.pager}>
     <label className={t.size}>
       Rows
-      <select value={size} onChange={e => setSize(Number(e.target.value))}>
-        {[25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+      <select value={size} onChange={(e) => setSize(Number(e.target.value))}>
+        {[25, 50, 100].map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
       </select>
     </label>
-    <button className={s.iconBtn} disabled={page === 0} onClick={() => setPage(p => p - 1)} aria-label="Previous page">
+    <button
+      className={s.iconBtn}
+      disabled={page === 0}
+      onClick={() => setPage((p) => p - 1)}
+      aria-label="Previous page"
+    >
       <Icon icon={ArrowLeft01Icon} size={16} />
     </button>
-    <span className={t.pageNo}>{page + 1} / {pages}</span>
-    <button className={s.iconBtn} disabled={page >= pages - 1} onClick={() => setPage(p => p + 1)} aria-label="Next page">
+    <span className={t.pageNo}>
+      {page + 1} / {pages}
+    </span>
+    <button
+      className={s.iconBtn}
+      disabled={page >= pages - 1}
+      onClick={() => setPage((p) => p + 1)}
+      aria-label="Next page"
+    >
       <Icon icon={ArrowRight01Icon} size={16} />
     </button>
   </span>

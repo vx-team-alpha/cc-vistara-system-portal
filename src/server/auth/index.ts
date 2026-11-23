@@ -1,10 +1,12 @@
 "use server";
 
-import { headers } from "next/headers";
 import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+
 import { resolveNextPath } from "@/lib/auth/config";
 import { isOAuthProviderConfigured } from "@/lib/auth/oauth-providers";
+import { createClient } from "@/lib/supabase/server";
+
 import {
   MagicLinkSchema,
   OAuthProviderSchema,

@@ -3,6 +3,7 @@
 > Source names, paths, selectors, and imports are examples. Apply these design rules in the target project as described in [the skill](../SKILL.md#applying-the-system-in-a-target-project); do not assume the original admin code exists.
 
 ## Table of Contents
+
 1. [App shell](#app-shell)
 2. [Sidebar](#sidebar)
 3. [Topbar](#topbar)
@@ -53,6 +54,7 @@ aside.side (sticky, height 100dvh, flex column)
 ```
 
 **Sidebar dimensions:**
+
 - Expanded: `264px`
 - Collapsed: `72px` (icons only + tooltips)
 - Mobile drawer: `272px`
@@ -152,25 +154,31 @@ Use this composition for portal content pages where appropriate. Standalone page
 ## Grid Patterns
 
 ### Two-column form grid
+
 ```tsx
 <div className={s.grid2}>
   <Field label="Name" name="name" />
   <Field label="Email" name="email" />
 </div>
 ```
+
 `grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px`
 Becomes single column at ≤860px.
 
 ### Overview KPI row
+
 Uses a custom `.kpis` grid in `overview.module.css` — 4 equal-width linked cards.
 
 ### Overview tile lattice (site content)
+
 `.tiles` in `overview.module.css` — `repeat(auto-fill, minmax(200px, 1fr))` for navigation tiles.
 
 ### Media row (images)
+
 `.mediaRow` in `admin.module.css` — `repeat(auto-fit, minmax(200px, 1fr)); gap: 16px`.
 
 ### Split layout (overview page)
+
 `.split` in `overview.module.css` — two side-by-side cards (upcoming calls + this week). Typically `grid-template-columns: 1fr 1fr` or similar.
 
 ---
@@ -178,6 +186,7 @@ Uses a custom `.kpis` grid in `overview.module.css` — 4 equal-width linked car
 ## Do / Don't
 
 ✅ **Do**
+
 ```tsx
 // Standard page structure
 <>
@@ -189,6 +198,7 @@ Uses a custom `.kpis` grid in `overview.module.css` — 4 equal-width linked car
 ```
 
 ❌ **Don't**
+
 ```tsx
 // No custom wrappers that bypass the shell
 <div className="container mx-auto px-6">…</div>

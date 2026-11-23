@@ -8,7 +8,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function AuthLoading() {
   return (
     <div className="flex min-h-40 items-center justify-center" role="status" aria-live="polite">
-      <div aria-hidden="true" className="w-full max-w-sm space-y-4 px-6"><Skeleton className="h-7 w-1/2" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>
+      <div aria-hidden="true" className="w-full max-w-sm space-y-4 px-6">
+        <Skeleton className="h-7 w-1/2" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
       <span className="sr-only">Loading</span>
     </div>
   );

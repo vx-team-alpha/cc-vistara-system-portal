@@ -18,13 +18,13 @@ If you know shadcn's older `form.tsx` (`<Form>`, `<FormField>`, `<FormItem>`, `<
 `<FormMessage>`, `useFormField`), **none of it exists here and none of it will compile.** This repo
 uses the newer Field family, and the difference is not cosmetic:
 
-| Old `form.tsx` | This repo's `field.tsx` |
-|---|---|
-| `<Form {...form}>` provider wrapping `<form>` | **No provider.** Use the native `<form>` directly |
-| `<FormField control={} name={} render={} />` | **Doesn't exist.** Use `register()` or RHF's `<Controller>` |
-| `<FormMessage />` reads errors from context | `<FieldError errors={[errors.title]} />` — **you pass errors in explicitly** |
-| `<FormLabel>` auto-wires `htmlFor`/`id` | `<FieldLabel htmlFor="title">` — **you wire it yourself** |
-| `<FormControl>` injects a11y props | **Doesn't exist.** Set `aria-invalid` on the input yourself |
+| Old `form.tsx`                                | This repo's `field.tsx`                                                      |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| `<Form {...form}>` provider wrapping `<form>` | **No provider.** Use the native `<form>` directly                            |
+| `<FormField control={} name={} render={} />`  | **Doesn't exist.** Use `register()` or RHF's `<Controller>`                  |
+| `<FormMessage />` reads errors from context   | `<FieldError errors={[errors.title]} />` — **you pass errors in explicitly** |
+| `<FormLabel>` auto-wires `htmlFor`/`id`       | `<FieldLabel htmlFor="title">` — **you wire it yourself**                    |
+| `<FormControl>` injects a11y props            | **Doesn't exist.** Set `aria-invalid` on the input yourself                  |
 
 `Field` components are presentational. They carry no react-hook-form context. Every wire between
 RHF state and the markup is one you write.
@@ -69,9 +69,10 @@ below. Inline is what compiles today.
 ```tsx
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+
 import { CreatePostSchema } from "@/server/posts/schemas";
 
 type CreatePostValues = z.infer<typeof CreatePostSchema>;
@@ -147,9 +148,7 @@ spread. Use RHF's `Controller`:
 <Controller
   control={control}
   name="published"
-  render={({ field }) => (
-    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-  )}
+  render={({ field }) => <Checkbox checked={field.value} onCheckedChange={field.onChange} />}
 />
 ```
 
@@ -191,7 +190,7 @@ startTransition(async () => {
     const res = await createPostAction(values);
 
     if (!res.ok) {
-      setStatus({ type: "error", text: res.error });   // your message
+      setStatus({ type: "error", text: res.error }); // your message
       return;
     }
 
@@ -229,14 +228,18 @@ button:
 ```tsx
 const [status, setStatus] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
-{status && (
-  <p
-    role="status"
-    className={status.type === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"}
-  >
-    {status.text}
-  </p>
-)}
+{
+  status && (
+    <p
+      role="status"
+      className={
+        status.type === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"
+      }
+    >
+      {status.text}
+    </p>
+  );
+}
 ```
 
 `role="status"` announces it to screen readers. Clear it at the top of `onSubmit` so a stale error

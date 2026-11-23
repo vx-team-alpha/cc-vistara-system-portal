@@ -1,9 +1,11 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { headers } from "next/headers";
+
 import { isLinkableProviderConfigured } from "@/lib/auth/oauth-providers";
 import { authAction } from "@/server/auth-wrapper";
+
 import {
   LinkIdentitySchema,
   UnlinkIdentitySchema,
@@ -120,7 +122,8 @@ export const linkIdentityAction = authAction(
 
 export const unlinkIdentityAction = authAction(
   async ({ supabase }, input): Promise<ActionOk> => {
-    const { data: identitiesData, error: identitiesError } = await supabase.auth.getUserIdentities();
+    const { data: identitiesData, error: identitiesError } =
+      await supabase.auth.getUserIdentities();
 
     if (identitiesError || !identitiesData) {
       return { ok: false, error: "Could not load connected accounts. Please try again." };

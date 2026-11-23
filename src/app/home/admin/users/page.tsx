@@ -1,10 +1,12 @@
-import type { Metadata } from 'next';
-import { PageHead, Card, Empty, formatDate, portalStyles as s } from '@/components/portal/ui';
-import { getAllAccounts, adminContext } from '@/server/admin/data';
-import { CreateUserDialog } from '../_components/create-user-dialog';
-import { RoleSelect } from '../_components/role-select';
+import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: 'All Users' };
+import { PageHead, Card, Empty, formatDate, portalStyles as s } from "@/components/portal/ui";
+import { getAllAccounts, adminContext } from "@/server/admin/data";
+
+import { CreateUserDialog } from "../_components/create-user-dialog";
+import { RoleSelect } from "../_components/role-select";
+
+export const metadata: Metadata = { title: "All Users" };
 
 export default async function AdminUsersPage() {
   const [ctx, accounts] = await Promise.all([adminContext(), getAllAccounts()]);
@@ -14,7 +16,7 @@ export default async function AdminUsersPage() {
     <>
       <PageHead
         title="All users"
-        note={`${accounts.length} registered ${accounts.length === 1 ? 'account' : 'accounts'} on the platform.`}
+        note={`${accounts.length} registered ${accounts.length === 1 ? "account" : "accounts"} on the platform.`}
       >
         <CreateUserDialog />
       </PageHead>
@@ -38,11 +40,11 @@ export default async function AdminUsersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {accounts.map(account => (
+                  {accounts.map((account) => (
                     <tr key={account.id}>
                       <td>
                         <strong className={s.cellTitle}>{account.name}</strong>
-                        <small>{account.email ?? '—'}</small>
+                        <small>{account.email ?? "—"}</small>
                       </td>
                       <td>
                         <RoleSelect

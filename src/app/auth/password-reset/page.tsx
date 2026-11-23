@@ -1,12 +1,8 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import Link from "next/link";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { PasswordResetForm } from "./password-reset-form";
 
 export const metadata: Metadata = { title: "Reset password" };

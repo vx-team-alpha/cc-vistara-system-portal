@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { USER_QUERY_KEY } from "./use-user";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
+
 import { useSupabase } from "./use-supabase";
+import { USER_QUERY_KEY } from "./use-user";
 
 type Props = {
   /**
@@ -30,10 +31,7 @@ type Props = {
  * forced a request. A hard navigation makes the server re-read the cookies and
  * re-run the proxy.
  */
-export function useAuthChangeListener({
-  privatePathPrefixes,
-  signedOutRedirect = "/",
-}: Props) {
+export function useAuthChangeListener({ privatePathPrefixes, signedOutRedirect = "/" }: Props) {
   const supabase = useSupabase();
   const pathname = usePathname();
   const queryClient = useQueryClient();

@@ -5,9 +5,9 @@ description: Use when changing the Supabase database in this repo — adding/alt
 
 # Supabase DB Changes
 
-The database uses **Supabase declarative schemas**. The files in `supabase/schemas/` are the source of truth; migrations are *generated* from diffs against them. Never invert that.
+The database uses **Supabase declarative schemas**. The files in `supabase/schemas/` are the source of truth; migrations are _generated_ from diffs against them. Never invert that.
 
-This skill owns the **migration workflow**. For schema *design* — RLS predicates, grant patterns, security-definer conventions, the shape of this project's schema — use `postgres-expert`.
+This skill owns the **migration workflow**. For schema _design_ — RLS predicates, grant patterns, security-definer conventions, the shape of this project's schema — use `postgres-expert`.
 
 ## Mandatory workflow
 
@@ -15,7 +15,7 @@ This skill owns the **migration workflow**. For schema *design* — RLS predicat
 2. `pnpm supabase:diff <descriptive_name>` — generates a migration into `supabase/migrations/`. Uses `--use-pg-delta` (configured in `package.json`); do not switch to migra. Snake_case names (`add_account_email_index`, not `AddAccountEmailIndex`).
 3. **Review the generated migration.** It should match what you intended. With `pg-delta` you almost never need hand-edits; if you do, see "When pg-delta falls short" below.
 4. `pnpm supabase:reset` — applies all migrations to the local DB from scratch. Catches order/dependency bugs that a push against a populated DB hides.
-5. **Cross-engine diff verification** — run all three diff engines; *all three* must report **"No schema changes found"**:
+5. **Cross-engine diff verification** — run all three diff engines; _all three_ must report **"No schema changes found"**:
    ```bash
    pnpm supabase db diff --use-pg-delta
    pnpm supabase db diff --use-migra
@@ -46,14 +46,14 @@ Files are loaded **alphabetically**. This ordering is load-bearing: `check_funct
 
 Current files:
 
-| File | Contents |
-|---|---|
-| `010-accounts.sql` | The `accounts` table (the only application table). |
-| `100-functions.sql` | `current_account()`. Must sort **after** the table files. |
-| `200-triggers.sql` | Trigger functions + triggers on **public** tables. |
-| `210-auth-triggers.sql` | Triggers on **`auth.users`** only. |
-| `900-rls.sql` | `enable row level security` + policies. **No grants.** |
-| `999-grants.sql` | Every `grant`/`revoke`. Nothing else. |
+| File                    | Contents                                                  |
+| ----------------------- | --------------------------------------------------------- |
+| `010-accounts.sql`      | The `accounts` table (the only application table).        |
+| `100-functions.sql`     | `current_account()`. Must sort **after** the table files. |
+| `200-triggers.sql`      | Trigger functions + triggers on **public** tables.        |
+| `210-auth-triggers.sql` | Triggers on **`auth.users`** only.                        |
+| `900-rls.sql`           | `enable row level security` + policies. **No grants.**    |
+| `999-grants.sql`        | Every `grant`/`revoke`. Nothing else.                     |
 
 Convention for new files: `0xx` foundation (extensions, enums), `1xx`–`8xx` tables and their functions, `9xx` RLS and grants. Put a new table at `020-`, `030-`, … and its functions after `100-`.
 
@@ -71,7 +71,7 @@ Convention for new files: `0xx` foundation (extensions, enums), `1xx`–`8xx` ta
 Alphabetical load order means `900-rls.sql` runs **before** `999-grants.sql`. So a `REVOKE` in 900 can be silently undone by a `GRANT` in 999. That is exactly why this repo keeps **all** ACLs in `999-grants.sql` and none in the RLS file.
 
 - Put deny-by-default revokes that need to be **final** at the **end of `999-grants.sql`**.
-- `ALTER DEFAULT PRIVILEGES … GRANT ALL ON {TABLES,FUNCTIONS,SEQUENCES} TO anon` is a silent footgun: it makes every *future* object anon-readable. If you're hardening, audit `999-grants.sql` for these. Note that `auto_expose_new_tables` is unset in `config.toml`, so new tables get **no** grants by default — the reverse footgun applies too: a new table with perfect RLS and no grant returns "permission denied" on every request.
+- `ALTER DEFAULT PRIVILEGES … GRANT ALL ON {TABLES,FUNCTIONS,SEQUENCES} TO anon` is a silent footgun: it makes every _future_ object anon-readable. If you're hardening, audit `999-grants.sql` for these. Note that `auto_expose_new_tables` is unset in `config.toml`, so new tables get **no** grants by default — the reverse footgun applies too: a new table with perfect RLS and no grant returns "permission denied" on every request.
 - Verify default ACLs with:
   ```bash
   docker exec supabase_db_cc-frontage-desgn psql -U postgres -d postgres -c \
@@ -117,11 +117,12 @@ Full detail lives in `postgres-expert`. The essentials for migration review:
 
 Rare. Known gaps:
 
-- **New functions silently get `PUBLIC EXECUTE` (anon can call them).** When a migration creates a new function, pg-delta does NOT emit per-function `REVOKE EXECUTE … FROM PUBLIC`. The bulk `REVOKE … ON ALL FUNCTIONS` in `999-grants.sql` only affects functions that exist *at the moment it runs* — it is not a default-privilege rule. Result: pg-delta reports "No schema changes found" while anon can call the new function.
+- **New functions silently get `PUBLIC EXECUTE` (anon can call them).** When a migration creates a new function, pg-delta does NOT emit per-function `REVOKE EXECUTE … FROM PUBLIC`. The bulk `REVOKE … ON ALL FUNCTIONS` in `999-grants.sql` only affects functions that exist _at the moment it runs_ — it is not a default-privilege rule. Result: pg-delta reports "No schema changes found" while anon can call the new function.
 
   Note `REVOKE … FROM anon` alone does **not** fix this: `create function` grants EXECUTE to **PUBLIC**, and `anon` inherits it as a member of PUBLIC. The revoke must name PUBLIC.
 
   This is why `999-grants.sql` carries an explicit per-function revoke line for every function. **Add one there whenever you add a function**, then verify after `pnpm supabase:reset`:
+
   ```bash
   docker exec supabase_db_cc-frontage-desgn psql -U postgres -d postgres -c \
     "SELECT p.proname, r.rolname, has_function_privilege(r.rolname, p.oid, 'EXECUTE') AS can_exec
@@ -130,9 +131,11 @@ Rare. Known gaps:
         AND r.rolname IN ('anon','authenticated','service_role')
       ORDER BY p.proname, r.rolname;"
   ```
+
   `anon` MUST show `can_exec = f` for every function.
 
 - `ALTER PUBLICATION supabase_realtime ADD TABLE …` — pg-delta does not emit publication membership changes. If you add a table that needs realtime, hand-add an idempotent block to the migration:
+
   ```sql
   do $$
   begin
@@ -149,7 +152,7 @@ Rare. Known gaps:
 
 - **Phantom `CREATE OR REPLACE FUNCTION` re-emits.** All three diff engines sometimes re-emit a `CREATE OR REPLACE FUNCTION` for a function whose body in the live DB is byte-for-byte identical to the schema file. Comparing `pg_get_functiondef(oid)` against the schema source shows identical text — the engines read normalization metadata that doesn't round-trip cleanly.
 
-  Mitigation: if all three engines emit *only* identical-body `CREATE OR REPLACE FUNCTION` statements (no semantic change, no signature/owner/grant change), it is safe to ignore — the migration applies a no-op replace. Document it in the migration's hand-edit banner. Don't try to "fix" it by editing whitespace; the diff comes back regardless.
+  Mitigation: if all three engines emit _only_ identical-body `CREATE OR REPLACE FUNCTION` statements (no semantic change, no signature/owner/grant change), it is safe to ignore — the migration applies a no-op replace. Document it in the migration's hand-edit banner. Don't try to "fix" it by editing whitespace; the diff comes back regardless.
 
 If you do hand-edit, add a banner header listing what you added so the next person regenerating knows what to preserve:
 

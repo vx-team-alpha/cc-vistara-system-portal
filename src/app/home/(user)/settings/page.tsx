@@ -1,3 +1,4 @@
+import { portalStyles as s } from "@/components/portal/ui";
 import {
   getConfiguredLinkableProviders,
   getLinkableProviderOption,
@@ -5,12 +6,15 @@ import {
 } from "@/lib/auth/oauth-providers";
 import type { LinkableProvider } from "@/server/auth/schemas";
 import { getSettingsData } from "@/server/settings/data";
-import { UpdateNameCard } from "./_components/update-name-card";
-import { UpdateEmailCard } from "./_components/update-email-card";
-import { UpdatePasswordCard } from "./_components/update-password-card";
-import { ConnectedAccountsCard, type ConnectedIdentity } from "./_components/connected-accounts-card";
+
+import {
+  ConnectedAccountsCard,
+  type ConnectedIdentity,
+} from "./_components/connected-accounts-card";
 import { DeleteAccountCard } from "./_components/delete-account-card";
-import { portalStyles as s } from "@/components/portal/ui";
+import { UpdateEmailCard } from "./_components/update-email-card";
+import { UpdateNameCard } from "./_components/update-name-card";
+import { UpdatePasswordCard } from "./_components/update-password-card";
 
 function isLinkableProvider(provider: string): provider is LinkableProvider {
   return isKnownLinkableProvider(provider);

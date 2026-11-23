@@ -1,30 +1,29 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-
-import { Eye, EyeOff, Lock } from 'lucide-react';
+import { Eye, EyeOff, Lock } from "lucide-react";
+import { useState } from "react";
 
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from '@/components/ui/input-group';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/input-group";
+import { cn } from "@/lib/utils";
 
 export function PasswordInput({
   groupClassName,
   disabled,
   ...props
-}: React.ComponentProps<'input'> & { groupClassName?: string }) {
+}: React.ComponentProps<"input"> & { groupClassName?: string }) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <InputGroup className={cn(groupClassName)}>
       <InputGroupInput
         data-test="password-input"
-        type={showPassword ? 'text' : 'password'}
-        placeholder={'************'}
+        type={showPassword ? "text" : "password"}
+        placeholder={"************"}
         disabled={disabled}
         {...props}
       />
@@ -41,11 +40,7 @@ export function PasswordInput({
           aria-pressed={showPassword}
           onClick={() => setShowPassword((visible) => !visible)}
         >
-          {showPassword ? (
-            <EyeOff aria-hidden="true" />
-          ) : (
-            <Eye aria-hidden="true" />
-          )}
+          {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
         </InputGroupButton>
       </InputGroupAddon>
     </InputGroup>

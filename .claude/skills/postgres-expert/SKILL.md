@@ -12,7 +12,7 @@ them are deliberate inversions of advice you would otherwise give.
 **Migrations are out of scope here.** Generating, ordering, and applying them is
 owned by the `supabase-db-changes` skill. Read that before touching
 `supabase/migrations/`. The one rule worth repeating: schema files are the source
-of truth, and migrations are *generated* from them via `pnpm supabase:diff` —
+of truth, and migrations are _generated_ from them via `pnpm supabase:diff` —
 never hand-written.
 
 ## The schema in one paragraph
@@ -31,14 +31,14 @@ Loaded **alphabetically** by the CLI, which is load-bearing: a `language sql`
 function body is parsed at CREATE time (`check_function_bodies` is on), so the
 tables it references must already exist.
 
-| File | Contents |
-|---|---|
-| `010-accounts.sql` | The table. |
-| `100-functions.sql` | `current_account()`. Must sort after the table. |
-| `200-triggers.sql` | Trigger functions + triggers on **public** tables. |
-| `210-auth-triggers.sql` | Triggers on **`auth.users`** only. |
-| `900-rls.sql` | `enable row level security` + policies. **No grants.** |
-| `999-grants.sql` | Every `grant`/`revoke` in the schema. Nothing else. |
+| File                    | Contents                                               |
+| ----------------------- | ------------------------------------------------------ |
+| `010-accounts.sql`      | The table.                                             |
+| `100-functions.sql`     | `current_account()`. Must sort after the table.        |
+| `200-triggers.sql`      | Trigger functions + triggers on **public** tables.     |
+| `210-auth-triggers.sql` | Triggers on **`auth.users`** only.                     |
+| `900-rls.sql`           | `enable row level security` + policies. **No grants.** |
+| `999-grants.sql`        | Every `grant`/`revoke` in the schema. Nothing else.    |
 
 Adding a function means editing **two** files: the body in `100-functions.sql`,
 and both a `revoke` and (if callable) a `grant` in `999-grants.sql`.
@@ -46,7 +46,7 @@ and both a `revoke` and (if callable) a `grant` in `999-grants.sql`.
 ## Non-negotiable rules
 
 1. **All ACLs live in `999-grants.sql`.** Files load alphabetically and pg-delta
-   diffs the *final* state, so a `revoke` in `900-rls.sql` is silently undone by
+   diffs the _final_ state, so a `revoke` in `900-rls.sql` is silently undone by
    a later `grant`. One file is the last word.
 
 2. **Never add `force row level security`.** It reads like hardening and is the
@@ -64,7 +64,7 @@ and both a `revoke` and (if callable) a `grant` in `999-grants.sql`.
 
 5. **`anon` gets nothing.** Not one privilege, on any object. Policies are also
    scoped `to authenticated`; denying at the grant layer too is deliberate,
-   because a table grant with no matching policy returns *zero rows* instead of
+   because a table grant with no matching policy returns _zero rows_ instead of
    an error — a far worse failure mode to debug than "permission denied".
 
 6. **New tables get no grants implicitly.** `auto_expose_new_tables` is unset in

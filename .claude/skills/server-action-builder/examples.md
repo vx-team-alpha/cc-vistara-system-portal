@@ -37,8 +37,10 @@ export type CreatePostInput = z.infer<typeof CreatePostSchema>;
 "use server";
 
 import { revalidatePath } from "next/cache";
+
 import { authAction } from "@/server/auth-wrapper";
 import type { ActionResult } from "@/server/types";
+
 import { CreatePostSchema } from "./schemas";
 
 export const createPostAction = authAction(
@@ -99,7 +101,7 @@ export const deleteAnyPostAction = authAction(
 );
 ```
 
-`roles` is an OR — `roles: ["AUTHOR", "ADMIN"]` admits either. For "the author of *this* post, or
+`roles` is an OR — `roles: ["AUTHOR", "ADMIN"]` admits either. For "the author of _this_ post, or
 any admin", the role list can't express it; gate in RLS, or check ownership in the handler:
 
 ```typescript
@@ -138,14 +140,19 @@ export const listMyPostsAction = authAction(
     const { data, error } = await supabase
       .from("posts")
       .select("id, title, slug, published, created_at")
-      .eq("author_id", user.id)      // redundant with RLS, but explicit
+      .eq("author_id", user.id) // redundant with RLS, but explicit
       .order("created_at", { ascending: false })
       .range(input.offset, input.offset + input.limit - 1);
 
     if (error) return { ok: false, error: "Could not load posts." };
     return { ok: true, data: data as Post[] };
   },
-  { schema: z.object({ limit: z.number().int().max(100).default(20), offset: z.number().int().min(0).default(0) }) },
+  {
+    schema: z.object({
+      limit: z.number().int().max(100).default(20),
+      offset: z.number().int().min(0).default(0),
+    }),
+  },
 );
 ```
 
@@ -203,8 +210,9 @@ use it. Write a plain Server Function and validate by hand.
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { ContactSchema } from "./schemas";
 import type { ActionResult } from "@/server/types";
+
+import { ContactSchema } from "./schemas";
 
 export async function submitContactAction(raw: unknown): Promise<ActionResult> {
   const parsed = ContactSchema.safeParse(raw);
@@ -234,6 +242,7 @@ not throw one.
 "use client";
 
 import { useTransition } from "react";
+
 import { createPostAction } from "@/server/posts";
 import type { CreatePostInput } from "@/server/posts/schemas";
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { LinkableProviderSchema } from "@/server/auth/schemas";
 
 export const UpdateNameSchema = z.object({

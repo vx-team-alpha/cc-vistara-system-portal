@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+
 import { resolveNextPath } from "@/lib/auth/config";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * OAuth / PKCE landing point — the `?code=` flow.
@@ -30,9 +31,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!code) {
-    redirect(
-      `/auth/sign-in?error=${encodeURIComponent("Missing authorization code.")}`,
-    );
+    redirect(`/auth/sign-in?error=${encodeURIComponent("Missing authorization code.")}`);
   }
 
   const supabase = await createClient();
@@ -40,9 +39,7 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     redirect(
-      `/auth/sign-in?error=${encodeURIComponent(
-        "Could not complete sign-in. Please try again.",
-      )}`,
+      `/auth/sign-in?error=${encodeURIComponent("Could not complete sign-in. Please try again.")}`,
     );
   }
 

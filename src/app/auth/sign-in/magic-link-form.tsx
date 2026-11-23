@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MailCheck } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import type { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -53,8 +54,8 @@ export function MagicLinkForm({ next }: { next?: string }) {
         {/* Deliberately does not confirm the address exists — the action always
             reports success for the same reason password reset does. */}
         <p className="text-sm">
-          If an account exists for <span className="font-medium">{sentTo}</span>, we&apos;ve
-          sent a sign-in link. Follow it to continue.
+          If an account exists for <span className="font-medium">{sentTo}</span>, we&apos;ve sent a
+          sign-in link. Follow it to continue.
         </p>
       </div>
     );

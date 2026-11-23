@@ -1,9 +1,11 @@
-'use client';
-import { useTransition, useState } from 'react';
-import { updateRoleAction } from '@/server/admin/actions';
-import s from '@/components/portal/portal.module.css';
+"use client";
+import { useTransition, useState } from "react";
 
-type Role = 'admin' | 'user';
+import { updateRoleAction } from "@/server/admin/actions";
+
+import s from "@/components/portal/portal.module.css";
+
+type Role = "admin" | "user";
 
 export function RoleSelect({
   targetId,
@@ -16,11 +18,11 @@ export function RoleSelect({
 }) {
   const [pending, startTransition] = useTransition();
   const [role, setRole] = useState<Role>(currentRole as Role);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newRole = e.target.value as Role;
-    setError('');
+    setError("");
 
     startTransition(async () => {
       try {
@@ -31,7 +33,7 @@ export function RoleSelect({
         }
         setRole(newRole);
       } catch {
-        setError('Failed to update role.');
+        setError("Failed to update role.");
       }
     });
   }

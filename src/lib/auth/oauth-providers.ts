@@ -1,5 +1,4 @@
 import "server-only";
-
 import type { LinkableProvider, OAuthProvider } from "@/server/auth/schemas";
 
 type ProviderCredentials = {

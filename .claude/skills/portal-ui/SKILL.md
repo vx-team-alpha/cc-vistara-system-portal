@@ -29,15 +29,15 @@ Apply the system throughout the user's requested scope. A single-page request do
 
 ## Quick Reference
 
-| Topic | Reference file |
-|---|---|
-| Colors, themes, dark mode, semantic tokens | [references/colors.md](references/colors.md) |
-| Font families, size/weight scale, letter-spacing | [references/typography.md](references/typography.md) |
-| Spacing, radius, borders, shadows, breakpoints, class ordering | [references/styling.md](references/styling.md) |
-| App shell, sidebar, topbar, page anatomy, grid patterns | [references/layout.md](references/layout.md) |
-| Every shared component with props, variants, and usage snippet | [references/components.md](references/components.md) |
-| Forms, tables, modals, toasts, empty/loading/error states, nav | [references/patterns.md](references/patterns.md) |
-| Focus, contrast, ARIA, keyboard behaviour | [references/accessibility.md](references/accessibility.md) |
+| Topic                                                          | Reference file                                             |
+| -------------------------------------------------------------- | ---------------------------------------------------------- |
+| Colors, themes, dark mode, semantic tokens                     | [references/colors.md](references/colors.md)               |
+| Font families, size/weight scale, letter-spacing               | [references/typography.md](references/typography.md)       |
+| Spacing, radius, borders, shadows, breakpoints, class ordering | [references/styling.md](references/styling.md)             |
+| App shell, sidebar, topbar, page anatomy, grid patterns        | [references/layout.md](references/layout.md)               |
+| Every shared component with props, variants, and usage snippet | [references/components.md](references/components.md)       |
+| Forms, tables, modals, toasts, empty/loading/error states, nav | [references/patterns.md](references/patterns.md)           |
+| Focus, contrast, ARIA, keyboard behaviour                      | [references/accessibility.md](references/accessibility.md) |
 
 ## Essential Design Rules
 

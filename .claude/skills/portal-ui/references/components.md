@@ -3,6 +3,7 @@
 These component names, props, and snippets describe the source implementation in `app/admin/`. In the target project, locate matching components and reuse or adapt them; implement missing primitives locally. All imports below are illustrative and must resolve to actual target files.
 
 ## Table of Contents
+
 1. [ui.tsx — server components](#uitsx--server-components)
    - [PageHead](#pagehead)
    - [Card](#card)
@@ -44,6 +45,7 @@ Imported as: `import { PageHead, Card, Field, TextArea, Select, Check, Actions, 
 Top of every admin page. Shows a Hugeicons icon, a title, an optional subtitle, and right-side action buttons.
 
 **Props:**
+
 ```ts
 { title: string; note?: string; icon?: IconSvgElement; children?: ReactNode }
 ```
@@ -52,9 +54,12 @@ Top of every admin page. Shows a Hugeicons icon, a title, an optional subtitle, 
 - `children` are rendered in `.pageActions` (right side, flex row, gap 8px).
 
 **Usage:**
+
 ```tsx
 <PageHead title="Projects" note="The work grid, in site order.">
-  <FormModal label="Add project" title="New project">…</FormModal>
+  <FormModal label="Add project" title="New project">
+    …
+  </FormModal>
 </PageHead>
 ```
 
@@ -65,6 +70,7 @@ Top of every admin page. Shows a Hugeicons icon, a title, an optional subtitle, 
 A framed section of a page (`.card` = `.frame` + flex column). Each card is a `<section>`.
 
 **Props:**
+
 ```ts
 {
   title?: string;
@@ -81,6 +87,7 @@ A framed section of a page (`.card` = `.frame` + flex column). Each card is a `<
 - Card header: `padding: 15px 22px 14px`, separated by `var(--hair-b)`.
 
 **Usage:**
+
 ```tsx
 <Card title="Details" note="Basic information about this project." id="details">
   <div className={s.grid2}>
@@ -103,6 +110,7 @@ A framed section of a page (`.card` = `.frame` + flex column). Each card is a `<
 A text input with label and optional hint. Always full-width.
 
 **Props:**
+
 ```ts
 {
   label: string;
@@ -116,6 +124,7 @@ A text input with label and optional hint. Always full-width.
 ```
 
 **Usage:**
+
 ```tsx
 <Field label="Name" name="name" defaultValue={row.name} required />
 <Field label="URL" name="url" type="url" placeholder="https://…" hint="The project's live URL." />
@@ -128,6 +137,7 @@ A text input with label and optional hint. Always full-width.
 Multi-line text input with label and optional hint. Resizable vertically.
 
 **Props:**
+
 ```ts
 { label: string; name: string; defaultValue?: string | null; hint?: string; rows?: number }
 ```
@@ -135,6 +145,7 @@ Multi-line text input with label and optional hint. Resizable vertically.
 Min-height: `92px`. Default `rows` is unset (browser default).
 
 **Usage:**
+
 ```tsx
 <TextArea label="Description" name="description" defaultValue={row.description} rows={4} />
 ```
@@ -146,6 +157,7 @@ Min-height: `92px`. Default `rows` is unset (browser default).
 A `<select>` with label and optional hint.
 
 **Props:**
+
 ```ts
 {
   label: string;
@@ -157,14 +169,15 @@ A `<select>` with label and optional hint.
 ```
 
 **Usage:**
+
 ```tsx
 <Select
   label="Status"
   name="status"
   defaultValue={row.status}
   options={[
-    { value: 'active', label: 'Active' },
-    { value: 'archived', label: 'Archived' },
+    { value: "active", label: "Active" },
+    { value: "archived", label: "Archived" },
   ]}
 />
 ```
@@ -176,11 +189,13 @@ A `<select>` with label and optional hint.
 A single checkbox with an inline label.
 
 **Props:**
+
 ```ts
 { label: string; name: string; defaultChecked?: boolean }
 ```
 
 **Usage:**
+
 ```tsx
 <Check label="Show on homepage" name="featured" defaultChecked={row.featured} />
 ```
@@ -194,6 +209,7 @@ A flex row (flex-wrap, gap 8px, margin-top 20px) for form buttons.
 **Props:** `{ children: ReactNode }`
 
 **Usage:**
+
 ```tsx
 <Actions>
   <SaveButton />
@@ -210,6 +226,7 @@ A framed, cross-hatch-backgrounded paragraph for empty states in lists.
 **Props:** `{ children: ReactNode }`
 
 **Usage:**
+
 ```tsx
 <Empty>No testimonials yet. Add the first one above.</Empty>
 ```
@@ -241,11 +258,13 @@ Requires `"use client"`. Uses `useFormStatus`.
 Danger button with two-click confirmation. First click: arms it (label changes to "Click again to delete"). Second click: submits to the delete `formAction`. Auto-disarms after 3.5s.
 
 **Props:**
+
 ```ts
 { action: (formData: FormData) => void; id?: string; label?: string }
 ```
 
 **Usage:**
+
 ```tsx
 <Actions>
   <SaveButton />
@@ -262,6 +281,7 @@ Danger button with two-click confirmation. First click: arms it (label changes t
 A native `<dialog>` modal. Focus-trapped, Escape closes, click-backdrop closes.
 
 **Props:**
+
 ```ts
 {
   open: boolean;
@@ -275,11 +295,17 @@ A native `<dialog>` modal. Focus-trapped, Escape closes, click-backdrop closes.
 Size: `min(720px, 100vw - 32px)` wide, `min(860px, 100dvh - 48px)` tall. `border-radius: 16px`. Modal head uses the cross-hatch `--band` background.
 
 **Usage (low-level):**
+
 ```tsx
 const [open, setOpen] = useState(false);
 <Modal open={open} onClose={() => setOpen(false)} title="Edit project">
-  <form>…<Actions><SaveButton /></Actions></form>
-</Modal>
+  <form>
+    …
+    <Actions>
+      <SaveButton />
+    </Actions>
+  </form>
+</Modal>;
 ```
 
 ---
@@ -289,6 +315,7 @@ const [open, setOpen] = useState(false);
 A primary button (`+ Label`) that opens a `Modal` containing a form. Auto-closes and fires a toast after `reset` (successful save).
 
 **Props:**
+
 ```ts
 {
   label: string;       // button text
@@ -301,11 +328,14 @@ A primary button (`+ Label`) that opens a `Modal` containing a form. Auto-closes
 ```
 
 **Usage:**
+
 ```tsx
 <FormModal label="Add project" title="New project" done="Project added">
   <form action={addProject}>
     <Field label="Title" name="title" required />
-    <Actions><SaveButton label="Add" /></Actions>
+    <Actions>
+      <SaveButton label="Add" />
+    </Actions>
   </form>
 </FormModal>
 ```
@@ -317,6 +347,7 @@ A primary button (`+ Label`) that opens a `Modal` containing a form. Auto-closes
 Like `FormModal` but the modal stays open after a save (used for the media uploader).
 
 **Props:**
+
 ```ts
 { label: string; title: string; description?: string; primary?: boolean; children: ReactNode }
 ```
@@ -329,11 +360,11 @@ Renders toasts in the bottom-right corner. Fired programmatically.
 
 ```tsx
 // In Shell.tsx (always present)
-<Toaster />
+<Toaster />;
 
 // Call from any client component:
-import { toast } from '../Modal';
-toast('Project deleted');
+import { toast } from "../Modal";
+toast("Project deleted");
 ```
 
 Toast style: dark bg (`var(--toast-bg)`), 13px bold text, green check SVG icon, `border-radius: 10px`, disappears after 2.6s.
@@ -347,6 +378,7 @@ Toast style: dark bg (`var(--toast-bg)`), 13px bold text, green check SVG icon, 
 Wraps a collection in a DnD context (dnd-kit) + ARIA announcements. Persists the new order to the server immediately on drop or button-move.
 
 **Props:**
+
 ```ts
 {
   table: string;     // DB table name for save
@@ -358,9 +390,10 @@ Wraps a collection in a DnD context (dnd-kit) + ARIA announcements. Persists the
 ```
 
 **Usage:**
+
 ```tsx
-<SortableRows table="faqs" ids={rows.map(r => r.id)} label="questions">
-  {rows.map(row => (
+<SortableRows table="faqs" ids={rows.map((r) => r.id)} label="questions">
+  {rows.map((row) => (
     <Item key={row.id} id={row.id} title={row.question} meta={`${row.answer.slice(0, 60)}…`}>
       <form action={saveFaq}>
         <Field label="Question" name="question" defaultValue={row.question} />
@@ -382,6 +415,7 @@ Wraps a collection in a DnD context (dnd-kit) + ARIA announcements. Persists the
 A single sortable row: drag handle, position number, optional thumbnail, a button that opens an edit modal, and up/down/top/bottom buttons.
 
 **Props:**
+
 ```ts
 {
   id: string;
@@ -408,6 +442,7 @@ A `<details>`/`<summary>` for optional/advanced fields within a form.
 An image/video picker: drag-and-drop zone, file browse, library picker (reuse already-uploaded). Stores a key (not a URL) in a hidden `<input>`.
 
 **Props:**
+
 ```ts
 {
   label: string;
@@ -421,6 +456,7 @@ An image/video picker: drag-and-drop zone, file browse, library picker (reuse al
 ```
 
 **Usage:**
+
 ```tsx
 <MediaField
   label="Cover image"
@@ -443,12 +479,15 @@ A sticky subnav (below the topbar, top: 60px) with anchor links to each card on 
 **Props:** `{ items: { id: string; label: string }[] }`
 
 **Usage:**
+
 ```tsx
-<SectionNav items={[
-  { id: 'brand', label: 'Brand' },
-  { id: 'hero', label: 'Hero' },
-  { id: 'seo', label: 'SEO' },
-]} />
+<SectionNav
+  items={[
+    { id: "brand", label: "Brand" },
+    { id: "hero", label: "Hero" },
+    { id: "seo", label: "SEO" },
+  ]}
+/>
 ```
 
 ---
@@ -471,7 +510,7 @@ A sticky save bar pinned to the page bottom for long settings forms. Shows "Unsa
 
 ```tsx
 <form action={saveSettings}>
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
     <Card title="Brand">…</Card>
     <Card title="SEO">…</Card>
   </div>
@@ -490,11 +529,13 @@ Renders a Hugeicons stroke-rounded icon (strokeWidth 1.5, `aria-hidden`).
 Default size: `18`. Common sizes: `16` (button icons), `18` (nav, topbar), `20` (page icon, tile icon).
 
 **Usage:**
-```tsx
-import Folder01Icon from '@hugeicons/core-free-icons/Folder01Icon';
-import { Icon } from '../Icon';
 
-<Icon icon={Folder01Icon} size={18} />
+```tsx
+import Folder01Icon from "@hugeicons/core-free-icons/Folder01Icon";
+
+import { Icon } from "../Icon";
+
+<Icon icon={Folder01Icon} size={18} />;
 ```
 
 ---
@@ -502,6 +543,7 @@ import { Icon } from '../Icon';
 ## `AdminNav.tsx`
 
 Three sub-components used in the shell (not in pages):
+
 - **`AdminNav`** — the sidebar nav links (grouped, with active state).
 - **`Crumbs`** — breadcrumb in the topbar (`"Site / Projects"`).
 - **`MenuButton`** — hamburger button (mobile only).

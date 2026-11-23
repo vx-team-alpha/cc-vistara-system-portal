@@ -68,7 +68,7 @@ grant update (name, picture_url) on public.accounts to authenticated;
 grant all on public.accounts to service_role;
 ```
 
-SELECT is unrestricted across columns *because* `accounts_select` already limits
+SELECT is unrestricted across columns _because_ `accounts_select` already limits
 the caller to their own row — there is no other account's data to withhold. The
 UPDATE grant is where the real security work happens; see SKILL.md.
 
@@ -124,7 +124,7 @@ Definer here because the SELECT grant may be column-restricted in future, and
 column privileges apply to `where`-clause columns too. The body runs as the table
 owner, so it is exempt from both the column grant and RLS.
 
-Note there is **no `current_account_id()`** — the account id *is* `auth.uid()`,
+Note there is **no `current_account_id()`** — the account id _is_ `auth.uid()`,
 so code needing just the id should call that and skip the round trip.
 
 ## Trigger functions that cannot throw
@@ -211,7 +211,7 @@ create trigger on_auth_user_email_updated
 then skips the no-op writes GoTrue makes on every sign-in (`last_sign_in_at` and
 friends touch the row without changing the address).
 
-Only *triggers* belong in this file. Never add tables, columns, or constraints in
+Only _triggers_ belong in this file. Never add tables, columns, or constraints in
 the `auth` schema — that is GoTrue's, and a diff against a linked project would
 try to reconcile GoTrue's own migration state.
 

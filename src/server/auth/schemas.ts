@@ -55,10 +55,7 @@ export const UpdatePasswordSchema = z
 
 export const VerifyMfaSchema = z.object({
   factorId: z.string().min(1),
-  code: z
-    .string()
-    .length(6, "Enter the 6-digit code")
-    .regex(/^\d+$/, "The code is digits only"),
+  code: z.string().length(6, "Enter the 6-digit code").regex(/^\d+$/, "The code is digits only"),
 });
 
 /** Providers we actually have buttons for. Keeps an arbitrary string out of signInWithOAuth. */

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import type { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/cusotm/password-input";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { updatePasswordAction } from "@/server/auth";
 import { MIN_PASSWORD_LENGTH, UpdatePasswordSchema } from "@/server/auth/schemas";
 

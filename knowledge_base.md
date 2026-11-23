@@ -27,10 +27,10 @@
 
 ### Core Users (today)
 
-| User | Goal |
-|---|---|
-| Homeowner | Choose a door/window layout, configure design, colour, glass, and hardware, then get a spec to take to a dealer. |
-| Dealer (future admin) | Publish their own catalogue, embed the configurator on their site, receive leads. |
+| User                  | Goal                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Homeowner             | Choose a door/window layout, configure design, colour, glass, and hardware, then get a spec to take to a dealer. |
+| Dealer (future admin) | Publish their own catalogue, embed the configurator on their site, receive leads.                                |
 
 ### Product Principles
 
@@ -95,14 +95,14 @@ cc-/
 
 ### Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend framework | Vite + React 19 |
-| Rendering | SVG DOM mutation (no canvas for windows; canvas colour stain for doors) |
-| PDF output | `pdf-lib` |
-| Fonts | `@fontsource/inter` |
-| Scraping | Python 3 (`requests`, `playwright`) + Node.js (Playwright) |
-| Deployment | Vercel (`web/vercel.json`) |
+| Layer              | Technology                                                              |
+| ------------------ | ----------------------------------------------------------------------- |
+| Frontend framework | Vite + React 19                                                         |
+| Rendering          | SVG DOM mutation (no canvas for windows; canvas colour stain for doors) |
+| PDF output         | `pdf-lib`                                                               |
+| Fonts              | `@fontsource/inter`                                                     |
+| Scraping           | Python 3 (`requests`, `playwright`) + Node.js (Playwright)              |
+| Deployment         | Vercel (`web/vercel.json`)                                              |
 
 ---
 
@@ -140,15 +140,15 @@ Selecta portal (selecta.portal.quotila.com)
 
 ### Key Data Files
 
-| File | Contents |
-|---|---|
-| `web/public/catalogue/manifest.json` | Full door manifest: layouts, questions, option sets, designs, side designs, hardware, variants |
-| `web/src/catalog.json` | Slim layout list (84 entries) used for the layout picker |
-| `web/src/designer.json` | 14 questions, 709 options for the ORiGINAL designer |
-| `web/dist/window-data/index.json` | 2 window products (Chamfered + Sculptured Casement), 91 styles each |
-| `web/dist/window-data/*/styles.json` | Style SVG paths, thumbnails, metadata |
-| `web/dist/window-data/*/questions.json` | Shared questions across styles |
-| `web/dist/window-data/*/questions-by-style.json` | Per-style question overrides |
+| File                                             | Contents                                                                                       |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `web/public/catalogue/manifest.json`             | Full door manifest: layouts, questions, option sets, designs, side designs, hardware, variants |
+| `web/src/catalog.json`                           | Slim layout list (84 entries) used for the layout picker                                       |
+| `web/src/designer.json`                          | 14 questions, 709 options for the ORiGINAL designer                                            |
+| `web/dist/window-data/index.json`                | 2 window products (Chamfered + Sculptured Casement), 91 styles each                            |
+| `web/dist/window-data/*/styles.json`             | Style SVG paths, thumbnails, metadata                                                          |
+| `web/dist/window-data/*/questions.json`          | Shared questions across styles                                                                 |
+| `web/dist/window-data/*/questions-by-style.json` | Per-style question overrides                                                                   |
 
 ---
 
@@ -162,16 +162,16 @@ Range → Layout → Specify (up to ~19 questions) → Review → PDF
 
 ### State (App.jsx)
 
-| State variable | Purpose |
-|---|---|
-| `rangeId` | Active product range (ORiGINAL / GRiPCORE / Stable) |
-| `layoutSlug` | Chosen door layout (e.g. "left-hand-door-right-hand-sideslab") |
-| `designId` | Currently selected door design (e.g. Belfry 3 Farmhouse) |
-| `sideDesigns` | Per-section side design overrides (keyed by section ID) |
-| `picked` | Map of `question.key → optionId` for all user choices |
-| `texts` | Free-text inputs (numerals) |
-| `internal` | Whether the elevation is showing the internal face |
-| `style` | Door range style (Traditional / Contemporary / Designer / Stable) |
+| State variable | Purpose                                                           |
+| -------------- | ----------------------------------------------------------------- |
+| `rangeId`      | Active product range (ORiGINAL / GRiPCORE / Stable)               |
+| `layoutSlug`   | Chosen door layout (e.g. "left-hand-door-right-hand-sideslab")    |
+| `designId`     | Currently selected door design (e.g. Belfry 3 Farmhouse)          |
+| `sideDesigns`  | Per-section side design overrides (keyed by section ID)           |
+| `picked`       | Map of `question.key → optionId` for all user choices             |
+| `texts`        | Free-text inputs (numerals)                                       |
+| `internal`     | Whether the elevation is showing the internal face                |
+| `style`        | Door range style (Traditional / Contemporary / Designer / Stable) |
 
 ### Question List Builder (`configuration.js → questionList`)
 
@@ -206,16 +206,16 @@ Product → Style → Specify → Review → PDF
 
 ### State (Windows.jsx)
 
-| State variable | Purpose |
-|---|---|
-| `folder` | Active product folder (`sculptured-casement` / `chamfered-casement`) |
-| `slug` | Chosen style slug (e.g. "case-32") |
-| `item` | Full item JSON from `window-data/{folder}/items/{slug}.json` |
-| `catalogues` | Merged question catalogues (product-level + style-level) |
-| `picks` | Map of `question.key → optionId` |
-| `internal` | Whether to show internal profile colour |
-| `materials` | Loaded from `render-materials.json` (colour textures, handle images, glass patterns) |
-| `drawing` | Raw SVG markup of the current window elevation |
+| State variable | Purpose                                                                              |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `folder`       | Active product folder (`sculptured-casement` / `chamfered-casement`)                 |
+| `slug`         | Chosen style slug (e.g. "case-32")                                                   |
+| `item`         | Full item JSON from `window-data/{folder}/items/{slug}.json`                         |
+| `catalogues`   | Merged question catalogues (product-level + style-level)                             |
+| `picks`        | Map of `question.key → optionId`                                                     |
+| `internal`     | Whether to show internal profile colour                                              |
+| `materials`    | Loaded from `render-materials.json` (colour textures, handle images, glass patterns) |
+| `drawing`      | Raw SVG markup of the current window elevation                                       |
 
 ### Data Loading Sequence
 
@@ -251,13 +251,13 @@ Both configurators share the same philosophy:
 
 > **Portal captures are the ground truth. The renderer replaces materials inside the captured geometry — it does not redraw geometry.**
 
-| Concern | Doors | Windows |
-|---|---|---|
-| Geometry source | Scraped SVG from Quotila Job API | Scraped SVG from Selecta portal |
-| Colour application | `feColorMatrix` + `feBlend multiply` on slab/cassette layers | Swap `foil`/`sharedprofile` image hrefs to texture bitmaps |
-| Glass | Swap `xlink:href` per pane to glass-unit bitmap | Insert `<image>` over `gradient-glass` rects |
-| Hardware | Swap handle/letterplate image hrefs; apply tone filter | Swap `casement_handles` href; apply size/offset correction |
-| Namespace collision | `namespace()` prefixes all SVG IDs when multiple SVGs coexist | Single SVG, no collision issue |
+| Concern             | Doors                                                         | Windows                                                    |
+| ------------------- | ------------------------------------------------------------- | ---------------------------------------------------------- |
+| Geometry source     | Scraped SVG from Quotila Job API                              | Scraped SVG from Selecta portal                            |
+| Colour application  | `feColorMatrix` + `feBlend multiply` on slab/cassette layers  | Swap `foil`/`sharedprofile` image hrefs to texture bitmaps |
+| Glass               | Swap `xlink:href` per pane to glass-unit bitmap               | Insert `<image>` over `gradient-glass` rects               |
+| Hardware            | Swap handle/letterplate image hrefs; apply tone filter        | Swap `casement_handles` href; apply size/offset correction |
+| Namespace collision | `namespace()` prefixes all SVG IDs when multiple SVGs coexist | Single SVG, no collision issue                             |
 
 ---
 
@@ -275,15 +275,16 @@ A **white-label SaaS** where any door or window dealer/retailer can:
 
 ### Embed Modes
 
-| Mode | How it works | Best for |
-|---|---|---|
-| **Script embed** | `<script src="https://cdn.frontage.io/embed.js" data-key="pub_xxx"></script>` injects a React island | Sites with any CMS (WordPress, Squarespace, Wix) |
-| **iFrame embed** | `<iframe src="https://app.frontage.io/embed/pub_xxx" ...>` | Maximum isolation, simplest integration |
-| **Next.js Component** | npm package `@frontage/react` → `<FrontageConfigurator publishableKey="..." />` | Dealer sites built on Next.js / React |
+| Mode                  | How it works                                                                                         | Best for                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Script embed**      | `<script src="https://cdn.frontage.io/embed.js" data-key="pub_xxx"></script>` injects a React island | Sites with any CMS (WordPress, Squarespace, Wix) |
+| **iFrame embed**      | `<iframe src="https://app.frontage.io/embed/pub_xxx" ...>`                                           | Maximum isolation, simplest integration          |
+| **Next.js Component** | npm package `@frontage/react` → `<FrontageConfigurator publishableKey="..." />`                      | Dealer sites built on Next.js / React            |
 
 ### Tenant Isolation
 
 Each tenant's embed:
+
 - Loads only their product catalogue (filtered by `tenantId`).
 - Submits leads to their own CRM webhook or email.
 - Can apply their own brand colours via CSS custom properties or embed config.
@@ -462,13 +463,13 @@ CREATE INDEX idx_layouts_range       ON layouts(range_id);
 
 ### Key Design Decisions
 
-| Decision | Rationale |
-|---|---|
-| `assets` table with content hash | Deduplicates scraped images; same bitmap shared across tenants |
-| `config JSONB` on `embed_widgets` | Flexible branding/feature flags without schema migrations |
-| `spec JSONB` on `leads` | Snapshot of exact picks at enquiry time; layout/option IDs may change later |
-| `condition JSONB` on `questions` | Mirrors the portal's `when` visibility rules; avoids a separate conditions table |
-| `publishable_key` / `secret_key` | Public key is safe in embed HTML; secret key for server-side webhook auth |
+| Decision                          | Rationale                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| `assets` table with content hash  | Deduplicates scraped images; same bitmap shared across tenants                   |
+| `config JSONB` on `embed_widgets` | Flexible branding/feature flags without schema migrations                        |
+| `spec JSONB` on `leads`           | Snapshot of exact picks at enquiry time; layout/option IDs may change later      |
+| `condition JSONB` on `questions`  | Mirrors the portal's `when` visibility rules; avoids a separate conditions table |
+| `publishable_key` / `secret_key`  | Public key is safe in embed HTML; secret key for server-side webhook auth        |
 
 ---
 
@@ -480,10 +481,10 @@ All SVGs, PNGs, and bitmaps (door/window elevations, option tiles, glass units, 
 
 **Recommended stack:**
 
-| Service | Purpose |
-|---|---|
-| **Cloudflare R2** | Primary object storage (no egress fees). Bucket: `frontage-assets`. |
-| **Cloudflare CDN / Cache Rules** | Serve `cdn.frontage.io/assets/*` with 1-year TTL, immutable headers. |
+| Service                          | Purpose                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| **Cloudflare R2**                | Primary object storage (no egress fees). Bucket: `frontage-assets`.       |
+| **Cloudflare CDN / Cache Rules** | Serve `cdn.frontage.io/assets/*` with 1-year TTL, immutable headers.      |
 | **Cloudflare Images** (optional) | On-the-fly resizing for option thumbnails (avoid storing multiple sizes). |
 
 ### Folder Structure in R2
@@ -558,13 +559,13 @@ The embed script (`embed.js`) is a small React island that:
 
 ### Scaling Considerations
 
-| Concern | Solution |
-|---|---|
-| SVG rendering is client-side | No server rendering cost per configuration. |
-| Catalogue JSON can be large (~4 MB) | Split manifest by range; lazy-load only the selected range. |
-| CDN cache for assets | 1-year immutable headers on content-hashed filenames. |
-| Multi-tenant API rate limiting | Cloudflare rate limit rules per `publishable_key` header. |
-| Lead webhooks | Background queue (e.g. Cloudflare Queue or Trigger.dev) to avoid blocking the UI. |
+| Concern                             | Solution                                                                          |
+| ----------------------------------- | --------------------------------------------------------------------------------- |
+| SVG rendering is client-side        | No server rendering cost per configuration.                                       |
+| Catalogue JSON can be large (~4 MB) | Split manifest by range; lazy-load only the selected range.                       |
+| CDN cache for assets                | 1-year immutable headers on content-hashed filenames.                             |
+| Multi-tenant API rate limiting      | Cloudflare rate limit rules per `publishable_key` header.                         |
+| Lead webhooks                       | Background queue (e.g. Cloudflare Queue or Trigger.dev) to avoid blocking the UI. |
 
 ---
 
@@ -642,35 +643,35 @@ GET    /api/admin/assets/upload-url      — presigned R2 upload URL (future cus
 
 ### Rendering
 
-| Item | Status |
-|---|---|
+| Item                                                 | Status                                              |
+| ---------------------------------------------------- | --------------------------------------------------- |
 | Per-design HQ glass/aperture layers (Belfry 3, etc.) | ❌ Not scraped — only 90×200 option tiles available |
-| GRiPCORE / Stable separate designer option sets | ❌ Still using ORiGINAL designer.json |
-| Two threshold options missing images | ❌ Hidden but not removed |
-| Letterplate Position 49 / bottom rail height | ⚠️ Estimated from two captured positions |
-| Azure-only colour-burn filter accuracy | ⚠️ Generic matrix for all other colours |
-| Window handle capture (external view) | ❌ Capture data only exists for internal view |
+| GRiPCORE / Stable separate designer option sets      | ❌ Still using ORiGINAL designer.json               |
+| Two threshold options missing images                 | ❌ Hidden but not removed                           |
+| Letterplate Position 49 / bottom rail height         | ⚠️ Estimated from two captured positions            |
+| Azure-only colour-burn filter accuracy               | ⚠️ Generic matrix for all other colours             |
+| Window handle capture (external view)                | ❌ Capture data only exists for internal view       |
 
 ### Data
 
-| Item | Status |
-|---|---|
-| `finishes`, `hardware`, `variants`, `sideDesigns` in manifest | ⚠️ Partially populated |
-| Merion Farmhouse stable thumbnail | ❌ Missing |
-| Muirfield / Troon / Medinah / Penina side shapes | ⚠️ Cassette-file matches, not captured portal states |
-| Window glass unit bitmaps (toplights) | ⚠️ Cropped approximation; portal has no toplight-specific question |
+| Item                                                          | Status                                                             |
+| ------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `finishes`, `hardware`, `variants`, `sideDesigns` in manifest | ⚠️ Partially populated                                             |
+| Merion Farmhouse stable thumbnail                             | ❌ Missing                                                         |
+| Muirfield / Troon / Medinah / Penina side shapes              | ⚠️ Cassette-file matches, not captured portal states               |
+| Window glass unit bitmaps (toplights)                         | ⚠️ Cropped approximation; portal has no toplight-specific question |
 
 ### SaaS / Admin
 
-| Item | Status |
-|---|---|
-| Next.js project setup | ✅ Exists (reference in user query) |
-| Database schema implemented | ❌ Planned in this doc |
-| R2 bucket created and assets migrated | ❌ Not started |
-| Embed bundle built | ❌ Not started |
-| Admin portal routes | ❌ Not started |
-| Auth (Supabase / Clerk) | ❌ Not started |
-| Lead webhook system | ❌ Not started |
+| Item                                  | Status                              |
+| ------------------------------------- | ----------------------------------- |
+| Next.js project setup                 | ✅ Exists (reference in user query) |
+| Database schema implemented           | ❌ Planned in this doc              |
+| R2 bucket created and assets migrated | ❌ Not started                      |
+| Embed bundle built                    | ❌ Not started                      |
+| Admin portal routes                   | ❌ Not started                      |
+| Auth (Supabase / Clerk)               | ❌ Not started                      |
+| Lead webhook system                   | ❌ Not started                      |
 
 ---
 
@@ -687,4 +688,4 @@ GET    /api/admin/assets/upload-url      — presigned R2 upload URL (future cus
 
 ---
 
-*Last updated: 9 November 2026*
+_Last updated: 9 November 2026_
