@@ -22,9 +22,9 @@ export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[
 
 export function canTransitionOrder(current: string, next: string) {
   return (
-    (ORDER_STATUS_TRANSITIONS[current as OrderStatus] as readonly string[] | undefined)?.includes(
-      next,
-    ) ?? false
+    ALL_ORDER_STATUSES.includes(next as OrderStatus) &&
+    ALL_ORDER_STATUSES.includes(current as OrderStatus) &&
+    current !== next
   );
 }
 

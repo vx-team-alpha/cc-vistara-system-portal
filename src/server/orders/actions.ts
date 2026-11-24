@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { canTransitionOrder, incompleteDoorLines } from "@/lib/orders/lifecycle";
+import { canTransitionOrder } from "@/lib/orders/lifecycle";
 import { authAction, type TypedSupabaseClient } from "@/server/auth-wrapper";
 import { ConfigurationSchema } from "@/server/portal/schemas";
 
@@ -608,7 +608,7 @@ export const updateOrderStatusAction = authAction(
   async ({ supabase, account }, input) => {
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("id,status,revision,order_items(id,line_number,configuration)")
+      .select("id,status,revision")
       .eq("id", input.order_id)
       .eq("account_id", account.id)
       .maybeSingle();
@@ -625,19 +625,6 @@ export const updateOrderStatusAction = authAction(
         ok: false as const,
         error: `This order cannot move from ${order.status.replace("_", " ")} to ${input.status.replace("_", " ")}.`,
       };
-    }
-
-    if (order.status === "draft" && input.status === "issued") {
-      if (!order.order_items.length) {
-        return { ok: false as const, error: "Add and configure at least one door before issuing." };
-      }
-      const incomplete = incompleteDoorLines(order.order_items).map((line) => `Door ${line}`);
-      if (incomplete.length) {
-        return {
-          ok: false as const,
-          error: `${incomplete.join(", ")} must be fully configured before issuing.`,
-        };
-      }
     }
 
     const now = new Date().toISOString();
