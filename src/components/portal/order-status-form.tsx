@@ -22,15 +22,6 @@ const statuses = [
   ["cancelled", "Cancelled"],
 ] as const;
 
-const nextStatuses: Record<string, readonly string[]> = {
-  draft: ["issued", "cancelled"],
-  issued: ["confirmed", "cancelled"],
-  confirmed: ["in_production", "cancelled"],
-  in_production: ["completed", "cancelled"],
-  completed: [],
-  cancelled: [],
-};
-
 export function OrderStatusForm({
   orderId,
   currentStatus,
@@ -43,9 +34,6 @@ export function OrderStatusForm({
   const [status, setStatus] = useState(currentStatus);
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
-  const available = statuses.filter(
-    ([value]) => value === currentStatus || nextStatuses[currentStatus]?.includes(value),
-  );
 
   return (
     <form
@@ -68,11 +56,7 @@ export function OrderStatusForm({
         Order status
       </Label>
       <div className="flex flex-wrap items-center gap-2">
-        <Select
-          value={status}
-          onValueChange={setStatus}
-          disabled={pending || available.length <= 1}
-        >
+        <Select value={status} onValueChange={setStatus} disabled={pending}>
           <SelectTrigger
             id="order-status"
             className="h-9 min-w-[180px] bg-background"
@@ -81,7 +65,7 @@ export function OrderStatusForm({
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent position="popper">
-            {available.map(([value, label]) => (
+            {statuses.map(([value, label]) => (
               <SelectItem key={value} value={value}>
                 {label}
               </SelectItem>
@@ -92,7 +76,7 @@ export function OrderStatusForm({
           type="submit"
           variant="primary"
           size="sm"
-          disabled={pending || status === currentStatus || available.length === 1}
+          disabled={pending || status === currentStatus}
           data-test="update-order-status"
         >
           {pending ? "Updating…" : "Update status"}

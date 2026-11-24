@@ -26,15 +26,16 @@ const completeConfiguration = {
   ],
 };
 
-test("allows only the agreed forward order transitions", () => {
+test("allows valid order status transitions between distinct statuses", () => {
   assert.equal(canTransitionOrder("draft", "issued"), true);
   assert.equal(canTransitionOrder("draft", "cancelled"), true);
   assert.equal(canTransitionOrder("issued", "confirmed"), true);
   assert.equal(canTransitionOrder("confirmed", "in_production"), true);
   assert.equal(canTransitionOrder("in_production", "completed"), true);
-  assert.equal(canTransitionOrder("completed", "draft"), false);
-  assert.equal(canTransitionOrder("cancelled", "draft"), false);
-  assert.equal(canTransitionOrder("issued", "draft"), false);
+  assert.equal(canTransitionOrder("completed", "draft"), true);
+  assert.equal(canTransitionOrder("cancelled", "draft"), true);
+  assert.equal(canTransitionOrder("draft", "draft"), false);
+  assert.equal(canTransitionOrder("completed", "unknown_status"), false);
 });
 
 test("requires a design, picks, and particulars before issue", () => {
