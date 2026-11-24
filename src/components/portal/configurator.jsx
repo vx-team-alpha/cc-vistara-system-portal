@@ -3,6 +3,15 @@ import DOMPurify from "dompurify";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   hydrate,
   installAssets,
@@ -223,9 +232,9 @@ export function Configurator({
     return (
       <div className={s.notice} data-error role="alert">
         {error}
-        <button className={s.btn} type="button" onClick={() => setRetry((v) => v + 1)}>
+        <Button variant="outline" size="sm" type="button" onClick={() => setRetry((v) => v + 1)}>
           Try again
-        </button>
+        </Button>
       </div>
     );
   if (!runtime || !state) return <ConfiguratorSkeleton />;
@@ -263,9 +272,9 @@ export function Configurator({
       <div className={s.elevationPanel}>
         <div className={s.toolbar}>
           <strong>{internal ? "Inside view" : "Outside view"}</strong>
-          <button type="button" className={s.btn} onClick={() => setInternal(!internal)}>
+          <Button variant="outline" size="sm" type="button" onClick={() => setInternal(!internal)}>
             View {internal ? "outside" : "inside"}
-          </button>
+          </Button>
         </div>
         <div className={s.elevation} aria-busy={drawing.request !== request}>
           {drawing.request !== request ? (
@@ -273,9 +282,14 @@ export function Configurator({
           ) : drawing.error ? (
             <p role="alert">
               {drawing.error}
-              <button className={s.btn} type="button" onClick={() => setRetry((v) => v + 1)}>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => setRetry((v) => v + 1)}
+              >
                 Retry drawing
-              </button>
+              </Button>
             </p>
           ) : (
             <div dangerouslySetInnerHTML={{ __html: drawing.markup }} />
@@ -296,21 +310,27 @@ export function Configurator({
                 </span>
                 {headerAction}
               </div>
-              <select
-                className={s.select}
-                aria-label="Jump to configuration option"
-                value={active}
-                onChange={(e) => {
-                  setIndex(Number(e.target.value));
+              <Select
+                value={String(active)}
+                onValueChange={(val) => {
+                  setIndex(Number(val));
                   setQuery("");
                 }}
               >
-                {state.questions.map((q, i) => (
-                  <option key={q.key} value={i}>
-                    {q.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger
+                  className="h-9 min-w-[200px] bg-background"
+                  aria-label="Jump to configuration option"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {state.questions.map((q, i) => (
+                    <SelectItem key={q.key} value={String(i)}>
+                      {q.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <h2 className={s.cardTitle}>{question.name.replace(" (Door)", "")}</h2>
             <div className={s.optionScrollFrame}>
@@ -327,9 +347,8 @@ export function Configurator({
                       <label className={s.label} htmlFor="option-search">
                         Find an option
                       </label>
-                      <input
+                      <Input
                         id="option-search"
-                        className={s.input}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Search options"
@@ -367,10 +386,9 @@ export function Configurator({
                       <label className={s.label} htmlFor="option-text">
                         {textQuestion.name}
                       </label>
-                      <input
+                      <Input
                         data-test="house-number-input"
                         id="option-text"
-                        className={s.input}
                         value={configuration.texts[textQuestion.key] || ""}
                         maxLength={
                           textQuestion.validation?.maxLength > 0
@@ -390,9 +408,10 @@ export function Configurator({
               </div>
             </div>
             <div className={s.actions}>
-              <button
+              <Button
                 type="button"
-                className={s.btn}
+                variant="outline"
+                size="sm"
                 disabled={active === 0}
                 onClick={() => {
                   setIndex(Math.max(0, active - 1));
@@ -400,20 +419,21 @@ export function Configurator({
                 }}
               >
                 Previous
-              </button>
+              </Button>
               {active === state.questions.length - 1 ? (
                 completionAction
               ) : (
-                <button
+                <Button
                   type="button"
-                  className={`${s.btn} ${s.btnPrimary}`}
+                  variant="primary"
+                  size="sm"
                   onClick={() => {
                     setIndex(active + 1);
                     setQuery("");
                   }}
                 >
                   Next option
-                </button>
+                </Button>
               )}
             </div>
           </>

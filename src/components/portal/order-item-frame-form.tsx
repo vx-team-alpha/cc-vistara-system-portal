@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { createOrderItemAction, updateOrderItemAction } from "@/server/orders/actions";
 import { CreateOrderItemSchema, UpdateOrderItemSchema } from "@/server/orders/schemas";
 
@@ -103,8 +104,7 @@ export function OrderItemFrameForm({
       <div className={s.formGrid}>
         <label className={s.field}>
           <span className={s.label}>Width (mm)</span>
-          <input
-            className={s.input}
+          <Input
             type="number"
             inputMode="numeric"
             min={300}
@@ -119,8 +119,7 @@ export function OrderItemFrameForm({
         </label>
         <label className={s.field}>
           <span className={s.label}>Height (mm)</span>
-          <input
-            className={s.input}
+          <Input
             type="number"
             inputMode="numeric"
             min={1750}
@@ -135,8 +134,7 @@ export function OrderItemFrameForm({
         </label>
         <label className={s.field}>
           <span className={s.label}>Quantity</span>
-          <input
-            className={s.input}
+          <Input
             type="number"
             inputMode="numeric"
             min={1}
@@ -151,8 +149,7 @@ export function OrderItemFrameForm({
         </label>
         <label className={s.field}>
           <span className={s.label}>Location</span>
-          <input
-            className={s.input}
+          <Input
             placeholder="For example: Front entrance"
             aria-invalid={Boolean(form.formState.errors.location)}
             {...form.register("location")}

@@ -1,25 +1,28 @@
 "use client";
-import { useTransition, useState, useRef } from "react";
 
+import { Plus } from "lucide-react";
+import { useState, useTransition } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createUserAction } from "@/server/admin/actions";
 
-import s from "@/components/portal/portal.module.css";
-
 export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
+  const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  function openDialog() {
-    setMessage("");
-    setIsError(false);
-    requestAnimationFrame(() => dialogRef.current?.showModal());
-  }
-
-  function closeDialog() {
-    dialogRef.current?.close();
-  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,97 +60,92 @@ export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
   }
 
   return (
-    <>
-      <button type="button" className={`${s.btn} ${s.btnPrimary}`} onClick={openDialog}>
-        Create user
-      </button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="primary" size="sm" className="gap-1.5">
+          <Plus className="size-4" />
+          <span>Create user</span>
+        </Button>
+      </DialogTrigger>
 
-      <dialog
-        ref={dialogRef}
-        className={s.adminDialog}
-        onClick={(e) => {
-          if (e.target === dialogRef.current) closeDialog();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") closeDialog();
-        }}
-      >
-        <div className={s.adminDialogInner}>
-          <header className={s.adminDialogHead}>
-            <h2 className={s.cardTitle}>Create new user</h2>
-            <button
-              type="button"
-              className={s.iconBtn}
-              aria-label="Close dialog"
-              onClick={closeDialog}
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-h3 font-bold text-brand-txt-primary">
+            Create new user
+          </DialogTitle>
+          <DialogDescription className="text-subtitle text-brand-txt-secondary">
+            Create a new portal user with email and password credentials.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} noValidate className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="cu-name" className="text-subtitle font-medium text-brand-txt-primary">
+              Full name
+            </Label>
+            <Input
+              id="cu-name"
+              name="name"
+              required
+              maxLength={80}
+              placeholder="e.g. Acme Windows Ltd"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="cu-email" className="text-subtitle font-medium text-brand-txt-primary">
+              Email address
+            </Label>
+            <Input
+              id="cu-email"
+              name="email"
+              type="email"
+              required
+              placeholder="user@example.com"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="cu-password"
+              className="text-subtitle font-medium text-brand-txt-primary"
             >
-              ✕
-            </button>
-          </header>
+              Temporary password <span className="text-muted-foreground">(min. 8 characters)</span>
+            </Label>
+            <Input
+              id="cu-password"
+              name="password"
+              type="password"
+              required
+              minLength={8}
+              placeholder="••••••••"
+            />
+            <p className="text-xs text-muted-foreground">
+              The user can change this after signing in.
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} noValidate>
-            <div className={s.field}>
-              <label className={s.label} htmlFor="cu-name">
-                Full name
-              </label>
-              <input
-                className={s.input}
-                id="cu-name"
-                name="name"
-                required
-                maxLength={80}
-                placeholder="e.g. Acme Windows Ltd"
-              />
-            </div>
+          {message && (
+            <p
+              className={`text-subtitle ${isError ? "text-destructive" : "text-[#0d7555]"}`}
+              role="status"
+            >
+              {message}
+            </p>
+          )}
 
-            <div className={s.field}>
-              <label className={s.label} htmlFor="cu-email">
-                Email address
-              </label>
-              <input
-                className={s.input}
-                id="cu-email"
-                name="email"
-                type="email"
-                required
-                placeholder="user@example.com"
-              />
-            </div>
-
-            <div className={s.field}>
-              <label className={s.label} htmlFor="cu-password">
-                Temporary password
-                <span className={s.hint}> (min. 8 characters)</span>
-              </label>
-              <input
-                className={s.input}
-                id="cu-password"
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                placeholder="••••••••"
-              />
-              <span className={s.hint}>The user can change this after signing in.</span>
-            </div>
-
-            {message && (
-              <p className={s.notice} data-error={isError || undefined} role="status">
-                {message}
-              </p>
-            )}
-
-            <div className={s.actions}>
-              <button type="submit" className={`${s.btn} ${s.btnPrimary}`} disabled={pending}>
-                {pending ? "Creating…" : "Create user"}
-              </button>
-              <button type="button" className={s.btn} onClick={closeDialog}>
+          <DialogFooter className="gap-2 pt-2 sm:gap-0">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" size="sm">
                 Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      </dialog>
-    </>
+              </Button>
+            </DialogClose>
+            <Button type="submit" variant="primary" size="sm" disabled={pending}>
+              {pending ? "Creating…" : "Create user"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

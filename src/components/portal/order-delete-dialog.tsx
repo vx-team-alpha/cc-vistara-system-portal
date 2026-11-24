@@ -1,10 +1,23 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { deleteOrderAction } from "@/server/orders/actions";
-
-import s from "./portal.module.css";
 
 export function OrderDeleteDialog({
   orderId,
@@ -13,7 +26,7 @@ export function OrderDeleteDialog({
   orderId: string;
   orderNumber: string;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState("");
@@ -40,82 +53,90 @@ export function OrderDeleteDialog({
   }
 
   return (
-    <>
-      <button
-        type="button"
-        className={`${s.btn} ${s.btnDanger}`}
-        onClick={() => dialog.current?.showModal()}
-        data-test="delete-order"
-      >
-        Delete order
-      </button>
-      <dialog
-        ref={dialog}
-        className={s.adminDialog}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") dialog.current?.close();
-        }}
-        onClick={(event) => {
-          if (event.target === dialog.current) dialog.current?.close();
-        }}
-      >
-        <div className={s.confirmDialog}>
-          <header className={s.adminDialogHead}>
-            <div>
-              <h2 className={s.cardTitle}>Permanently delete {orderNumber}?</h2>
-              <p className={s.hint}>Doors, documents, and activity history cannot be recovered.</p>
-            </div>
-            <button
-              type="button"
-              className={s.iconBtn}
-              aria-label="Close delete confirmation"
-              onClick={() => dialog.current?.close()}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          data-test="delete-order"
+        >
+          <Trash2 className="size-3.5" />
+          <span>Delete order</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-h3 font-bold text-destructive">
+            Permanently delete {orderNumber}?
+          </DialogTitle>
+          <DialogDescription className="text-subtitle text-brand-txt-secondary">
+            Doors, documents, and activity history cannot be recovered.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="delete-confirmation"
+              className="text-subtitle font-medium text-brand-txt-primary"
             >
-              ×
-            </button>
-          </header>
-          <div className={s.confirmDialogBody}>
-            <label className={s.field}>
-              <span className={s.label}>Type {orderNumber} to confirm</span>
-              <input
-                className={s.input}
-                value={confirmation}
-                onChange={(event) => setConfirmation(event.target.value)}
-                autoComplete="off"
-              />
-            </label>
-            <label className={s.field}>
-              <span className={s.label}>Deletion reason</span>
-              <textarea
-                className={s.textarea}
-                value={reason}
-                maxLength={500}
-                onChange={(event) => setReason(event.target.value)}
-                placeholder="Why is this order being removed?"
-              />
-            </label>
-            {message && (
-              <p className={s.notice} data-error role="alert">
-                {message}
-              </p>
-            )}
-            <div className={s.actions}>
-              <button
-                type="button"
-                className={`${s.btn} ${s.btnDangerSolid}`}
-                disabled={!ready || pending}
-                onClick={submit}
-                data-test="confirm-delete-order"
-              >
-                {pending ? "Deleting permanently…" : "Delete permanently"}
-              </button>
-              <button type="button" className={s.btn} onClick={() => dialog.current?.close()}>
-                Cancel
-              </button>
-            </div>
+              Type <strong className="font-bold text-foreground">{orderNumber}</strong> to confirm
+            </Label>
+            <Input
+              id="delete-confirmation"
+              value={confirmation}
+              onChange={(event) => setConfirmation(event.target.value)}
+              autoComplete="off"
+              placeholder={orderNumber}
+              className="font-mono text-sm"
+            />
           </div>
+
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="delete-reason"
+              className="text-subtitle font-medium text-brand-txt-primary"
+            >
+              Deletion reason (at least 5 characters)
+            </Label>
+            <Textarea
+              id="delete-reason"
+              value={reason}
+              maxLength={500}
+              onChange={(event) => setReason(event.target.value)}
+              placeholder="Why is this order being removed?"
+              className="resize-none text-sm"
+              rows={3}
+            />
+          </div>
+
+          {message && (
+            <p className="text-subtitle text-destructive" role="alert">
+              {message}
+            </p>
+          )}
         </div>
-      </dialog>
-    </>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <DialogClose asChild>
+            <Button type="button" variant="outline" size="sm">
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            disabled={!ready || pending}
+            onClick={submit}
+            data-test="confirm-delete-order"
+          >
+            {pending ? "Deleting permanently…" : "Delete permanently"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

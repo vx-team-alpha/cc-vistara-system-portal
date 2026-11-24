@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
 import { saveOrderItemConfigurationAction } from "@/server/orders/actions";
 import type { Configuration } from "@/server/portal/schemas";
 
@@ -73,15 +74,15 @@ export function OrderItemConfigurator({
   };
 
   const saveButton = (label: string) => (
-    <button
+    <Button
       type="button"
-      className={`${s.btn} ${s.btnPrimary}`}
+      variant="primary"
       disabled={pending || !configuration}
       onClick={save}
       data-test="save-door-configuration"
     >
       {pending ? "Saving…" : label}
-    </button>
+    </Button>
   );
 
   return (

@@ -4,7 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { createOrderAction } from "@/server/orders/actions";
 import { CreateOrderSchema, type CreateOrderInput } from "@/server/orders/schemas";
 
@@ -45,8 +48,7 @@ export function OrderIntakeForm() {
       <div className={s.formGrid}>
         <label className={s.field}>
           <span className={s.label}>Customer name</span>
-          <input
-            className={s.input}
+          <Input
             autoComplete="name"
             aria-invalid={Boolean(form.formState.errors.customer_name)}
             {...form.register("customer_name")}
@@ -57,8 +59,7 @@ export function OrderIntakeForm() {
         </label>
         <label className={s.field}>
           <span className={s.label}>Phone</span>
-          <input
-            className={s.input}
+          <Input
             type="tel"
             autoComplete="tel"
             aria-invalid={Boolean(form.formState.errors.phone)}
@@ -71,8 +72,7 @@ export function OrderIntakeForm() {
       </div>
       <label className={s.field}>
         <span className={s.label}>Address</span>
-        <input
-          className={s.input}
+        <Input
           autoComplete="street-address"
           aria-invalid={Boolean(form.formState.errors.address)}
           {...form.register("address")}
@@ -84,8 +84,7 @@ export function OrderIntakeForm() {
       <div className={s.formGrid3}>
         <label className={s.field}>
           <span className={s.label}>City</span>
-          <input
-            className={s.input}
+          <Input
             autoComplete="address-level2"
             aria-invalid={Boolean(form.formState.errors.city)}
             {...form.register("city")}
@@ -96,8 +95,7 @@ export function OrderIntakeForm() {
         </label>
         <label className={s.field}>
           <span className={s.label}>State</span>
-          <input
-            className={s.input}
+          <Input
             autoComplete="address-level1"
             aria-invalid={Boolean(form.formState.errors.state)}
             {...form.register("state")}
@@ -108,8 +106,7 @@ export function OrderIntakeForm() {
         </label>
         <label className={s.field}>
           <span className={s.label}>ZIP code</span>
-          <input
-            className={s.input}
+          <Input
             autoComplete="postal-code"
             aria-invalid={Boolean(form.formState.errors.zip_code)}
             {...form.register("zip_code")}
@@ -142,7 +139,7 @@ export function OrderIntakeForm() {
       </div>
       <label className={s.field}>
         <span className={s.label}>Note</span>
-        <textarea className={s.textarea} {...form.register("note")} />
+        <Textarea {...form.register("note")} />
         {form.formState.errors.note && (
           <span className={s.fieldError}>{form.formState.errors.note.message}</span>
         )}
@@ -153,14 +150,9 @@ export function OrderIntakeForm() {
         </p>
       )}
       <div className={s.actions}>
-        <button
-          type="submit"
-          className={`${s.btn} ${s.btnPrimary}`}
-          disabled={pending}
-          data-test="create-order"
-        >
+        <Button type="submit" variant="primary" disabled={pending} data-test="create-order">
           {pending ? "Creating order…" : "Continue to door selection"}
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -14,6 +14,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore, useRef, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import { Icon } from "./icon";
 
 import s from "./portal.module.css";
@@ -143,41 +146,51 @@ export function PortalShell({
             <small>{email}</small>
           </div>
           <form action={signOut}>
-            <button className={s.iconBtn} aria-label="Sign out" data-test="portal-sign-out">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              aria-label="Sign out"
+              data-test="portal-sign-out"
+            >
               <Icon icon={Logout01Icon} />
-            </button>
+            </Button>
           </form>
         </div>
       </aside>
       <div className={s.work}>
         <header className={s.topbar}>
           <div className={s.topActions}>
-            <button
+            <Button
               ref={menuButton}
               type="button"
-              className={`${s.iconBtn} ${s.mobileMenu}`}
+              variant="ghost"
+              size="icon"
+              className={`${s.mobileMenu} size-8`}
               aria-label={open ? "Close menu" : "Open menu"}
               aria-controls="portal-navigation"
               aria-expanded={open}
               onClick={() => setOpen(!open)}
             >
               <Icon icon={open ? Cancel01Icon : Menu01Icon} />
-            </button>
+            </Button>
             <div className={s.breadcrumb}>
               Workspace <span aria-hidden="true">/</span>
               <strong>{breadcrumbLabel}</strong>
             </div>
           </div>
           <div className={s.topActions}>
-            <span className={s.badge}>Order workspace</span>
-            <button
+            <Badge variant="secondary">Order workspace</Badge>
+            <Button
               type="button"
-              className={s.iconBtn}
+              variant="ghost"
+              size="icon"
+              className="size-8"
               onClick={toggleTheme}
               aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
             >
               <Icon icon={theme === "light" ? Moon02Icon : Sun01Icon} />
-            </button>
+            </Button>
           </div>
         </header>
         <main id="main-content" className={s.main}>
