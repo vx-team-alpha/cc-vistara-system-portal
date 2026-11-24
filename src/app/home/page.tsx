@@ -1,5 +1,7 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
+import { PageHeader } from "@/components/page-header";
 import { OrderTable } from "@/components/portal/order-table";
 import { Button } from "@/components/ui/button";
 import { LiveIndicator } from "@/components/ui/live-indicator";
@@ -18,77 +20,24 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="mx-auto w-full space-y-12">
-      {/* Hero Welcome Banner in Ladder App Style */}
-      <div className="bg-gradient-green rounded-2xl border-none p-6 text-white shadow-xs sm:p-8">
-        <Typography className="text-h2 font-bold tracking-tight text-white">
-          Get ready for a new ordering experience!
-        </Typography>
+    <div className="mx-auto w-full space-y-8">
+      {/* Page Header */}
+      <PageHeader
+        title="Overview"
+        subtitle="Current quotes, confirmed work and upcoming deliveries."
+      >
+        <Button variant="secondery" size="sm" asChild>
+          <Link href="/home/quotes/new" className="flex items-center gap-2">
+            <Plus className="size-4" />
+            <span>New order</span>
+          </Link>
+        </Button>
+      </PageHeader>
 
-        <div className="mt-6">
-          {/* Step 1 */}
-          <div className="w-full p-4">
-            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center md:gap-10">
-              <div className="space-y-1.5">
-                <Typography className="text-lg-body font-medium text-white">
-                  1. Create your first quote or works order.
-                </Typography>
-                <Typography className="text-body text-white/75">
-                  Configure specifications, calculate instant customer pricing, and prepare quotes.
-                </Typography>
-                <p className="text-caption text-brand-accent2">Mark as done</p>
-              </div>
-              <Button variant="secondery" asChild className="w-full sm:w-auto">
-                <Link href="/home/quotes/new">New order</Link>
-              </Button>
-            </div>
-          </div>
-
-          <Separator className="bg-white/35" />
-
-          {/* Step 2 */}
-          <div className="w-full p-4">
-            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center md:gap-10">
-              <div className="space-y-1.5">
-                <Typography className="text-lg-body font-medium text-white">
-                  2. Configure bespoke window & door specifications.
-                </Typography>
-                <Typography className="text-body text-white/75">
-                  Select profile suites, glass, colors, and hardware to generate detailed
-                  manufacturing specs.
-                </Typography>
-                <p className="text-caption text-brand-accent2">Mark as done</p>
-              </div>
-              <Button variant="primary" asChild className="w-full text-white sm:w-auto">
-                <Link href="/home/quotes/new">Start specification</Link>
-              </Button>
-            </div>
-          </div>
-
-          <Separator className="bg-white/35" />
-
-          {/* Step 3 */}
-          <div className="w-full p-4">
-            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center md:gap-10">
-              <div className="space-y-1.5">
-                <Typography className="text-lg-body font-medium text-white">
-                  3. Track production and delivery schedules.
-                </Typography>
-                <Typography className="text-body text-white/75">
-                  Monitor confirmed works orders, batch allocations, and upcoming delivery dates.
-                </Typography>
-                <p className="text-caption text-brand-accent2">Mark as done</p>
-              </div>
-              <Button variant="primary" asChild className="w-full text-white sm:w-auto">
-                <Link href="/home/quotes">Browse orders</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Separator className="bg-brand-backgroundMain" />
 
       {/* Key Metrics Section */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Typography variant="h3" className="text-h3 font-bold text-brand-txt-primary">
           Key Metrics
         </Typography>
@@ -124,6 +73,8 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+
+      <Separator className="bg-brand-backgroundMain" />
 
       {/* Recent Orders Section */}
       <div className="space-y-6">
