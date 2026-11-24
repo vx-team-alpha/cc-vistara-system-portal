@@ -29,7 +29,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
       />
       <SidebarInset className="m-2 overflow-hidden rounded-2xl border border-[#DCDCDC] bg-background shadow-xs peer-data-[variant=inset]:max-h-[calc(100svh-theme(spacing.4))] md:m-3">
         <ScrollArea className="h-full">
-          <div className="relative mx-auto w-full max-w-[1440px] p-4 md:p-8 lg:p-10">
+          <div className="relative p-4 md:p-6">
             <SidebarTrigger className="absolute top-4 right-4 z-20 flex md:hidden" />
             {children}
           </div>

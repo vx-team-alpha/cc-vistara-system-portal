@@ -48,7 +48,7 @@ export default async function QuotesPage({
         title="Quotes & Orders"
         subtitle="Create, resume and track every customer specification and manufacturing order."
       >
-        <Button variant="primary" size="md" asChild>
+        <Button variant="secondery" size="sm" asChild>
           <Link href="/home/quotes/new" className="flex items-center gap-2">
             <PlusCircle className="size-4" />
             <span>New order</span>

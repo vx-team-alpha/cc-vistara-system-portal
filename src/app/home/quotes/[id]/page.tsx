@@ -193,7 +193,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             </CardDescription>
           </div>
           {order.status === "draft" && (
-            <Button variant="primary" size="sm" asChild>
+            <Button variant="secondery" size="sm" asChild>
               <Link
                 href={`/home/quotes/${order.id}/items/new`}
                 className="flex items-center gap-1.5"
@@ -250,7 +250,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 specification.
               </Typography>
               {order.status === "draft" && (
-                <Button variant="primary" size="sm" asChild>
+                <Button variant="secondery" size="sm" asChild>
                   <Link href={`/home/quotes/${order.id}/items/new`}>Choose Door Style</Link>
                 </Button>
               )}

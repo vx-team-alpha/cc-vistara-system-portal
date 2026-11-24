@@ -1,124 +1,123 @@
-import { ArrowUpRight01Icon, Door01Icon, Mail01Icon, ViewIcon } from "@hugeicons/core-free-icons";
-import { PlusCircle, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
-import { PageHeader } from "@/components/page-header";
-import { Icon } from "@/components/portal/icon";
 import { OrderTable } from "@/components/portal/order-table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LiveIndicator } from "@/components/ui/live-indicator";
+import { Separator } from "@/components/ui/separator";
 import { Typography } from "@/components/ui/typography";
 import { getOrderStats, getRecentOrders } from "@/server/orders/data";
 
 export default async function HomePage() {
   const [stats, orders] = await Promise.all([getOrderStats(), getRecentOrders()]);
 
-  const metrics = [
-    {
-      label: "Draft orders",
-      value: stats.draft,
-      note: `${stats.issued} issued`,
-      icon: Mail01Icon,
-      accentBg: "bg-brand-accent3",
-      accentText: "text-brand-txt-primary",
-    },
-    {
-      label: "Confirmed",
-      value: stats.confirmed,
-      note: "Ready for production",
-      icon: ViewIcon,
-      accentBg: "bg-brand-accent6",
-      accentText: "text-brand-accent1",
-    },
-    {
-      label: "In production",
-      value: stats.production,
-      note: "Active works orders",
-      icon: Door01Icon,
-      accentBg: "bg-brand-accent1",
-      accentText: "text-brand-accent2",
-    },
-    {
-      label: "Due soon",
-      value: stats.dueSoon,
-      note: stats.overdue ? `${stats.overdue} overdue` : "Next seven days",
-      icon: ArrowUpRight01Icon,
-      accentBg: "bg-brand-accent4/10",
-      accentText: "text-brand-accent4",
-    },
+  const keyMetrics = [
+    { title: "Draft orders", value: stats.draft.toString(), trend: "up" as const },
+    { title: "Confirmed", value: stats.confirmed.toString() },
+    { title: "In production", value: stats.production.toString() },
+    { title: "Due soon", value: stats.dueSoon.toString(), trend: "up" as const },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <PageHeader
-        title="Overview"
-        subtitle="Current quotes, confirmed work and upcoming deliveries."
-      >
-        <Button variant="primary" size="md" asChild>
-          <Link href="/home/quotes/new" className="flex items-center gap-2">
-            <PlusCircle className="size-4" />
-            <span>New order</span>
-          </Link>
-        </Button>
-      </PageHeader>
-
+    <div className="mx-auto w-full space-y-12">
       {/* Hero Welcome Banner in Ladder App Style */}
-      <div className="bg-gradient-green relative overflow-hidden rounded-2xl p-6 text-white shadow-xs sm:p-8">
-        <div className="max-w-2xl space-y-2">
-          <Typography className="text-h2 font-bold tracking-tight text-white">
-            Vistara Window & Door Platform
-          </Typography>
-          <Typography className="text-body text-white/80">
-            Configure bespoke Eurocell windows and composite doors, generate instant customer
-            pricing, and manage your manufacturing workflow.
-          </Typography>
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Button variant="secondery" size="sm" asChild>
-              <Link href="/home/quotes/new">Start Door Specification</Link>
-            </Button>
-            <Button
-              variant="transparent"
-              size="sm"
-              asChild
-              className="text-white hover:bg-white/10"
-            >
-              <Link href="/home/quotes">Browse All Orders</Link>
-            </Button>
+      <div className="bg-gradient-green rounded-2xl border-none p-6 text-white shadow-xs sm:p-8">
+        <Typography className="text-h2 font-bold tracking-tight text-white">
+          Get ready for a new ordering experience!
+        </Typography>
+
+        <div className="mt-6">
+          {/* Step 1 */}
+          <div className="w-full p-4">
+            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center md:gap-10">
+              <div className="space-y-1.5">
+                <Typography className="text-lg-body font-medium text-white">
+                  1. Create your first quote or works order.
+                </Typography>
+                <Typography className="text-body text-white/75">
+                  Configure specifications, calculate instant customer pricing, and prepare quotes.
+                </Typography>
+                <p className="text-caption text-brand-accent2">Mark as done</p>
+              </div>
+              <Button variant="secondery" asChild className="w-full sm:w-auto">
+                <Link href="/home/quotes/new">New order</Link>
+              </Button>
+            </div>
+          </div>
+
+          <Separator className="bg-white/35" />
+
+          {/* Step 2 */}
+          <div className="w-full p-4">
+            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center md:gap-10">
+              <div className="space-y-1.5">
+                <Typography className="text-lg-body font-medium text-white">
+                  2. Configure bespoke window & door specifications.
+                </Typography>
+                <Typography className="text-body text-white/75">
+                  Select profile suites, glass, colors, and hardware to generate detailed
+                  manufacturing specs.
+                </Typography>
+                <p className="text-caption text-brand-accent2">Mark as done</p>
+              </div>
+              <Button variant="primary" asChild className="w-full text-white sm:w-auto">
+                <Link href="/home/quotes/new">Start specification</Link>
+              </Button>
+            </div>
+          </div>
+
+          <Separator className="bg-white/35" />
+
+          {/* Step 3 */}
+          <div className="w-full p-4">
+            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center md:gap-10">
+              <div className="space-y-1.5">
+                <Typography className="text-lg-body font-medium text-white">
+                  3. Track production and delivery schedules.
+                </Typography>
+                <Typography className="text-body text-white/75">
+                  Monitor confirmed works orders, batch allocations, and upcoming delivery dates.
+                </Typography>
+                <p className="text-caption text-brand-accent2">Mark as done</p>
+              </div>
+              <Button variant="primary" asChild className="w-full text-white sm:w-auto">
+                <Link href="/home/quotes">Browse orders</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Key Metrics Section */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         <Typography variant="h3" className="text-h3 font-bold text-brand-txt-primary">
           Key Metrics
         </Typography>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric) => (
-            <div
-              key={metric.label}
-              className="flex flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-xs transition-colors hover:border-brand-accent1/30"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-subtitle font-medium text-brand-txt-secondary">
-                  {metric.label}
-                </span>
-                <div
-                  className={`flex size-8 items-center justify-center rounded-lg ${metric.accentBg} ${metric.accentText}`}
-                >
-                  <Icon icon={metric.icon} size={16} />
-                </div>
-              </div>
-
-              <div className="mt-3">
-                <p className="text-lg-input font-bold tracking-tight text-brand-txt-primary">
-                  {metric.value.toLocaleString()}
-                </p>
-                <div className="text-caption mt-1 flex items-center gap-1.5 text-brand-txt-secondary">
-                  <ArrowUpRight className="size-3.5 text-emerald-600" />
-                  <span>{metric.note}</span>
+        <div className="grid grid-cols-2 gap-6 py-2 sm:grid-cols-4 lg:grid-cols-4">
+          {keyMetrics.map((metric) => (
+            <div key={metric.title} className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-subtitle text-brand-txt-secondary">{metric.title}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-lg-input font-bold tracking-tight text-brand-txt-primary">
+                    {metric.value}
+                  </p>
+                  {metric.trend === "up" && (
+                    <span className="text-emerald-500">
+                      <svg
+                        width="25"
+                        height="24"
+                        viewBox="0 0 25 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M15.6 6C15.0477 6 14.6 6.44772 14.6 7C14.6 7.55228 15.0477 8 15.6 8H20.1858L14.0242 14.1615C13.8146 14.3712 13.6993 14.4854 13.6101 14.5611L13.6 14.5696L13.5898 14.5611C13.5007 14.4854 13.3854 14.3712 13.1757 14.1615L10.4159 11.4017C10.2375 11.2232 10.0637 11.0494 9.90446 10.9142C9.72962 10.7658 9.50773 10.6062 9.21801 10.5121C8.81632 10.3816 8.38363 10.3816 7.98194 10.5121C7.69222 10.6062 7.47033 10.7658 7.29549 10.9142C7.13627 11.0494 6.9625 11.2232 6.78406 11.4017L1.89287 16.2929C1.50234 16.6834 1.50234 17.3166 1.89287 17.7071C2.28339 18.0976 2.91656 18.0976 3.30708 17.7071L8.17571 12.8385C8.38539 12.6288 8.50067 12.5146 8.58984 12.4389L8.59998 12.4304L8.61011 12.4389C8.69928 12.5146 8.81456 12.6288 9.02424 12.8385L11.7841 15.5983C11.9625 15.7768 12.1363 15.9506 12.2955 16.0858C12.4703 16.2342 12.6922 16.3938 12.9819 16.4879C13.3836 16.6184 13.8163 16.6184 14.218 16.4879C14.5077 16.3938 14.7296 16.2342 14.9045 16.0858C15.0637 15.9506 15.2375 15.7768 15.4159 15.5983L21.6 9.41421V14C21.6 14.5523 22.0477 15 22.6 15C23.1523 15 23.6 14.5523 23.6 14V7C23.6 6.44772 23.1523 6 22.6 6H15.6Z"
+                          fill="#00C853"
+                        />
+                      </svg>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -127,24 +126,24 @@ export default async function HomePage() {
       </div>
 
       {/* Recent Orders Section */}
-      <Card className="rounded-2xl border border-border bg-card shadow-xs">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-5">
-          <div className="space-y-1">
-            <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
+      <div className="space-y-6">
+        <div className="flex flex-col justify-between gap-1">
+          <div className="flex items-center justify-between">
+            <Typography variant="h3" className="relative flex items-center gap-2">
+              <LiveIndicator />
               Recent orders
-            </CardTitle>
-            <CardDescription className="text-subtitle text-brand-txt-secondary">
-              Resume a draft or open the latest customer specification.
-            </CardDescription>
+            </Typography>
+            <Button asChild variant="transparent" size="sm" className="text-brand-accent5">
+              <Link href="/home/quotes">See all</Link>
+            </Button>
           </div>
-          <Button variant="link" size="sm" asChild className="font-medium text-brand-accent5">
-            <Link href="/home/quotes">View all quotes &rarr;</Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          <OrderTable orders={orders} />
-        </CardContent>
-      </Card>
+          <Typography className="text-subtitle text-brand-txt-secondary">
+            Resume a draft or open the latest customer specification.
+          </Typography>
+        </div>
+
+        <OrderTable orders={orders} />
+      </div>
     </div>
   );
 }
