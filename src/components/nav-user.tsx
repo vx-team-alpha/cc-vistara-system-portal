@@ -54,12 +54,14 @@ export function NavUser({
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="text-subtitle truncate font-semibold text-brand-txt-primary">
+                <span className="text-subtitle truncate font-semibold text-sidebar-foreground">
                   {user.name || "My Account"}
                 </span>
-                <span className="text-caption truncate text-brand-txt-secondary">{user.email}</span>
+                <span className="text-caption truncate text-sidebar-foreground/70">
+                  {user.email}
+                </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4 text-brand-txt-secondary" />
+              <ChevronsUpDown className="ml-auto size-4 text-sidebar-foreground/70" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

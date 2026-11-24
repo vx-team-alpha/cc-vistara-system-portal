@@ -126,7 +126,12 @@ function ensureLayer(doc) {
   return layer;
 }
 
-function drawOverallDimensions(doc, layer, { x0, y0, width, height }) {
+function drawOverallDimensions(
+  doc,
+  layer,
+  { x0, y0, width, height },
+  { width: displayWidth = width, height: displayHeight = height } = {},
+) {
   const metrics = dimensionMetrics(doc);
   const x1 = x0 + width;
   const y1 = y0 + height;
@@ -138,7 +143,7 @@ function drawOverallDimensions(doc, layer, { x0, y0, width, height }) {
     dimensionLabel(doc, {
       x: (x0 + x1) / 2,
       y: topY,
-      value: width,
+      value: displayWidth,
       editable: true,
       title: "Overall width",
     }),
@@ -148,7 +153,7 @@ function drawOverallDimensions(doc, layer, { x0, y0, width, height }) {
   const heightLabel = dimensionLabel(doc, {
     x: 0,
     y: 0,
-    value: height,
+    value: displayHeight,
     editable: true,
     title: "Overall height",
   });
@@ -158,7 +163,13 @@ function drawOverallDimensions(doc, layer, { x0, y0, width, height }) {
   ensureViewBoxFits(doc, leftX, topY, x1, y1, metrics.pad);
 }
 
-function drawSpanDimensions(doc, layer, spans, { x0, y0, width, height }) {
+function drawSpanDimensions(
+  doc,
+  layer,
+  spans,
+  { x0, y0, width, height },
+  { showOverall = true } = {},
+) {
   if (!spans.length) return;
   const metrics = dimensionMetrics(doc);
   const y1 = y0 + height;
@@ -177,23 +188,19 @@ function drawSpanDimensions(doc, layer, spans, { x0, y0, width, height }) {
       }),
     );
   }
-  layer.append(
-    dimensionLabel(doc, {
-      x: x0 + width / 2,
-      y: spanY + Math.round(metrics.fontSize * 0.7),
-      value: width,
-      editable: false,
-      title: "Overall width",
-    }),
-  );
-  ensureViewBoxFits(
-    doc,
-    x0,
-    y0,
-    x0 + width,
-    spanY + Math.round(metrics.fontSize * 0.7),
-    metrics.pad,
-  );
+  const overallY = spanY + Math.round(metrics.fontSize * 0.7);
+  if (showOverall) {
+    layer.append(
+      dimensionLabel(doc, {
+        x: x0 + width / 2,
+        y: overallY,
+        value: width,
+        editable: false,
+        title: "Overall width",
+      }),
+    );
+  }
+  ensureViewBoxFits(doc, x0, y0, x0 + width, showOverall ? overallY : spanY, metrics.pad);
 }
 
 /** Replace catalogue foreignObject controls with safe SVG labels; keep dimension lines. */
@@ -294,8 +301,7 @@ function horizontalSpans(layout) {
 /** Draw overall (and side-panel) catalogue sizes onto door elevations. */
 export function attachDoorDimensions(doc, layout, override = {}) {
   const catalogueFrame = doorContentFrame(layout, doc);
-  const frame = catalogueFrame && {
-    ...catalogueFrame,
+  const displaySize = catalogueFrame && {
     width:
       Number.isFinite(Number(override.width)) && Number(override.width) > 0
         ? Number(override.width)
@@ -305,11 +311,13 @@ export function attachDoorDimensions(doc, layout, override = {}) {
         ? Number(override.height)
         : catalogueFrame.height,
   };
-  if (!frame) return;
+  if (!catalogueFrame || !displaySize) return;
   const layer = ensureLayer(doc);
   layer.replaceChildren();
-  drawOverallDimensions(doc, layer, frame);
-  drawSpanDimensions(doc, layer, horizontalSpans(layout), frame);
+  drawOverallDimensions(doc, layer, catalogueFrame, displaySize);
+  drawSpanDimensions(doc, layer, horizontalSpans(layout), catalogueFrame, {
+    showOverall: false,
+  });
 }
 
 export function catalogueDimensions(source) {

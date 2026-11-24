@@ -65,7 +65,7 @@ export function AppSidebar({
                 <div className="text-xxs flex aspect-square size-5 items-center justify-center rounded-sm bg-brand-accent1 font-bold text-brand-accent2">
                   VL
                 </div>
-                <div className="text-subtitle truncate font-medium text-brand-txt-primary">
+                <div className="text-subtitle truncate font-medium text-sidebar-foreground">
                   {account.name || "Windowlink"}
                 </div>
               </Link>

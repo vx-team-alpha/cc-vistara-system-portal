@@ -198,6 +198,64 @@ test("window and door elevations expose catalogue millimetre dimensions", async 
   assert.match(doorSvg, />2050</);
   assert.doesNotMatch(doorSvg, /✎/);
 });
+
+test("door dimension lines span complete sidelight and toplight assemblies", async () => {
+  const lineSegments = (path) =>
+    [...path.matchAll(/M(-?[\d.]+) (-?[\d.]+) L(-?[\d.]+) (-?[\d.]+)/g)].map((match) =>
+      match.slice(1).map(Number),
+    );
+  const names = [
+    "Left Hand Door Right Hand Sidelight",
+    "Left Hand Door Right Hand Sideslab",
+    "Door Left Hand + Toplight",
+    "Left Hand Door Right Hand Sidelight + Toplight",
+    "Left Hand Door Right Hand Sideslab + Toplight",
+    "Left Hand Door Left+Right Sideslabs + Toplight",
+  ];
+
+  for (const name of names) {
+    const item = rows.layouts.find(
+      (layout) =>
+        layout.range_id === originalRange.id &&
+        layout.features.kind === "layout" &&
+        layout.name === name,
+    );
+    assert.ok(item, `Missing door fixture: ${name}`);
+    const source = item.features.source;
+    const state = doorState(manifest, source, configuration);
+    const output = await renderDoor({
+      data: manifest,
+      layout: source,
+      design: state.design,
+      sideDesigns: state.sides,
+      questions: state.questions,
+      picks: state.picks,
+      texts: {},
+      internal: false,
+      frameDetails: { width_mm: 900, height_mm: 2100 },
+    });
+    const doc = new dom.window.DOMParser().parseFromString(output, "image/svg+xml");
+    const lines = [...doc.querySelectorAll('g[layertype="Dimensions"] [data-dimension-line]')];
+    const viewBox = source.slim.viewBox.split(/\s+/).map(Number);
+    const expectedWidth = Math.round(viewBox[2] - 40);
+    const expectedHeight = Math.round(viewBox[3] - 40);
+
+    assert.equal(lineSegments(lines[0].getAttribute("d"))[1][2], expectedWidth, name);
+    assert.equal(lineSegments(lines[1].getAttribute("d"))[1][3], expectedHeight, name);
+    assert.equal(
+      doc.querySelector('[data-dimension="Overall width"][data-dimension-kind="input"] text')
+        .textContent,
+      "900",
+      name,
+    );
+    assert.equal(
+      doc.querySelector('[data-dimension="Overall height"][data-dimension-kind="input"] text')
+        .textContent,
+      "2100",
+      name,
+    );
+  }
+});
 test.after(() => {
   globalThis.fetch = originalFetch;
   dom.window.close();
