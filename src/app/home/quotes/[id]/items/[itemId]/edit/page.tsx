@@ -60,7 +60,7 @@ export default async function EditOrderItemPage({
 
       {choosingLayout ? (
         <Card className="rounded-2xl border border-border bg-card shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4.5">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 p-6">
             <div className="space-y-0.5">
               <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
                 Choose Replacement Door Style
@@ -98,7 +98,7 @@ export default async function EditOrderItemPage({
         </Card>
       ) : (
         <Card className="rounded-2xl border border-border bg-card shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4.5">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 p-6">
             <div className="space-y-0.5">
               <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
                 {selected.name}
