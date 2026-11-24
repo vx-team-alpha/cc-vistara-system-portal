@@ -1,6 +1,9 @@
 "use client";
 import { useSyncExternalStore, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+
 import s from "./portal.module.css";
 const subscribe = () => () => {};
 export function EmbedCode({ publicKey, name }: { publicKey: string; name: string }) {
@@ -46,30 +49,40 @@ export function EmbedCode({ publicKey, name }: { publicKey: string; name: string
         <label className={s.label} htmlFor="embed-code">
           Responsive embed code
         </label>
-        <textarea
+        <Textarea
           id="embed-code"
-          className={s.textarea}
           readOnly
           value={snippet}
           onFocus={(e) => e.target.select()}
+          rows={6}
+          className="font-mono text-xs"
         />
       </div>
       <div className={s.actions}>
-        <button
+        <Button
           type="button"
-          className={s.btn}
+          variant="outline"
+          size="sm"
           disabled={!origin}
           onClick={() => copy(snippet)}
           data-test="copy-embed"
         >
           Copy embed code
-        </button>
-        <a href={link} className={s.btn} target="_blank" rel="noreferrer">
-          Open preview
-        </a>
-        <button className={s.btn} type="button" disabled={!origin} onClick={() => copy(link)}>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <a href={link} target="_blank" rel="noreferrer">
+            Open preview
+          </a>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          type="button"
+          disabled={!origin}
+          onClick={() => copy(link)}
+        >
           Copy public link
-        </button>
+        </Button>
       </div>
       {message && (
         <p role="status" className={s.notice}>

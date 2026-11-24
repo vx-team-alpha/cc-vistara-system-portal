@@ -4,6 +4,15 @@ import Image, { type ImageLoaderProps } from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createWidget, updateWidget } from "@/server/portal/actions";
 import { WidgetSchema, UpdateWidgetSchema } from "@/server/portal/schemas";
 
@@ -50,6 +59,8 @@ export function WidgetForm({
   const [logoMessage, setLogoMessage] = useState("");
   const [logoError, setLogoError] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [widgetType, setWidgetType] = useState(initialType);
+  const [enabledValue, setEnabledValue] = useState(String(widget?.enabled ?? true));
   const previewDialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -187,8 +198,7 @@ export function WidgetForm({
           <label className={s.label} htmlFor="widget-name">
             Component name
           </label>
-          <input
-            className={s.input}
+          <Input
             id="widget-name"
             name="name"
             required
@@ -202,10 +212,19 @@ export function WidgetForm({
             <label className={s.label} htmlFor="widget-type">
               Product type
             </label>
-            <select id="widget-type" name="type" className={s.select} defaultValue={initialType}>
-              <option value="door">Doors</option>
-              <option value="window">Windows</option>
-            </select>
+            <Select
+              value={widgetType}
+              onValueChange={(val) => setWidgetType(val as "door" | "window")}
+            >
+              <SelectTrigger id="widget-type" className="h-9 w-full bg-background">
+                <SelectValue placeholder="Select product type" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="door">Doors</SelectItem>
+                <SelectItem value="window">Windows</SelectItem>
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="type" value={widgetType} />
             <span className={s.hint}>Door and window components have separate embed codes.</span>
           </div>
         )}
@@ -213,8 +232,7 @@ export function WidgetForm({
           <label className={s.label} htmlFor="widget-website">
             Website URL <span className={s.hint}>(optional)</span>
           </label>
-          <input
-            className={s.input}
+          <Input
             type="url"
             id="widget-website"
             name="website_url"
@@ -236,8 +254,7 @@ export function WidgetForm({
             <label className={s.label} htmlFor="widget-brand-name">
               Brand name
             </label>
-            <input
-              className={s.input}
+            <Input
               id="widget-brand-name"
               name="brand_name"
               required
@@ -337,8 +354,7 @@ export function WidgetForm({
             <label className={s.label} htmlFor="widget-brand-phone">
               Phone number
             </label>
-            <input
-              className={s.input}
+            <Input
               id="widget-brand-phone"
               name="brand_phone"
               type="tel"
@@ -379,15 +395,16 @@ export function WidgetForm({
             <label className={s.label} htmlFor="widget-enabled">
               Availability
             </label>
-            <select
-              className={s.select}
-              id="widget-enabled"
-              name="enabled"
-              defaultValue={String(widget.enabled)}
-            >
-              <option value="true">Live — accept visitors and enquiries</option>
-              <option value="false">Paused — hide the public component</option>
-            </select>
+            <Select value={enabledValue} onValueChange={setEnabledValue}>
+              <SelectTrigger id="widget-enabled" className="h-9 w-full bg-background">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="true">Live — accept visitors and enquiries</SelectItem>
+                <SelectItem value="false">Paused — hide the public component</SelectItem>
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="enabled" value={enabledValue} />
           </div>
         )}
         {message && (
@@ -396,12 +413,7 @@ export function WidgetForm({
           </p>
         )}
         <div className={s.actions}>
-          <button
-            className={`${s.btn} ${s.btnPrimary}`}
-            type="submit"
-            disabled={pending}
-            data-test="save-widget"
-          >
+          <Button type="submit" variant="primary" disabled={pending} data-test="save-widget">
             {logoUploading
               ? "Uploading logo…"
               : pending
@@ -409,21 +421,21 @@ export function WidgetForm({
                 : widget
                   ? "Save changes"
                   : "Create component"}
-          </button>
+          </Button>
           {widget && (
-            <button
+            <Button
               type="button"
-              className={s.btn}
+              variant="outline"
               onClick={openPreview}
               data-test="preview-widget"
             >
               Preview
-            </button>
+            </Button>
           )}
           {created && (
-            <Link href={`/home/widgets/${created}`} className={s.btn}>
-              Open component
-            </Link>
+            <Button variant="outline" asChild>
+              <Link href={`/home/widgets/${created}`}>Open component</Link>
+            </Button>
           )}
         </div>
       </form>
@@ -447,14 +459,16 @@ export function WidgetForm({
                   Live product options, elevations, and enquiry flow for this component.
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
-                className={s.iconBtn}
+                variant="ghost"
+                size="icon"
+                className="size-8"
                 aria-label="Close preview"
                 onClick={closePreview}
               >
                 ✕
-              </button>
+              </Button>
             </header>
             {previewOpen && (
               <iframe

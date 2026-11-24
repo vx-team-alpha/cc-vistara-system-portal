@@ -8,6 +8,7 @@ import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
@@ -315,11 +316,16 @@ export function EditOrderDialog({
 
           {/* Update Customer Profile Checkbox */}
           <div className="flex items-center gap-2 pt-1">
-            <input
-              type="checkbox"
-              id="update_customer_profile"
-              className="size-4 rounded border-border text-brand-accent1 focus:ring-brand-accent1"
-              {...form.register("update_customer_profile")}
+            <Controller
+              control={form.control}
+              name="update_customer_profile"
+              render={({ field }) => (
+                <Checkbox
+                  id="update_customer_profile"
+                  checked={Boolean(field.value)}
+                  onCheckedChange={field.onChange}
+                />
+              )}
             />
             <Label
               htmlFor="update_customer_profile"

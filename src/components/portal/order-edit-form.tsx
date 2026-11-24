@@ -2,8 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { updateOrderAction } from "@/server/orders/actions";
 import { UpdateOrderSchema, type UpdateOrderInput } from "@/server/orders/schemas";
 
@@ -37,8 +41,7 @@ export function OrderEditForm({ initialValues }: { initialValues: UpdateOrderInp
       <div className={s.formGrid}>
         <label className={s.field}>
           <span className={s.label}>Customer name</span>
-          <input
-            className={s.input}
+          <Input
             autoComplete="name"
             aria-invalid={Boolean(form.formState.errors.customer_name)}
             {...form.register("customer_name")}
@@ -49,8 +52,7 @@ export function OrderEditForm({ initialValues }: { initialValues: UpdateOrderInp
         </label>
         <label className={s.field}>
           <span className={s.label}>Phone</span>
-          <input
-            className={s.input}
+          <Input
             type="tel"
             autoComplete="tel"
             aria-invalid={Boolean(form.formState.errors.phone)}
@@ -63,8 +65,7 @@ export function OrderEditForm({ initialValues }: { initialValues: UpdateOrderInp
       </div>
       <label className={s.field}>
         <span className={s.label}>Address</span>
-        <input
-          className={s.input}
+        <Input
           autoComplete="street-address"
           aria-invalid={Boolean(form.formState.errors.address)}
           {...form.register("address")}
@@ -76,21 +77,21 @@ export function OrderEditForm({ initialValues }: { initialValues: UpdateOrderInp
       <div className={s.formGrid3}>
         <label className={s.field}>
           <span className={s.label}>City</span>
-          <input className={s.input} autoComplete="address-level2" {...form.register("city")} />
+          <Input autoComplete="address-level2" {...form.register("city")} />
           {form.formState.errors.city && (
             <span className={s.fieldError}>{form.formState.errors.city.message}</span>
           )}
         </label>
         <label className={s.field}>
           <span className={s.label}>State</span>
-          <input className={s.input} autoComplete="address-level1" {...form.register("state")} />
+          <Input autoComplete="address-level1" {...form.register("state")} />
           {form.formState.errors.state && (
             <span className={s.fieldError}>{form.formState.errors.state.message}</span>
           )}
         </label>
         <label className={s.field}>
           <span className={s.label}>ZIP code</span>
-          <input className={s.input} autoComplete="postal-code" {...form.register("zip_code")} />
+          <Input autoComplete="postal-code" {...form.register("zip_code")} />
           {form.formState.errors.zip_code && (
             <span className={s.fieldError}>{form.formState.errors.zip_code.message}</span>
           )}
@@ -98,39 +99,44 @@ export function OrderEditForm({ initialValues }: { initialValues: UpdateOrderInp
       </div>
       <label className={s.field}>
         <span className={s.label}>Delivery date</span>
-        <input className={s.input} type="date" {...form.register("delivery_date")} />
+        <Input type="date" {...form.register("delivery_date")} />
         {form.formState.errors.delivery_date && (
           <span className={s.fieldError}>{form.formState.errors.delivery_date.message}</span>
         )}
       </label>
       <label className={s.field}>
         <span className={s.label}>Note</span>
-        <textarea className={s.textarea} {...form.register("note")} />
+        <Textarea {...form.register("note")} />
         {form.formState.errors.note && (
           <span className={s.fieldError}>{form.formState.errors.note.message}</span>
         )}
       </label>
-      <label className={s.checkField}>
-        <input type="checkbox" {...form.register("update_customer_profile")} />
-        <span>
+      <div className={s.checkField}>
+        <Controller
+          control={form.control}
+          name="update_customer_profile"
+          render={({ field }) => (
+            <Checkbox
+              id="update_customer_profile"
+              checked={Boolean(field.value)}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+        <label htmlFor="update_customer_profile" className="cursor-pointer">
           <strong>Update the reusable customer profile too</strong>
           <small>Leave off to change only this order snapshot.</small>
-        </span>
-      </label>
+        </label>
+      </div>
       {message && (
         <p className={s.notice} data-error role="alert">
           {message}
         </p>
       )}
       <div className={s.actions}>
-        <button
-          type="submit"
-          className={`${s.btn} ${s.btnPrimary}`}
-          disabled={pending}
-          data-test="save-order-details"
-        >
+        <Button type="submit" variant="primary" disabled={pending} data-test="save-order-details">
           {pending ? "Saving changes…" : "Save order details"}
-        </button>
+        </Button>
       </div>
     </form>
   );

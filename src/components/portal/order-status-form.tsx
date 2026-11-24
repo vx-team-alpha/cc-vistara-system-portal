@@ -3,6 +3,14 @@
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { updateOrderStatusAction } from "@/server/orders/actions";
 
 import s from "./portal.module.css";
@@ -58,23 +66,30 @@ export function OrderStatusForm({
       }}
       data-test="order-status-form"
     >
-      <label className={s.label} htmlFor="order-status">
+      <Label className={s.label} htmlFor="order-status">
         Order status
-      </label>
+      </Label>
       <div className={s.statusControls}>
-        <select
-          id="order-status"
-          className={s.select}
+        <Select
           value={status}
-          onChange={(event) => setStatus(event.target.value)}
-          disabled={pending}
+          onValueChange={setStatus}
+          disabled={pending || available.length <= 1}
         >
-          {available.map(([value, label]) => (
-            <option value={value} key={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            id="order-status"
+            className="h-9 min-w-[180px] bg-background"
+            data-test="order-status-select"
+          >
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            {available.map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button
           type="submit"
           variant="primary"
