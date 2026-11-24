@@ -1,9 +1,13 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
+import { PageHeader } from "@/components/page-header";
 import { OrderEditForm } from "@/components/portal/order-edit-form";
-import { Badge, Card, PageHead, portalStyles as s } from "@/components/portal/ui";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOrder } from "@/server/orders/data";
 import type { Json } from "@/types/supabase";
 
@@ -22,21 +26,40 @@ export default async function EditOrderPage({ params }: { params: Promise<{ id: 
   const customer = snapshot(order.customer_snapshot);
 
   return (
-    <>
-      <PageHead
-        title="Edit order"
-        note={`${order.order_number} · Draft details and customer snapshot`}
-      >
-        <Badge state="draft">Draft only</Badge>
-      </PageHead>
-      <div className={s.stack}>
-        <Link href={`/home/quotes/${order.id}`} className={s.link}>
-          ← Order summary
-        </Link>
-        <Card
-          title="Order and customer details"
-          note="These changes apply to this order unless you explicitly update the customer profile."
+    <div className="space-y-6">
+      <div>
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="-ml-2 gap-1.5 text-brand-txt-secondary hover:text-brand-txt-primary"
         >
+          <Link href={`/home/quotes/${order.id}`}>
+            <ArrowLeft className="size-4" />
+            <span>Back to Order Summary</span>
+          </Link>
+        </Button>
+      </div>
+
+      <PageHeader
+        title={`Edit Order ${order.order_number}`}
+        subtitle="Modify customer contact details and requested delivery schedule."
+      >
+        <Badge variant="secondary" className="px-3 py-1 text-xs">
+          Draft Only
+        </Badge>
+      </PageHeader>
+
+      <Card className="max-w-3xl rounded-2xl border border-border bg-card shadow-xs">
+        <CardHeader className="border-b border-border/60 px-6 py-4.5">
+          <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
+            Order & Customer Details
+          </CardTitle>
+          <CardDescription className="text-subtitle text-brand-txt-secondary">
+            Changes will update this draft without altering previous finalized records.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
           <OrderEditForm
             initialValues={{
               order_id: order.id,
@@ -52,8 +75,8 @@ export default async function EditOrderPage({ params }: { params: Promise<{ id: 
               update_customer_profile: false,
             }}
           />
-        </Card>
-      </div>
-    </>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

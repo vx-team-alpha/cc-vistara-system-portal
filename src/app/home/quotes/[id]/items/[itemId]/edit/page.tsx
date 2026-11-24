@@ -1,10 +1,15 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
+import { PageHeader } from "@/components/page-header";
 import { LayoutPreview } from "@/components/portal/layout-preview";
 import { OrderItemFrameForm } from "@/components/portal/order-item-frame-form";
-import { Badge, Card, PageHead, portalStyles as s } from "@/components/portal/ui";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Typography } from "@/components/ui/typography";
 import { loadDoorCatalogue } from "@/server/catalogue/data";
 import { getOrder } from "@/server/orders/data";
 
@@ -29,69 +34,118 @@ export default async function EditOrderItemPage({
   const choosingLayout = query.change === "1" || !selected;
 
   return (
-    <>
-      <PageHead
-        title={`Edit Door ${item.line_number}`}
-        note={`${order.order_number} · Update the frame first, then review the saved configuration.`}
+    <div className="space-y-6">
+      <div>
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="-ml-2 gap-1.5 text-brand-txt-secondary hover:text-brand-txt-primary"
+        >
+          <Link href={`/home/quotes/${order.id}`}>
+            <ArrowLeft className="size-4" />
+            <span>Back to Order Summary</span>
+          </Link>
+        </Button>
+      </div>
+
+      <PageHeader
+        title={`Edit Door #${item.line_number}`}
+        subtitle={`${order.order_number} · Update frame dimensions, system profile, or choose a different door style.`}
       >
-        <Badge state="draft">Draft only</Badge>
-      </PageHead>
-      <div className={s.stack}>
-        <Link href={`/home/quotes/${order.id}`} className={s.link}>
-          ← Order summary
-        </Link>
-        {choosingLayout ? (
-          <Card
-            title="Choose a replacement door style"
-            note="Changing style resets incompatible configuration answers and drawings after confirmation."
-            flush
-          >
-            <div className={s.styleLibrary}>
+        <Badge variant="secondary" className="px-3 py-1 text-xs">
+          Draft Only
+        </Badge>
+      </PageHeader>
+
+      {choosingLayout ? (
+        <Card className="rounded-2xl border border-border bg-card shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4.5">
+            <div className="space-y-0.5">
+              <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
+                Choose Replacement Door Style
+              </CardTitle>
+              <CardDescription className="text-subtitle text-brand-txt-secondary">
+                Changing the style resets incompatible configuration answers and drawings.
+              </CardDescription>
+            </div>
+            {selected && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/home/quotes/${order.id}/items/${item.id}/edit`}>
+                  Cancel Style Change
+                </Link>
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {catalogue.products.map((product) => (
                 <Link
                   key={product.id}
                   href={`/home/quotes/${order.id}/items/${item.id}/edit?layout=${product.id}`}
-                  className={s.styleCard}
+                  className="group flex flex-col items-center rounded-xl border border-border bg-card p-4 text-center shadow-xs transition-all hover:border-brand-accent1 hover:bg-brand-backgroundSecondary/50"
                 >
-                  <span className={s.stylePreview}>
+                  <div className="mb-3 flex size-32 items-center justify-center p-2">
                     <LayoutPreview src={product.image} />
+                  </div>
+                  <span className="text-subtitle font-semibold text-brand-txt-primary transition-colors group-hover:text-brand-accent1">
+                    {product.name}
                   </span>
-                  <span className={s.styleName}>{product.name}</span>
                 </Link>
               ))}
             </div>
-          </Card>
-        ) : (
-          <Card title={selected.name} note="Saved answers are preserved unless the style changes.">
-            <div className={s.selectedStyle}>
-              <div className={s.selectedStylePreview}>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="rounded-2xl border border-border bg-card shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4.5">
+            <div className="space-y-0.5">
+              <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
+                {selected.name}
+              </CardTitle>
+              <CardDescription className="text-subtitle text-brand-txt-secondary">
+                Saved answers are preserved unless the style changes.
+              </CardDescription>
+            </div>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/home/quotes/${order.id}/items/${item.id}/edit?change=1`}>
+                Change Door Style
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-brand-backgroundSecondary p-6">
                 <LayoutPreview src={selected.image} />
+                <span className="text-subtitle mt-4 font-bold text-brand-txt-primary">
+                  {selected.name}
+                </span>
               </div>
-              <div className={s.stack}>
-                <Badge state="active">
-                  {item.system === "rehau" ? "Rehau Total70" : "Eurocell Composite"}
-                </Badge>
+
+              <div className="space-y-4">
                 <div>
-                  <h3 className={s.stepTitle}>Frame details</h3>
-                  <p className={s.cardNote}>Review measurements, quantity, and location.</p>
+                  <Typography
+                    variant="h3"
+                    className="text-title-2 font-bold text-brand-txt-primary"
+                  >
+                    Update Frame Details
+                  </Typography>
+                  <Typography className="text-subtitle text-brand-txt-secondary">
+                    Measurements, location, and manufacturing profile.
+                  </Typography>
                 </div>
+
                 <OrderItemFrameForm
                   orderId={order.id}
                   layoutId={selected.id}
                   revision={order.revision}
                   item={item}
                 />
-                <Link
-                  className={s.link}
-                  href={`/home/quotes/${order.id}/items/${item.id}/edit?change=1`}
-                >
-                  Change door style
-                </Link>
               </div>
             </div>
-          </Card>
-        )}
-      </div>
-    </>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
