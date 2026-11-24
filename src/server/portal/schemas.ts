@@ -60,7 +60,7 @@ export const ConfigurationSchema = z.object({
     .refine((v) => Object.keys(v).length <= 16)
     .default({}),
   picks: z
-    .record(z.string().max(1000), z.uuid())
+    .record(z.string().max(1000), z.string().trim().min(1).max(200))
     .refine((v) => Object.keys(v).length <= 100)
     .default({}),
   texts: z

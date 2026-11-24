@@ -34,7 +34,6 @@ export function OrderItemConfigurator({
   const [drawings, setDrawings] = useState(initialDrawings);
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
-  const editing = Boolean(initialConfiguration.design_id);
 
   const configWithSystem = useMemo(
     () => ({
@@ -99,8 +98,8 @@ export function OrderItemConfigurator({
         frameDetails={frameDetails}
         onChange={setConfiguration}
         onDrawingChange={onDrawingChange}
-        headerAction={editing ? saveButton("Save changes") : null}
-        completionAction={editing ? null : saveButton("Save door")}
+        headerAction={saveButton("Save")}
+        completionAction={null}
       />
     </>
   );
