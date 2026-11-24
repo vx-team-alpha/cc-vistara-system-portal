@@ -1,7 +1,7 @@
-import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
+import { NewOrderDialog } from "@/components/portal/new-order-dialog";
 import { OrderTable } from "@/components/portal/order-table";
 import { Button } from "@/components/ui/button";
 import { LiveIndicator } from "@/components/ui/live-indicator";
@@ -26,12 +26,7 @@ export default async function HomePage() {
         title="Overview"
         subtitle="Current quotes, confirmed work and upcoming deliveries."
       >
-        <Button variant="secondery" size="sm" asChild>
-          <Link href="/home/quotes/new" className="flex items-center gap-2">
-            <Plus className="size-4" />
-            <span>New order</span>
-          </Link>
-        </Button>
+        <NewOrderDialog />
       </PageHeader>
 
       <Separator className="bg-brand-backgroundMain" />

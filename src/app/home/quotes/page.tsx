@@ -1,7 +1,8 @@
-import { PlusCircle, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
+import { NewOrderDialog } from "@/components/portal/new-order-dialog";
 import { OrderTable } from "@/components/portal/order-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,7 @@ const statuses = [
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; page?: string; query?: string }>;
+  searchParams: Promise<{ status?: string; page?: string; query?: string; new?: string }>;
 }) {
   const query = await searchParams;
   const parsed = OrderListSchema.parse({
@@ -48,12 +49,7 @@ export default async function QuotesPage({
         title="Quotes & Orders"
         subtitle="Create, resume and track every customer specification and manufacturing order."
       >
-        <Button variant="secondery" size="sm" asChild>
-          <Link href="/home/quotes/new" className="flex items-center gap-2">
-            <PlusCircle className="size-4" />
-            <span>New order</span>
-          </Link>
-        </Button>
+        <NewOrderDialog defaultOpen={query.new === "1"} />
       </PageHeader>
 
       {/* Toolbar: Status filter pills & Search */}

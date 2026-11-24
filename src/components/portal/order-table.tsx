@@ -2,6 +2,7 @@ import type { VariantProps } from "class-variance-authority";
 import { ArrowRight, FileText } from "lucide-react";
 import Link from "next/link";
 
+import { NewOrderDialog } from "@/components/portal/new-order-dialog";
 import { Badge, type badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,9 +74,13 @@ export function OrderTable({ orders }: { orders: OrderRow[] }) {
           frames.
         </Typography>
         <div className="mt-6">
-          <Button variant="primary" size="sm" asChild>
-            <Link href="/home/quotes/new">Create the first order</Link>
-          </Button>
+          <NewOrderDialog
+            trigger={
+              <Button variant="secondery" size="sm">
+                Create the first order
+              </Button>
+            }
+          />
         </div>
       </div>
     );

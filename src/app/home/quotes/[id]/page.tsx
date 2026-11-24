@@ -1,10 +1,11 @@
 import type { VariantProps } from "class-variance-authority";
-import { ArrowLeft, Edit3, Plus, Printer } from "lucide-react";
+import { ArrowLeft, Plus, Printer } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/page-header";
+import { EditOrderDialog } from "@/components/portal/edit-order-dialog";
 import { OrderDeleteDialog } from "@/components/portal/order-delete-dialog";
 import { OrderItemActions } from "@/components/portal/order-item-actions";
 import { OrderStatusForm } from "@/components/portal/order-status-form";
@@ -45,8 +46,15 @@ function getStatusBadgeVariant(status: string): BadgeVariant {
   }
 }
 
-export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ edit?: string }>;
+}) {
   const { id } = await params;
+  const query = searchParams ? await searchParams : {};
   if (!z.uuid().safeParse(id).success) notFound();
   const [order, account] = await Promise.all([getOrder(id), getCurrentAccount()]);
   if (!order) notFound();
@@ -83,16 +91,17 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           </Badge>
 
           {order.status === "draft" && (
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href={`/home/quotes/${order.id}/edit`}
-                className="flex items-center gap-1.5"
-                data-test="edit-order"
-              >
-                <Edit3 className="size-3.5" />
-                <span>Edit Details</span>
-              </Link>
-            </Button>
+            <EditOrderDialog
+              order={{
+                id: order.id,
+                order_number: order.order_number,
+                revision: order.revision,
+                delivery_date: order.delivery_date,
+                note: order.note,
+                customer_snapshot: order.customer_snapshot,
+              }}
+              defaultOpen={query.edit === "1"}
+            />
           )}
 
           {order.order_items.length > 0 && (
