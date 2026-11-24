@@ -60,7 +60,7 @@ export function DeleteAccountCard() {
       </CardHeader>
 
       <CardContent className="grid gap-3">
-        <Field>
+        <Field className="w-full max-w-md">
           <FieldLabel htmlFor="delete-confirm">
             Type <span className="font-mono font-medium">{CONFIRM_PHRASE}</span> to confirm
           </FieldLabel>

@@ -70,7 +70,7 @@ export function UpdatePasswordCard() {
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FieldGroup>
-            <Field data-invalid={!!errors.password}>
+            <Field className="w-full max-w-md" data-invalid={!!errors.password}>
               <FieldLabel htmlFor="password">New password</FieldLabel>
               <PasswordInput
                 id="password"
@@ -81,7 +81,7 @@ export function UpdatePasswordCard() {
               <FieldError errors={[errors.password]} />
             </Field>
 
-            <Field data-invalid={!!errors.confirmPassword}>
+            <Field className="w-full max-w-md" data-invalid={!!errors.confirmPassword}>
               <FieldLabel htmlFor="confirmPassword">Confirm new password</FieldLabel>
               <PasswordInput
                 id="confirmPassword"

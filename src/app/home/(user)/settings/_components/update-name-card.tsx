@@ -69,6 +69,7 @@ export function UpdateNameCard({ initialName }: { initialName: string }) {
                 id="name"
                 autoComplete="name"
                 aria-invalid={!!errors.name}
+                className="w-full max-w-md"
                 {...register("name")}
               />
               <FieldError errors={[errors.name]} />

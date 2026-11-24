@@ -79,6 +79,7 @@ export function UpdateEmailCard({ currentEmail }: { currentEmail: string }) {
                   id="email"
                   type="email"
                   autoComplete="email"
+                  className="w-full max-w-md"
                   aria-invalid={!!errors.email}
                   {...register("email")}
                 />
