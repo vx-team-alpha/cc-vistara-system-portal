@@ -464,9 +464,12 @@
   padding: 24px;
 }
 .skeletonDrawing {
-  width: min(48%, 210px);
-  height: min(82%, 320px);
-  min-height: 220px;
+  width: auto;
+  max-width: 70%;
+  height: min(88%, 370px);
+  min-height: 0;
+  border-radius: 4px;
+  transform: translateY(-16px);
 }
 .skeletonOption {
   width: 100%;
@@ -628,6 +631,16 @@
   background: var(--primary-hover);
   border-color: var(--primary-hover);
 }
+.btnDanger {
+  border-color: var(--bad-line);
+  color: var(--bad);
+}
+.btnDangerSolid,
+.btnDangerSolid:hover {
+  border-color: var(--bad-solid);
+  background: var(--bad-solid);
+  color: var(--on-primary);
+}
 .btn:disabled,
 .iconBtn:disabled {
   opacity: 0.5;
@@ -645,10 +658,191 @@
   gap: 8px;
   margin-top: 20px;
 }
+.statusForm {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.systemSelector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 4px 0 16px;
+}
+.systemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out-quint),
+    border-color 150ms var(--ease-out-quint);
+}
+.systemCard:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+.systemCard[data-active="true"] {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  box-shadow: 0 0 0 1px var(--primary);
+}
+.systemCardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.systemCardDesc {
+  font-size: 11px;
+  color: var(--soft);
+  line-height: 1.35;
+}
+.statusControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.statusControls :is(.select, .btn),
+.rowActions .btn {
+  min-height: 40px;
+}
+.successText {
+  margin: 0;
+  color: var(--ok);
+  font-size: 12px;
+}
+.rowActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.rowTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.actionMenu {
+  position: relative;
+}
+.actionMenu > summary {
+  list-style: none;
+}
+.actionMenu > summary::-webkit-details-marker {
+  display: none;
+}
+.actionMenu[open] > summary {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+}
+.actionMenuPanel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  min-width: 164px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--pop-ring),
+    0 12px 28px var(--pop-shadow);
+}
+.actionMenuItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: 500 13px/1.4 var(--font-body);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--ease-out-quint),
+    color 160ms var(--ease-out-quint);
+}
+.actionMenuItem:hover,
+.actionMenuItem:focus-visible {
+  outline: none;
+  background: var(--fill);
+}
+.actionMenuItem:focus-visible {
+  box-shadow: var(--ring);
+}
+.actionMenuItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.actionMenuDanger {
+  color: var(--bad);
+}
+.clickableRow {
+  position: relative;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease-out-quint);
+}
+.clickableRow:hover {
+  background: var(--surface-hover);
+}
+.stretchedRowLink {
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-decoration: none;
+}
+.stretchedRowLink::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+.stretchedRowLink:focus-visible::after {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: -3px;
+}
 .field {
   display: grid;
   gap: 6px;
   margin-bottom: 14px;
+}
+.checkField {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--fill);
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+.checkField input {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--primary);
+}
+.checkField span {
+  display: grid;
+  gap: 2px;
+}
+.checkField strong {
+  font-weight: 500;
+}
+.checkField small {
+  color: var(--soft);
+  font-size: 12px;
 }
 .formGrid,
 .formGrid3 {
@@ -1187,6 +1381,13 @@
   .styleLibrary,
   .selectedStyle {
     grid-template-columns: 1fr;
+  }
+  .statusControls {
+    grid-template-columns: 1fr;
+  }
+  .rowActions {
+    align-items: flex-end;
+    flex-direction: column-reverse;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2016,6 +2217,21 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
+}
+.confirmDialog .adminDialogHead {
+  margin: 0;
+  padding: 18px 20px;
+  background: var(--band), var(--band-bg);
+  box-shadow: var(--hair-b);
+}
+.confirmDialogBody {
+  padding: 20px;
+}
+.confirmDialogBody > p:first-child {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.6;
 }
 .previewDialog {
   width: min(1100px, calc(100vw - 24px));

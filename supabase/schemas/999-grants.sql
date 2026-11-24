@@ -35,11 +35,15 @@ revoke all on function public.handle_new_user() from public, anon, authenticated
 revoke all on function public.handle_user_email_change() from public, anon, authenticated;
 revoke all on function public.set_updated_at() from public, anon, authenticated;
 revoke all on function public.set_order_number() from public, anon, authenticated, service_role;
+revoke all on function public.delete_order_permanently(uuid, text, text)
+  from public, anon, authenticated, service_role;
+revoke all on function public.enforce_order_lifecycle() from public, anon, authenticated;
 
 -- current_account() is called directly by app code to read the caller's own row,
 -- because the accounts SELECT grant below is column-restricted — see the note
 -- on that grant.
 grant execute on function public.current_account() to authenticated;
+grant execute on function public.delete_order_permanently(uuid, text, text) to authenticated;
 
 -- The trigger functions get NO grant:
 --   handle_new_user, handle_user_email_change, set_updated_at
@@ -103,9 +107,11 @@ revoke all on public.orders from public, anon, authenticated, service_role;
 revoke all on public.order_items from public, anon, authenticated, service_role;
 revoke all on public.order_events from public, anon, authenticated, service_role;
 revoke all on public.order_documents from public, anon, authenticated, service_role;
+revoke all on public.order_deletion_audits from public, anon, authenticated, service_role;
 
 revoke maintain, references, trigger, truncate on public.business_profiles, public.customers,
   public.orders, public.order_items, public.order_events, public.order_documents
+  , public.order_deletion_audits
   from anon, authenticated;
 
 grant select, insert on public.business_profiles to authenticated;
@@ -116,7 +122,9 @@ grant select, insert, delete on public.customers to authenticated;
 grant update (name, phone, phone_normalized, address, city, state, zip_code)
   on public.customers to authenticated;
 
-grant select, insert, delete on public.orders to authenticated;
+-- Permanent deletion must go through delete_order_permanently() so the
+-- non-cascading audit tombstone is written in the same transaction.
+grant select, insert on public.orders to authenticated;
 grant update (status, customer_snapshot, delivery_date, note, revision, issued_at,
   confirmed_at, production_at, completed_at, cancelled_at) on public.orders to authenticated;
 
@@ -127,9 +135,10 @@ grant update (line_number, layout_id, system, width_mm, height_mm, quantity, loc
 
 grant select, insert on public.order_events to authenticated;
 grant select on public.order_documents to authenticated;
+grant select on public.order_deletion_audits to authenticated;
 
 grant all on public.business_profiles, public.customers, public.orders, public.order_items,
-  public.order_events, public.order_documents to service_role;
+  public.order_events, public.order_documents, public.order_deletion_audits to service_role;
 
 
 -- ===========================================================================

@@ -79,3 +79,11 @@ export function formatDate(value: string) {
     timeZone: "UTC",
   }).format(new Date(value));
 }
+
+export function formatStatus(value: string) {
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}

@@ -54,6 +54,7 @@ export const ConfigurationSchema = z.object({
     .default({ width_mm: 900, height_mm: 2100, quantity: 1, location: "" }),
   style: z.string().max(80).default(""),
   design_id: z.union([z.uuid(), z.literal("")]).default(""),
+  design_name: z.string().max(200).default(""),
   side_designs: z
     .record(z.string().max(200), z.uuid())
     .refine((v) => Object.keys(v).length <= 16)
@@ -66,6 +67,17 @@ export const ConfigurationSchema = z.object({
     .record(z.string().max(1000), z.string().max(200))
     .refine((v) => Object.keys(v).length <= 100)
     .default({}),
+  particulars: z
+    .array(
+      z.object({
+        question: z.string().max(200),
+        original_name: z.string().max(200),
+        section: z.string().max(200),
+        answer: z.string().max(500),
+      }),
+    )
+    .max(200)
+    .default([]),
 });
 export type Configuration = z.infer<typeof ConfigurationSchema>;
 export const PublicSubmissionSchema = z.discriminatedUnion("kind", [

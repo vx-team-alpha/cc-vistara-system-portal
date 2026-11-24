@@ -10,9 +10,19 @@ import { buildCatalogue } from "./data.mjs";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 if (existsSync(path.join(root, ".env.local"))) process.loadEnvFile(path.join(root, ".env.local"));
 const command = process.argv[2];
-const source = path.resolve(root, process.env.FRONTAGE_SOURCE || "cc-/web");
+let source = path.resolve(root, process.env.FRONTAGE_SOURCE || "cc-/web");
+if (!existsSync(path.join(source, "public")) && existsSync(path.join(source, "web", "public"))) {
+  source = path.join(source, "web");
+}
 const publicDir = path.join(source, "public");
-const out = path.resolve(root, process.env.FRONTAGE_SEED_DIR || ".frontage-seed");
+const out = path.resolve(
+  root,
+  process.env.FRONTAGE_SEED_DIR ||
+    (existsSync(path.resolve(root, "frontage-seed")) &&
+    !existsSync(path.resolve(root, ".frontage-seed"))
+      ? "frontage-seed"
+      : ".frontage-seed"),
+);
 const url = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(
   /\/$/,
   "",
@@ -46,10 +56,14 @@ const walk = (dir) =>
 function prepare() {
   if (!url)
     throw new Error("Set SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) for the target storage URLs.");
-  if (!existsSync(publicDir))
+  if (!existsSync(publicDir)) {
+    const hint = source.includes("frontage-seed")
+      ? " (Note: FRONTAGE_SOURCE should point to the MVP web directory such as 'cc-/web', not FRONTAGE_SEED_DIR / 'frontage-seed'.)"
+      : "";
     throw new Error(
-      `MVP source not found: ${publicDir}. Set FRONTAGE_SOURCE to its web directory.`,
+      `MVP source not found: ${publicDir}. Set FRONTAGE_SOURCE to its web directory.${hint}`,
     );
+  }
   mkdirSync(path.join(out, "objects"), { recursive: true });
   const mimeOf = (file) => {
     if (mime[path.extname(file).toLowerCase()]) return mime[path.extname(file).toLowerCase()];

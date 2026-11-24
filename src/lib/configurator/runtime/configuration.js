@@ -1,5 +1,6 @@
 import doorPositions from "./door-letterplate-positions.js";
 import { glassPanes } from "./glass-panes.js";
+import { profileSystemQuestions } from "./profile-system-questions.js";
 
 // Catalogue state is local. Backend IDs remain evidence; UI keys include the
 // editable section because a heading can occur more than once in one product.
@@ -31,7 +32,7 @@ export function designsFor(data, range, style) {
   return styles[style] ?? Object.values(styles)[0] ?? [];
 }
 
-export function questionList(data, layout, design, sideDesigns, picks) {
+export function questionList(data, layout, design, sideDesigns, picks, system = "eurocell") {
   if (!layout) return [];
   const door = design ?? layout;
   const sideSections = layout.views["1"].sections.filter((s) => s.role === "side");
@@ -329,6 +330,60 @@ export function questionList(data, layout, design, sideDesigns, picks) {
       })[description] || "",
   };
   for (const q of list) {
+    if (system === "rehau") {
+      if (q.originalName === "Cill") {
+        const prevId = q.currentId;
+        const prevDesc = q.options?.find((o) => o.id === prevId)?.description?.toLowerCase();
+        q.options = [
+          { id: "rehau-cill-150", description: "150mm cill", src: "", isCurrentOption: true },
+          { id: "rehau-cill-180", description: "180mm cill", src: "" },
+          { id: "rehau-cill-95", description: "95mm stub cill", src: "" },
+          { id: "rehau-cill-none", description: "No cill", src: "" },
+        ];
+        const matched = q.options.find(
+          (o) =>
+            o.id === picks[q.key] ||
+            (prevDesc && o.description.toLowerCase().includes(prevDesc.replace(/mm.*$/, ""))),
+        );
+        q.currentId = matched?.id ?? q.options[0].id;
+      }
+      if (q.originalName === "Threshold") {
+        const prevId = q.currentId;
+        const prevDesc = q.options?.find((o) => o.id === prevId)?.description?.toLowerCase();
+        q.options = [
+          {
+            id: "rehau-thresh-72",
+            description: "72mm PVCu threshold",
+            src: "/diagrams/threshold-pvc.svg",
+            isCurrentOption: true,
+          },
+          {
+            id: "rehau-thresh-exitex-silver",
+            description: "Exitex low threshold (silver)",
+            src: "/diagrams/threshold-silver.svg",
+          },
+          {
+            id: "rehau-thresh-exitex-gold",
+            description: "Exitex low threshold (gold)",
+            src: "/diagrams/threshold-gold.svg",
+          },
+          {
+            id: "rehau-thresh-52",
+            description: "52mm PVCu threshold",
+            src: "/diagrams/threshold-pvc.svg",
+          },
+        ];
+        const matched = q.options.find(
+          (o) =>
+            o.id === picks[q.key] ||
+            (prevDesc &&
+              ((prevDesc.includes("gold") && o.description.includes("gold")) ||
+                (prevDesc.includes("silver") && o.description.includes("silver")) ||
+                (prevDesc.includes("pvc") && o.description.includes("72mm")))),
+        );
+        q.currentId = matched?.id ?? q.options[0].id;
+      }
+    }
     const pick = diagramFor[q.originalName];
     if (!pick) continue;
     q.options = q.options.map((o) => ({ ...o, src: pick(o.description) || o.src }));
@@ -337,9 +392,11 @@ export function questionList(data, layout, design, sideDesigns, picks) {
       if (bottom) q.currentId = bottom.id;
     }
   }
+  for (const profileQuestion of profileSystemQuestions(system)) add(profileQuestion, "frame");
   return list
     .filter((q) => {
       if (!q.options?.length && !q.hasText) return false;
+      if (q.originalName === "Door Range") return false;
       if (/split position/i.test(q.originalName)) return false;
       if (q.originalName === "Letterplate Position")
         return letter?.description === "Letterplate" && q.options?.length > 0;

@@ -30,11 +30,12 @@ export function doorState(data, source, configuration) {
     const side = data.sideDesigns?.[range]?.find((d) => d.designId === id);
     if (side) sides[section] = side;
   }
+  const system = configuration?.system || "eurocell";
   let picks = { ...configuration.picks };
   // Parent choices and visible descendants settle together in a bounded pass.
   let questions = [];
   for (let i = 0; i < 4; i++) {
-    questions = questionList(data, source, design, sides, picks);
+    questions = questionList(data, source, design, sides, picks, system);
     const next = reconcile(picks, questions);
     if (JSON.stringify(next) === JSON.stringify(picks)) break;
     picks = next;

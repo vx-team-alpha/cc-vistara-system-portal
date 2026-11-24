@@ -74,6 +74,11 @@ test("door finish choice changes the stored-catalogue SVG and sanitizes safely",
 });
 test("door snapshot uses catalogue labels and rejects forged choices", async () => {
   const state = doorState(manifest, door.features.source, configuration);
+  assert.equal(
+    state.questions.some((question) => question.originalName === "Door Range"),
+    false,
+  );
+  assert.equal(state.design.designName, "Augusta Centre Farmhouse");
   const runtime = {
     kind: "door",
     source: door.features.source,
@@ -87,6 +92,11 @@ test("door snapshot uses catalogue labels and rejects forged choices", async () 
     design_id: state.design.designId,
   });
   assert.ok(result.particulars.length > 0);
+  assert.equal(result.design_name, "Augusta Centre Farmhouse");
+  assert.equal(
+    result.particulars.some((item) => item.original_name === "Door Range"),
+    false,
+  );
   await assert.rejects(() =>
     validateConfiguration(runtime, {
       ...configuration,
@@ -539,5 +549,80 @@ test("cill profile member renders with 50mm overhang and removes when No Cill se
   assert.equal(
     standardLeft.querySelector("path").getAttribute("d"),
     "M 70 70 L -0 0 L 2020 0 L 1950 70 Z",
+  );
+});
+
+test("Rehau Total70 presents profile questions, adapted cills, and renders Exitex threshold", async () => {
+  const rehauConfig = { picks: {}, texts: {}, side_designs: {}, system: "rehau" };
+  const state = doorState(manifest, door.features.source, rehauConfig);
+
+  const outerFrameQ = state.questions.find((q) => q.originalName === "Outer frame");
+  assert.ok(outerFrameQ);
+  assert.deepEqual(
+    outerFrameQ.options.map((o) => o.description),
+    ["Composite outer frame", "Universal outer frame"],
+  );
+
+  const lockQ = state.questions.find((q) => q.originalName === "Locking");
+  assert.ok(lockQ);
+  assert.deepEqual(
+    lockQ.options.map((o) => o.description),
+    ["ERA Lock", "ERA Invincible Lock", "Hook lock"],
+  );
+
+  const safeTQ = state.questions.find((q) => q.originalName === "Safe T bar");
+  assert.ok(safeTQ);
+
+  const restrictorQ = state.questions.find((q) => q.originalName === "Restrictor");
+  assert.ok(restrictorQ);
+
+  const cillQ = state.questions.find((q) => q.originalName === "Cill");
+  assert.ok(cillQ);
+  assert.deepEqual(
+    cillQ.options.map((o) => o.description),
+    ["150mm cill", "180mm cill", "95mm stub cill", "No cill"],
+  );
+
+  const thresholdQ = state.questions.find((q) => q.originalName === "Threshold");
+  assert.ok(thresholdQ);
+  assert.deepEqual(
+    thresholdQ.options.map((o) => o.description),
+    [
+      "72mm PVCu threshold",
+      "Exitex low threshold (silver)",
+      "Exitex low threshold (gold)",
+      "52mm PVCu threshold",
+    ],
+  );
+
+  const exitexSilver = thresholdQ.options.find(
+    (o) => o.description === "Exitex low threshold (silver)",
+  );
+  const cill95 = cillQ.options.find((o) => o.description === "95mm stub cill");
+  const svg = await renderDoor({
+    data: manifest,
+    layout: door.features.source,
+    design: state.design,
+    sideDesigns: state.sides,
+    questions: state.questions,
+    picks: { ...state.picks, [thresholdQ.key]: exitexSilver.id, [cillQ.key]: cill95.id },
+    texts: {},
+    internal: false,
+  });
+  assert.match(svg, /<svg/);
+  const doc = new dom.window.DOMParser().parseFromString(svg, "image/svg+xml");
+  const thresholdG = [...doc.querySelectorAll("g")].find((g) =>
+    [...g.childNodes].some(
+      (c) => c.nodeType === 8 && c.textContent.trim().startsWith("Profile_member_fc745b90"),
+    ),
+  );
+  assert.ok(thresholdG);
+  assert.equal(
+    thresholdG.querySelector("g[transform] path").getAttribute("d"),
+    "M 0 13 L -0 0 L 900 -0 L 900 13 Z",
+  );
+  assert.equal(
+    thresholdG.querySelector("g[transform] rect").getAttribute("fill"),
+    "rgba(169, 169, 169, 1)",
   );
 });

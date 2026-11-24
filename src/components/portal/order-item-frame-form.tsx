@@ -2,33 +2,69 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
-import { createOrderItemAction } from "@/server/orders/actions";
-import { CreateOrderItemSchema, type CreateOrderItemInput } from "@/server/orders/schemas";
+import { createOrderItemAction, updateOrderItemAction } from "@/server/orders/actions";
+import { CreateOrderItemSchema, UpdateOrderItemSchema } from "@/server/orders/schemas";
 
 import s from "./portal.module.css";
 
-export function OrderItemFrameForm({ orderId, layoutId }: { orderId: string; layoutId: string }) {
+export function OrderItemFrameForm({
+  orderId,
+  layoutId,
+  revision,
+  item,
+}: {
+  orderId: string;
+  layoutId: string;
+  revision: number;
+  item?: {
+    id: string;
+    layout_id: string | null;
+    system?: string;
+    width_mm: number;
+    height_mm: number;
+    quantity: number;
+    location: string;
+  };
+}) {
+  const editing = Boolean(item);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
   const form = useForm({
-    resolver: zodResolver(CreateOrderItemSchema),
+    resolver: zodResolver(UpdateOrderItemSchema),
     defaultValues: {
       order_id: orderId,
+      item_id: item?.id ?? "00000000-0000-0000-0000-000000000000",
       layout_id: layoutId,
-      width_mm: 900,
-      height_mm: 2100,
-      quantity: 1,
-      location: "",
+      system: (item?.system === "rehau" ? "rehau" : "eurocell") as "eurocell" | "rehau",
+      revision,
+      width_mm: item?.width_mm ?? 900,
+      height_mm: item?.height_mm ?? 2100,
+      quantity: item?.quantity ?? 1,
+      location: item?.location ?? "",
     },
   });
 
-  const submit = form.handleSubmit((values: CreateOrderItemInput) => {
+  const selectedSystem = useWatch({ control: form.control, name: "system" }) ?? "eurocell";
+
+  const submit = form.handleSubmit((values) => {
+    const styleChanged = item?.layout_id && item.layout_id !== layoutId;
+    const systemChanged = item?.system && item.system !== values.system;
+    if (
+      (styleChanged || systemChanged) &&
+      !window.confirm(
+        "Changing the door style or profile system will permanently reset its saved configuration and drawings. Continue?",
+      )
+    ) {
+      return;
+    }
     setMessage("");
     startTransition(async () => {
       try {
-        const result = await createOrderItemAction(values);
+        const result = editing
+          ? await updateOrderItemAction(UpdateOrderItemSchema.parse(values))
+          : await createOrderItemAction(CreateOrderItemSchema.parse(values));
         if (result && !result.ok) setMessage(result.error);
       } catch (error) {
         if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
@@ -40,7 +76,29 @@ export function OrderItemFrameForm({ orderId, layoutId }: { orderId: string; lay
   return (
     <form onSubmit={submit} noValidate data-test="frame-details-form">
       <input type="hidden" {...form.register("order_id")} />
+      <input type="hidden" {...form.register("item_id")} />
       <input type="hidden" {...form.register("layout_id")} />
+      <input type="hidden" {...form.register("revision")} />
+      <div className={s.field}>
+        <span className={s.label}>Profile system</span>
+        <div className={s.systemSelector} role="radiogroup" aria-label="Profile system">
+          <label className={s.systemCard} data-active={selectedSystem === "eurocell"}>
+            <input
+              type="radio"
+              value="eurocell"
+              className={s.srOnly}
+              {...form.register("system")}
+            />
+            <span className={s.systemCardTitle}>Eurocell Composite</span>
+            <span className={s.systemCardDesc}>70mm Eurologik Outer Frame · 85–225mm Cills</span>
+          </label>
+          <label className={s.systemCard} data-active={selectedSystem === "rehau"}>
+            <input type="radio" value="rehau" className={s.srOnly} {...form.register("system")} />
+            <span className={s.systemCardTitle}>Rehau Total70</span>
+            <span className={s.systemCardDesc}>72mm Rehau Outer Frame · 95–180mm Cills</span>
+          </label>
+        </div>
+      </div>
       <div className={s.formGrid}>
         <label className={s.field}>
           <span className={s.label}>Width (mm)</span>
@@ -118,7 +176,11 @@ export function OrderItemFrameForm({ orderId, layoutId }: { orderId: string; lay
           disabled={pending}
           data-test="save-frame-details"
         >
-          {pending ? "Saving frame details…" : "Continue to door questions"}
+          {pending
+            ? "Saving frame details…"
+            : editing
+              ? "Save frame and continue"
+              : "Continue to door questions"}
         </button>
       </div>
     </form>

@@ -73,7 +73,7 @@ create table public.order_items (
   account_id uuid not null references public.accounts(id) on delete cascade,
   line_number smallint not null check (line_number > 0),
   layout_id uuid references public.layouts(id) on delete restrict,
-  system text not null default 'eurocell' check (system = 'eurocell'),
+  system text not null default 'eurocell' check (system in ('eurocell', 'rehau')),
   width_mm integer not null check (width_mm between 300 and 2800),
   height_mm integer not null check (height_mm between 1750 and 2500),
   quantity integer not null default 1 check (quantity between 1 and 999),
@@ -126,3 +126,19 @@ create table public.order_documents (
 );
 
 create index order_documents_order_idx on public.order_documents (order_id, created_at desc);
+
+-- Minimal, non-cascading evidence that an administrator permanently removed
+-- an order. Customer, item, configuration and document content is deliberately
+-- excluded so the deleted aggregate itself is not retained.
+create table public.order_deletion_audits (
+  id uuid primary key default gen_random_uuid(),
+  account_id uuid not null references public.accounts(id) on delete cascade,
+  order_id uuid not null,
+  order_number text not null,
+  deleted_by uuid not null references public.accounts(id) on delete cascade,
+  reason text not null check (char_length(btrim(reason)) between 5 and 500),
+  deleted_at timestamptz not null default now()
+);
+
+create index order_deletion_audits_account_idx
+  on public.order_deletion_audits (account_id, deleted_at desc);

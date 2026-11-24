@@ -129,3 +129,6 @@ create trigger set_updated_at before update on public.order_items
 
 create trigger set_order_number before insert on public.orders
   for each row execute function public.set_order_number();
+
+create trigger enforce_order_lifecycle before update on public.orders
+  for each row execute function public.enforce_order_lifecycle();

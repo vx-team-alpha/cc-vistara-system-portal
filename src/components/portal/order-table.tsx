@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import type { Json } from "@/types/supabase";
 
-import { Badge, Empty, formatDate } from "./ui";
+import { Badge, Empty, formatDate, formatStatus } from "./ui";
 
 import s from "./portal.module.css";
 
@@ -60,9 +60,12 @@ export function OrderTable({ orders }: { orders: OrderRow[] }) {
             const contact = customer(order.customer_snapshot);
             const quantity = order.order_items.reduce((total, item) => total + item.quantity, 0);
             return (
-              <tr key={order.id}>
+              <tr key={order.id} className={s.clickableRow}>
                 <td>
-                  <Link href={`/home/quotes/${order.id}`}>{order.order_number}</Link>
+                  <Link className={s.stretchedRowLink} href={`/home/quotes/${order.id}`}>
+                    {order.order_number}
+                    <span className={s.srOnly}> for {contact.name}</span>
+                  </Link>
                 </td>
                 <td>
                   <span className={s.cellTitle}>{contact.name}</span>
@@ -70,7 +73,7 @@ export function OrderTable({ orders }: { orders: OrderRow[] }) {
                 </td>
                 <td>{quantity || "—"}</td>
                 <td>
-                  <Badge state={order.status}>{order.status.replace("_", " ")}</Badge>
+                  <Badge state={order.status}>{formatStatus(order.status)}</Badge>
                 </td>
                 <td>{order.delivery_date ? formatDate(order.delivery_date) : "Not set"}</td>
                 <td>{formatDate(order.updated_at)}</td>

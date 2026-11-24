@@ -154,6 +154,7 @@ alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.order_events enable row level security;
 alter table public.order_documents enable row level security;
+alter table public.order_deletion_audits enable row level security;
 
 create policy business_profiles_select on public.business_profiles
   for select to authenticated using (account_id = (select auth.uid()));
@@ -183,20 +184,60 @@ create policy orders_update on public.orders
   for update to authenticated
   using (account_id = (select auth.uid()))
   with check (account_id = (select auth.uid()));
-create policy orders_delete_draft on public.orders
+create policy orders_delete_admin on public.orders
   for delete to authenticated
-  using (account_id = (select auth.uid()) and status = 'draft');
+  using (
+    account_id = (select auth.uid())
+    and status in ('draft', 'cancelled')
+    and exists (
+      select 1
+      from public.accounts a
+      where a.id = (select auth.uid()) and a.role = 'admin'
+    )
+  );
 
 create policy order_items_select on public.order_items
   for select to authenticated using (account_id = (select auth.uid()));
 create policy order_items_insert on public.order_items
-  for insert to authenticated with check (account_id = (select auth.uid()));
+  for insert to authenticated with check (
+    account_id = (select auth.uid())
+    and exists (
+      select 1 from public.orders o
+      where o.id = order_id
+        and o.account_id = (select auth.uid())
+        and o.status = 'draft'
+    )
+  );
 create policy order_items_update on public.order_items
   for update to authenticated
-  using (account_id = (select auth.uid()))
-  with check (account_id = (select auth.uid()));
+  using (
+    account_id = (select auth.uid())
+    and exists (
+      select 1 from public.orders o
+      where o.id = order_id
+        and o.account_id = (select auth.uid())
+        and o.status = 'draft'
+    )
+  )
+  with check (
+    account_id = (select auth.uid())
+    and exists (
+      select 1 from public.orders o
+      where o.id = order_id
+        and o.account_id = (select auth.uid())
+        and o.status = 'draft'
+    )
+  );
 create policy order_items_delete on public.order_items
-  for delete to authenticated using (account_id = (select auth.uid()));
+  for delete to authenticated using (
+    account_id = (select auth.uid())
+    and exists (
+      select 1 from public.orders o
+      where o.id = order_id
+        and o.account_id = (select auth.uid())
+        and o.status = 'draft'
+    )
+  );
 
 create policy order_events_select on public.order_events
   for select to authenticated using (account_id = (select auth.uid()));
@@ -205,3 +246,13 @@ create policy order_events_insert on public.order_events
 
 create policy order_documents_select on public.order_documents
   for select to authenticated using (account_id = (select auth.uid()));
+
+create policy order_deletion_audits_select_admin on public.order_deletion_audits
+  for select to authenticated using (
+    account_id = (select auth.uid())
+    and exists (
+      select 1
+      from public.accounts a
+      where a.id = (select auth.uid()) and a.role = 'admin'
+    )
+  );

@@ -213,7 +213,13 @@ export function AdminUsersSkeleton() {
 
 export const WorkspaceSkeleton = OverviewSkeleton;
 
-export function DrawingSkeleton() {
+export function DrawingSkeleton({
+  widthMm = 900,
+  heightMm = 2100,
+}: {
+  widthMm?: number;
+  heightMm?: number;
+}) {
   return (
     <div
       role="status"
@@ -221,7 +227,11 @@ export function DrawingSkeleton() {
       aria-label="Updating your design"
       className={s.drawingSkeleton}
     >
-      <Block className={s.skeletonDrawing} />
+      <span
+        aria-hidden="true"
+        className={`${s.skeleton} ${s.skeletonDrawing}`}
+        style={{ aspectRatio: `${widthMm} / ${heightMm}` }}
+      />
     </div>
   );
 }

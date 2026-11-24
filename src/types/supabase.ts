@@ -228,6 +228,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"order_deletion_audits": {
+                  Row: {
+                    "account_id": string,"deleted_at": string,"deleted_by": string,"id": string,"order_id": string,"order_number": string,"reason": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"deleted_at"?: string,"deleted_by": string,"id"?: string,"order_id": string,"order_number": string,"reason": string
+                  }
+                  Update: {
+                    "account_id"?: string,"deleted_at"?: string,"deleted_by"?: string,"id"?: string,"order_id"?: string,"order_number"?: string,"reason"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "order_deletion_audits_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_deletion_audits_deleted_by_fkey"
+      columns: ["deleted_by"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"order_documents": {
                   Row: {
                     "account_id": string,"checksum": string,"created_at": string,"document_type": string,"generation_metadata": NonNullable<Json>,"id": string,"order_id": string,"revision": number,"storage_key": string
@@ -425,7 +451,10 @@ isOneToOne: false
         to: "accounts"
         isOneToOne: false
         isSetofReturn: true
-      } }
+      } },
+"delete_order_permanently":
+{ Args: { "confirmed_order_number": string,"deletion_reason": string,"target_order_id": string }; Returns: boolean
+                           }
           }
           Enums: {
             [_ in never]: never

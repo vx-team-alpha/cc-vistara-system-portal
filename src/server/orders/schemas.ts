@@ -5,7 +5,7 @@ import { ConfigurationSchema } from "@/server/portal/schemas";
 const requiredText = (label: string, max: number) =>
   z.string().trim().min(1, `${label} is required.`).max(max, `${label} is too long.`);
 
-export const CreateOrderSchema = z.object({
+const OrderDetailsSchema = z.object({
   customer_name: requiredText("Customer name", 120),
   phone: requiredText("Phone", 50).regex(/^[0-9+().\-\s]+$/, "Enter a valid phone number."),
   address: requiredText("Address", 240),
@@ -19,6 +19,14 @@ export const CreateOrderSchema = z.object({
   note: z.string().trim().max(4000, "Note is too long."),
 });
 
+export const CreateOrderSchema = OrderDetailsSchema;
+
+export const UpdateOrderSchema = OrderDetailsSchema.extend({
+  order_id: z.uuid(),
+  revision: z.coerce.number().int().positive(),
+  update_customer_profile: z.boolean().default(false),
+});
+
 export const OrderListSchema = z.object({
   status: z
     .enum(["all", "draft", "issued", "confirmed", "in_production", "completed", "cancelled"])
@@ -27,9 +35,9 @@ export const OrderListSchema = z.object({
   page: z.number().int().min(1).max(10000).default(1),
 });
 
-export const CreateOrderItemSchema = z.object({
-  order_id: z.uuid(),
+const OrderItemFrameSchema = z.object({
   layout_id: z.uuid(),
+  system: z.enum(["eurocell", "rehau"]).default("eurocell"),
   width_mm: z.coerce
     .number({ error: "Enter the frame width." })
     .int("Width must be a whole millimetre.")
@@ -48,14 +56,50 @@ export const CreateOrderItemSchema = z.object({
   location: z.string().trim().max(120, "Location is too long."),
 });
 
+export const CreateOrderItemSchema = OrderItemFrameSchema.extend({
+  order_id: z.uuid(),
+  revision: z.coerce.number().int().positive(),
+});
+
+export const UpdateOrderItemSchema = OrderItemFrameSchema.extend({
+  order_id: z.uuid(),
+  item_id: z.uuid(),
+  revision: z.coerce.number().int().positive(),
+});
+
 export const SaveOrderItemConfigurationSchema = z.object({
   order_id: z.uuid(),
   item_id: z.uuid(),
+  revision: z.coerce.number().int().positive(),
   configuration: ConfigurationSchema,
   outside_drawing: z.string().max(2_000_000).default(""),
   inside_drawing: z.string().max(2_000_000).default(""),
 });
 
+export const UpdateOrderStatusSchema = z.object({
+  order_id: z.uuid(),
+  revision: z.coerce.number().int().positive(),
+  status: z.enum(["draft", "issued", "confirmed", "in_production", "completed", "cancelled"]),
+});
+
+export const OrderItemMutationSchema = z.object({
+  order_id: z.uuid(),
+  item_id: z.uuid(),
+  revision: z.coerce.number().int().positive(),
+});
+
+export const DeleteOrderSchema = z.object({
+  order_id: z.uuid(),
+  order_number: requiredText("Order number", 80),
+  confirmation: requiredText("Order number confirmation", 80),
+  reason: requiredText("Deletion reason", 500).min(
+    5,
+    "Explain why this order is being permanently deleted.",
+  ),
+});
+
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
 export type CreateOrderItemInput = z.infer<typeof CreateOrderItemSchema>;
+export type UpdateOrderInput = z.infer<typeof UpdateOrderSchema>;
+export type UpdateOrderItemInput = z.infer<typeof UpdateOrderItemSchema>;
 export type OrderListInput = z.infer<typeof OrderListSchema>;

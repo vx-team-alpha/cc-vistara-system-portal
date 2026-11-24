@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 
 import { saveOrderItemConfigurationAction } from "@/server/orders/actions";
 import type { Configuration } from "@/server/portal/schemas";
@@ -16,16 +16,33 @@ export function OrderItemConfigurator({
   itemId,
   layoutId,
   frameDetails,
+  system = "eurocell",
+  revision,
+  initialConfiguration,
+  initialDrawings,
 }: {
   orderId: string;
   itemId: string;
   layoutId: string;
   frameDetails: FrameDetails;
+  system?: "eurocell" | "rehau";
+  revision: number;
+  initialConfiguration: Configuration;
+  initialDrawings: { outside: string; inside: string };
 }) {
-  const [configuration, setConfiguration] = useState<Configuration | null>(null);
-  const [drawings, setDrawings] = useState({ outside: "", inside: "" });
+  const [configuration, setConfiguration] = useState<Configuration | null>(initialConfiguration);
+  const [drawings, setDrawings] = useState(initialDrawings);
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
+  const editing = Boolean(initialConfiguration.design_id);
+
+  const configWithSystem = useMemo(
+    () => ({
+      ...initialConfiguration,
+      system,
+    }),
+    [initialConfiguration, system],
+  );
   const onDrawingChange = useCallback((markup: string, internal: boolean) => {
     if (!markup) return;
     setDrawings((value) => ({ ...value, [internal ? "inside" : "outside"]: markup }));
@@ -39,7 +56,12 @@ export function OrderItemConfigurator({
         const result = await saveOrderItemConfigurationAction({
           order_id: orderId,
           item_id: itemId,
-          configuration: { ...configuration, system: "eurocell", frame: frameDetails },
+          revision,
+          configuration: {
+            ...configuration,
+            system,
+            frame: frameDetails,
+          },
           outside_drawing: drawings.outside,
           inside_drawing: drawings.inside,
         });
@@ -51,6 +73,18 @@ export function OrderItemConfigurator({
     });
   };
 
+  const saveButton = (label: string) => (
+    <button
+      type="button"
+      className={`${s.btn} ${s.btnPrimary}`}
+      disabled={pending || !configuration}
+      onClick={save}
+      data-test="save-door-configuration"
+    >
+      {pending ? "Saving…" : label}
+    </button>
+  );
+
   return (
     <>
       {message && (
@@ -61,20 +95,12 @@ export function OrderItemConfigurator({
       <Configurator
         configUrl={`/api/orders/${orderId}/catalogue/config`}
         layoutId={layoutId}
+        initialConfiguration={configWithSystem}
         frameDetails={frameDetails}
         onChange={setConfiguration}
         onDrawingChange={onDrawingChange}
-        completionAction={
-          <button
-            type="button"
-            className={`${s.btn} ${s.btnPrimary}`}
-            disabled={pending || !configuration}
-            onClick={save}
-            data-test="save-door-configuration"
-          >
-            {pending ? "Saving door…" : "Save door"}
-          </button>
-        }
+        headerAction={editing ? saveButton("Save changes") : null}
+        completionAction={editing ? null : saveButton("Save door")}
       />
     </>
   );

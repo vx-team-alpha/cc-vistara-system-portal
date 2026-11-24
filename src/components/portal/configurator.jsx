@@ -62,7 +62,7 @@ function loadRuntime(sourceKey, layoutId, configUrl) {
   }
   return promise;
 }
-/** @param {{publicKey?:string, configUrl?:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, onDrawingChange?:(value:string, internal:boolean)=>void, headerAction?:import('react').ReactNode, completionAction?:import('react').ReactNode, frameDetails?:import('@/server/portal/schemas').Configuration['frame']}} props */
+/** @param {{publicKey?:string, configUrl?:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, onDrawingChange?:(value:string, internal:boolean)=>void, headerAction?:import('react').ReactNode, completionAction?:import('react').ReactNode, frameDetails?:import('@/server/portal/schemas').Configuration['frame'], initialConfiguration?:import('@/server/portal/schemas').Configuration|null}} props */
 export function Configurator({
   publicKey,
   configUrl,
@@ -72,11 +72,18 @@ export function Configurator({
   headerAction = null,
   completionAction = null,
   frameDetails = null,
+  initialConfiguration = null,
 }) {
   const [runtime, setRuntime] = useState(null),
     [error, setError] = useState(""),
     [retry, setRetry] = useState(0);
-  const [configuration, setConfiguration] = useState(empty),
+  const [configuration, setConfiguration] = useState(() => ({
+      ...empty,
+      ...(initialConfiguration || {}),
+      side_designs: { ...empty.side_designs, ...(initialConfiguration?.side_designs || {}) },
+      picks: { ...empty.picks, ...(initialConfiguration?.picks || {}) },
+      texts: { ...empty.texts, ...(initialConfiguration?.texts || {}) },
+    })),
     [internal, setInternal] = useState(false),
     [index, setIndex] = useState(0),
     [query, setQuery] = useState("");
@@ -131,7 +138,12 @@ export function Configurator({
       ...configuration,
       style: state.style || "",
       design_id: state.design?.designId || "",
-      design_name: state.design?.title || state.design?.name || state.design?.design || "",
+      design_name:
+        state.design?.designName ||
+        state.design?.title ||
+        state.design?.name ||
+        state.design?.design ||
+        "",
       picks: state.picks,
       particulars,
     });
@@ -228,7 +240,6 @@ export function Configurator({
   function pick(option) {
     let next = { ...configuration, picks: { ...state.picks, [question.key]: option.id } };
     if (runtime.kind === "door") {
-      if (question.originalName === "Door Range") next = { ...empty, style: option.description };
       if (question.originalName === "Door Design (Door)") next.design_id = option.id;
       if (question.originalName === "Door Design (Side)")
         next.side_designs = { ...configuration.side_designs, [question.section]: option.id };
@@ -258,7 +269,7 @@ export function Configurator({
         </div>
         <div className={s.elevation} aria-busy={drawing.request !== request}>
           {drawing.request !== request ? (
-            <DrawingSkeleton />
+            <DrawingSkeleton widthMm={frameDetails?.width_mm} heightMm={frameDetails?.height_mm} />
           ) : drawing.error ? (
             <p role="alert">
               {drawing.error}

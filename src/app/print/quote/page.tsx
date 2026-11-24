@@ -94,6 +94,10 @@ function DeliveryNoteContent() {
     try {
       const parsed = JSON.parse(storedQuote);
       const config = parsed.config || {};
+      const savedParticulars = Array.isArray(config.particulars) ? config.particulars : [];
+      const selectedDoorDesign = savedParticulars.find((particular: Particular) =>
+        /^door design(?: \(door\))?$/i.test(particular.original_name || particular.question || ""),
+      )?.answer;
       return {
         ...fallback,
         brandName: parsed.brand || fallback.brandName,
@@ -103,8 +107,8 @@ function DeliveryNoteContent() {
         frame: parsed.frame || config.frame || fallback.frame,
         range: parsed.range || fallback.range,
         layoutName: parsed.layout_name || fallback.layoutName,
-        designName: config.design_name || config.style || fallback.designName,
-        particulars: Array.isArray(config.particulars) ? config.particulars : [],
+        designName: config.design_name || selectedDoorDesign || fallback.designName,
+        particulars: savedParticulars,
         svgMarkup: parsed.drawing || fallback.svgMarkup,
       };
     } catch {
@@ -338,9 +342,9 @@ function DeliveryNoteContent() {
             <tbody>
               {manufacturing.parts.map((part) => (
                 <tr key={part.lineId}>
-                  <td>{part.partCode || "—"}</td>
+                  <td>{part.partCode ? part.partCode : ""}</td>
                   <td>{part.description}</td>
-                  <td>{part.totalQuantity}</td>
+                  <td>{part.totalQuantity ?? 1}</td>
                   <td>{part.widthMm ?? "—"}</td>
                   <td>{part.heightMm ?? "—"}</td>
                   <td>
@@ -352,17 +356,8 @@ function DeliveryNoteContent() {
               ))}
             </tbody>
           </table>
-          {manufacturing.warnings.map((warning) => (
-            <p className={s.manufacturingWarning} key={warning}>
-              {warning}
-            </p>
-          ))}
         </section>
-      ) : (
-        <p className={s.manufacturingWarning}>
-          Manufacturing rules for this profile system have not been configured yet.
-        </p>
-      )}
+      ) : null}
 
       {/* ── Signature Block ── */}
       <div className={s.signBox}>

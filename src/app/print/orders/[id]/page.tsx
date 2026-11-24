@@ -68,15 +68,29 @@ function printDate(value: string | null) {
   }).format(new Date(value));
 }
 
-function drawingUrl(markup: string | null) {
-  return markup ? `data:image/svg+xml;base64,${Buffer.from(markup).toString("base64")}` : "";
+function printStatus(value: string) {
+  return value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
-export default async function OrderPrintPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function OrderPrintPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ item?: string }>;
+}) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   if (!z.uuid().safeParse(id).success) notFound();
   const { order, business } = await getOrderPrintData(id);
   if (!order || !order.order_items.length) notFound();
+  if (query.item && !z.uuid().safeParse(query.item).success) notFound();
+  const selectedItems = query.item
+    ? order.order_items.filter((item) => item.id === query.item)
+    : order.order_items;
+  if (!selectedItems.length) notFound();
   const customer = object(order.customer_snapshot);
 
   return (
@@ -128,7 +142,7 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
           <div>
             <h3>Order details</h3>
             <p>
-              <strong>Status:</strong> {order.status.replaceAll("_", " ")}
+              <strong>Status:</strong> {printStatus(order.status)}
             </p>
             <p>
               <strong>Order note:</strong> {order.note || "No note"}
@@ -137,10 +151,10 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
         </section>
 
         <h3 className={s.sectionIntro}>
-          Manufacture the following {order.order_items.length === 1 ? "item" : "items"}:
+          Manufacture the following {selectedItems.length === 1 ? "item" : "items"}:
         </h3>
 
-        {order.order_items
+        {selectedItems
           .toSorted((a, b) => a.line_number - b.line_number)
           .map((item) => {
             const config = object(item.configuration);
@@ -148,15 +162,25 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
             const rows = particulars(config.particulars);
             const answers = answerMap(rows);
             const finishes = resolveFinishSelections(rows);
+            const systemId =
+              item.system === "rehau" ||
+              string(config.system) === "rehau" ||
+              string(config.profile_system) === "rehau" ||
+              string(catalogue.system) === "rehau"
+                ? "rehau"
+                : "eurocell";
+            const systemName = systemId === "rehau" ? "Rehau Total70" : "Eurocell Composite";
             const layoutName = string(catalogue.layout_name, `Door ${item.line_number}`);
+            const selectedDoorDesign = firstAnswer(answers, "door design (door)", "door design");
             const designName =
-              string(config.design_name) || string(config.style) || "Composite door";
-            const preview = drawingUrl(item.outside_drawing || item.inside_drawing);
+              string(config.design_name) ||
+              (selectedDoorDesign !== "-" ? selectedDoorDesign : "") ||
+              "Composite door";
+            const drawingMarkup = item.outside_drawing || item.inside_drawing || "";
             let manufacturing = null;
-            let manufacturingError = "";
             try {
               manufacturing = calculateManufacturing({
-                system: "eurocell",
+                system: systemId,
                 style: layoutName,
                 designName,
                 frame: {
@@ -167,21 +191,23 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
                 },
                 particulars: rows,
               });
-            } catch (error) {
-              manufacturingError =
-                error instanceof Error ? error.message : "Parts could not be calculated.";
+            } catch {
+              manufacturing = null;
             }
 
             return (
               <section className={s.item} key={item.id}>
                 <header className={s.itemHeader}>
-                  Item {item.line_number} - Eurocell Composite - {layoutName} - {item.width_mm}w x{" "}
+                  Item {item.line_number} - {systemName} - {layoutName} - {item.width_mm}w x{" "}
                   {item.height_mm}h
                 </header>
                 <div className={s.itemBody}>
                   <figure className={s.preview}>
-                    {preview ? (
-                      <img src={preview} alt={`Outside elevation for item ${item.line_number}`} />
+                    {drawingMarkup ? (
+                      <div
+                        className={s.previewDrawing}
+                        dangerouslySetInnerHTML={{ __html: drawingMarkup }}
+                      />
                     ) : (
                       <div className={s.previewMissing}>Door preview unavailable</div>
                     )}
@@ -192,7 +218,7 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
                   <div className={s.specification}>
                     <dl>
                       <dt>Frame system</dt>
-                      <dd>Eurocell Composite</dd>
+                      <dd>{systemName}</dd>
                       <dt>Frame colour</dt>
                       <dd>{finishes.profile.label}</dd>
                       <dt>Door design</dt>
@@ -217,6 +243,24 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
                       <dd>{firstAnswer(answers, "hinges", "hinge colour")}</dd>
                       <dt>Locking</dt>
                       <dd>{firstAnswer(answers, "locking", "lock")}</dd>
+                      {firstAnswer(answers, "outer frame") !== "-" && (
+                        <>
+                          <dt>Outer frame</dt>
+                          <dd>{firstAnswer(answers, "outer frame")}</dd>
+                        </>
+                      )}
+                      {firstAnswer(answers, "restrictor") !== "-" && (
+                        <>
+                          <dt>Restrictor</dt>
+                          <dd>{firstAnswer(answers, "restrictor")}</dd>
+                        </>
+                      )}
+                      {firstAnswer(answers, "safe t bar") !== "-" && (
+                        <>
+                          <dt>Safe T bar</dt>
+                          <dd>{firstAnswer(answers, "safe t bar")}</dd>
+                        </>
+                      )}
                       <dt>Location</dt>
                       <dd>{item.location || "-"}</dd>
                       <dt>Quantity</dt>
@@ -245,46 +289,35 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
                   </span>
                 </div>
 
-                {manufacturing ? (
-                  <>
-                    <table className={s.partsTable}>
-                      <thead>
-                        <tr>
-                          <th>Part code</th>
-                          <th>Description</th>
-                          <th>Qty</th>
-                          <th>Width</th>
-                          <th>Height</th>
-                          <th>End preps</th>
+                {manufacturing && (
+                  <table className={s.partsTable}>
+                    <thead>
+                      <tr>
+                        <th>Part code</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Width</th>
+                        <th>Height</th>
+                        <th>End preps</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {manufacturing.parts.map((part) => (
+                        <tr key={part.lineId}>
+                          <td>{part.partCode ? part.partCode : ""}</td>
+                          <td>{part.description}</td>
+                          <td>{part.totalQuantity ?? 1}</td>
+                          <td>{part.widthMm ?? "-"}</td>
+                          <td>{part.heightMm ?? "-"}</td>
+                          <td>
+                            {part.leftEndPrep === "none"
+                              ? "-"
+                              : `${part.leftEndPrep} / ${part.rightEndPrep}`}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {manufacturing.parts.map((part) => (
-                          <tr key={part.lineId}>
-                            <td>{part.partCode || "-"}</td>
-                            <td>{part.description}</td>
-                            <td>{part.totalQuantity}</td>
-                            <td>{part.widthMm ?? "-"}</td>
-                            <td>{part.heightMm ?? "-"}</td>
-                            <td>
-                              {part.leftEndPrep === "none"
-                                ? "-"
-                                : `${part.leftEndPrep} / ${part.rightEndPrep}`}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {manufacturing.warnings.map((warning) => (
-                      <p className={s.warning} key={warning}>
-                        {warning}
-                      </p>
-                    ))}
-                  </>
-                ) : (
-                  <p className={s.warning}>
-                    {manufacturingError || "Manufacturing parts are not configured for this item."}
-                  </p>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
 
                 {rows.length > 0 && (

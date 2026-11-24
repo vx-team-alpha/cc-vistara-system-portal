@@ -54,3 +54,4 @@ next-env.d.ts
 cc-
 # Generated catalogue seed data and prepared storage objects
 /.frontage-seed/
+/frontage-seed/

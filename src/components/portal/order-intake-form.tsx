@@ -2,8 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
+import { DatePicker } from "@/components/ui/date-picker";
 import { createOrderAction } from "@/server/orders/actions";
 import { CreateOrderSchema, type CreateOrderInput } from "@/server/orders/schemas";
 
@@ -118,19 +119,27 @@ export function OrderIntakeForm() {
           )}
         </label>
       </div>
-      <label className={s.field}>
+      <div className={s.field}>
         <span className={s.label}>Delivery date</span>
-        <input
-          className={s.input}
-          type="date"
-          aria-invalid={Boolean(form.formState.errors.delivery_date)}
-          {...form.register("delivery_date")}
+        <Controller
+          control={form.control}
+          name="delivery_date"
+          render={({ field }) => (
+            <DatePicker
+              value={field.value}
+              onChange={field.onChange}
+              placeholder="Pick a delivery date"
+              disabled={pending}
+              aria-invalid={Boolean(form.formState.errors.delivery_date)}
+              data-test="delivery-date-picker"
+            />
+          )}
         />
         <span className={s.hint}>Optional. The order date is recorded automatically.</span>
         {form.formState.errors.delivery_date && (
           <span className={s.fieldError}>{form.formState.errors.delivery_date.message}</span>
         )}
-      </label>
+      </div>
       <label className={s.field}>
         <span className={s.label}>Note</span>
         <textarea className={s.textarea} {...form.register("note")} />

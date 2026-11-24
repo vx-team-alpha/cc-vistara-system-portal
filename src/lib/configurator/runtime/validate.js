@@ -57,7 +57,12 @@ export async function validateConfiguration(runtime, configuration) {
     ),
     style: state.style || null,
     design_id: state.design?.designId || null,
-    design_name: state.design?.title || state.design?.name || state.design?.design || "",
+    design_name:
+      state.design?.designName ||
+      state.design?.title ||
+      state.design?.name ||
+      state.design?.design ||
+      "",
     picks: state.picks,
     texts,
     particulars,

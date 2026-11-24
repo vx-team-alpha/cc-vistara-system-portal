@@ -29,7 +29,7 @@ export default async function NewOrderItemPage({
         title="Choose door style"
         note={`${order.order_number} · Select the structural layout before frame details.`}
       >
-        <Badge state="active">Eurocell</Badge>
+        <Badge state="active">Eurocell & Rehau</Badge>
       </PageHead>
       <div className={s.stack}>
         <Link href={`/home/quotes/${order.id}`} className={s.link}>
@@ -38,19 +38,22 @@ export default async function NewOrderItemPage({
         {selected ? (
           <Card
             title={selected.name}
-            note="Eurocell is the only enabled frame system for the first rollout."
+            note="Choose either Eurocell Composite or Rehau Total70 for your door frame."
           >
             <div className={s.selectedStyle}>
               <div className={s.selectedStylePreview}>
                 <LayoutPreview src={selected.image} />
               </div>
               <div className={s.stack}>
-                <Badge state="active">Eurocell Composite</Badge>
                 <div>
                   <h3 className={s.stepTitle}>Frame details</h3>
                   <p className={s.cardNote}>Enter the measurements supplied for this customer.</p>
                 </div>
-                <OrderItemFrameForm orderId={order.id} layoutId={selected.id} />
+                <OrderItemFrameForm
+                  orderId={order.id}
+                  layoutId={selected.id}
+                  revision={order.revision}
+                />
                 <Link className={s.link} href={`/home/quotes/${order.id}/items/new`}>
                   ← Change door style
                 </Link>
