@@ -1,15 +1,24 @@
 import { ConfigurationSchema } from "../../server/portal/schemas.ts";
 
-export const ORDER_STATUS_TRANSITIONS = {
-  draft: ["issued", "cancelled"],
-  issued: ["confirmed", "cancelled"],
-  confirmed: ["in_production", "cancelled"],
-  in_production: ["completed", "cancelled"],
-  completed: [],
-  cancelled: [],
-} as const;
+export const ALL_ORDER_STATUSES = [
+  "draft",
+  "issued",
+  "confirmed",
+  "in_production",
+  "completed",
+  "cancelled",
+] as const;
 
-export type OrderStatus = keyof typeof ORDER_STATUS_TRANSITIONS;
+export type OrderStatus = (typeof ALL_ORDER_STATUSES)[number];
+
+export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
+  draft: ["issued", "confirmed", "in_production", "completed", "cancelled"],
+  issued: ["draft", "confirmed", "in_production", "completed", "cancelled"],
+  confirmed: ["draft", "issued", "in_production", "completed", "cancelled"],
+  in_production: ["draft", "issued", "confirmed", "completed", "cancelled"],
+  completed: ["draft", "issued", "confirmed", "in_production", "cancelled"],
+  cancelled: ["draft", "issued", "confirmed", "in_production", "completed"],
+};
 
 export function canTransitionOrder(current: string, next: string) {
   return (
