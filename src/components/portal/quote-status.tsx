@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
 import { updateQuoteStatus } from "@/server/portal/actions";
 import { QuoteStatusSchema } from "@/server/portal/schemas";
 
@@ -36,9 +37,9 @@ export function QuoteStatus({ id, status }: { id: string; status: string }) {
           <option value="contacted">Contacted</option>
           <option value="closed">Closed</option>
         </select>
-        <button type="submit" disabled={pending} className={`${s.btn} ${s.btnPrimary}`}>
+        <Button type="submit" variant="primary" size="sm" disabled={pending}>
           {pending ? "Saving…" : "Update status"}
-        </button>
+        </Button>
       </div>
       {message && (
         <p role="status" className={s.notice}>

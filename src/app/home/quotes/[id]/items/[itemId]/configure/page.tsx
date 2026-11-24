@@ -69,26 +69,24 @@ export default async function ConfigureOrderItemPage({
         </Badge>
       </PageHeader>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-xs">
-        <OrderItemConfigurator
-          orderId={order.id}
-          itemId={item.id}
-          layoutId={item.layout_id}
-          system={item.system === "rehau" ? "rehau" : "eurocell"}
-          revision={order.revision}
-          initialConfiguration={initialConfiguration}
-          initialDrawings={{
-            outside: item.outside_drawing || "",
-            inside: item.inside_drawing || "",
-          }}
-          frameDetails={{
-            width_mm: item.width_mm,
-            height_mm: item.height_mm,
-            quantity: item.quantity,
-            location: item.location,
-          }}
-        />
-      </div>
+      <OrderItemConfigurator
+        orderId={order.id}
+        itemId={item.id}
+        layoutId={item.layout_id}
+        system={item.system === "rehau" ? "rehau" : "eurocell"}
+        revision={order.revision}
+        initialConfiguration={initialConfiguration}
+        initialDrawings={{
+          outside: item.outside_drawing || "",
+          inside: item.inside_drawing || "",
+        }}
+        frameDetails={{
+          width_mm: item.width_mm,
+          height_mm: item.height_mm,
+          quantity: item.quantity,
+          location: item.location,
+        }}
+      />
     </div>
   );
 }

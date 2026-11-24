@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
+import { Button } from "@/components/ui/button";
 import { createOrderItemAction, updateOrderItemAction } from "@/server/orders/actions";
 import { CreateOrderItemSchema, UpdateOrderItemSchema } from "@/server/orders/schemas";
 
@@ -170,18 +171,13 @@ export function OrderItemFrameForm({
         </p>
       )}
       <div className={s.actions}>
-        <button
-          className={`${s.btn} ${s.btnPrimary}`}
-          type="submit"
-          disabled={pending}
-          data-test="save-frame-details"
-        >
+        <Button variant="primary" type="submit" disabled={pending} data-test="save-frame-details">
           {pending
             ? "Saving frame details…"
             : editing
               ? "Save frame and continue"
               : "Continue to door questions"}
-        </button>
+        </Button>
       </div>
     </form>
   );

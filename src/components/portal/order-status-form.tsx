@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
 import { updateOrderStatusAction } from "@/server/orders/actions";
 
 import s from "./portal.module.css";
@@ -74,14 +75,15 @@ export function OrderStatusForm({
             </option>
           ))}
         </select>
-        <button
+        <Button
           type="submit"
-          className={`${s.btn} ${s.btnPrimary}`}
+          variant="primary"
+          size="sm"
           disabled={pending || status === currentStatus || available.length === 1}
           data-test="update-order-status"
         >
           {pending ? "Updating…" : "Update status"}
-        </button>
+        </Button>
       </div>
       {message && (
         <p className={resultClass(message)} role="status">

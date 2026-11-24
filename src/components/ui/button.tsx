@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 // Define button styles with variants matching cc-the-ladder-app
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-md font-medium transition-colors hover:ring-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:bg-brand-accent3 disabled:text-muted-foreground/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center rounded-md font-medium transition-colors hover:ring-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {

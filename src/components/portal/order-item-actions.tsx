@@ -1,12 +1,26 @@
 "use client";
 
-import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
+import { Copy, Edit3, MoreVertical, Printer, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { deleteOrderItemAction, duplicateOrderItemAction } from "@/server/orders/actions";
-
-import { Icon } from "./icon";
 
 import s from "./portal.module.css";
 
@@ -21,33 +35,11 @@ export function OrderItemActions({
   item: { id: string; line_number: number; location: string };
   editable: boolean;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const menu = useRef<HTMLDetailsElement>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    function closeMenu(event: PointerEvent) {
-      if (menu.current?.open && !menu.current.contains(event.target as Node)) {
-        menu.current.removeAttribute("open");
-      }
-    }
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape" && menu.current?.open) {
-        menu.current.removeAttribute("open");
-        menu.current.querySelector("summary")?.focus();
-      }
-    }
-    document.addEventListener("pointerdown", closeMenu);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeMenu);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, []);
-
   function run(action: "duplicate" | "delete") {
-    menu.current?.removeAttribute("open");
     setMessage("");
     startTransition(async () => {
       try {
@@ -72,111 +64,114 @@ export function OrderItemActions({
 
   return (
     <>
-      <details className={s.actionMenu} ref={menu}>
-        <summary
-          className={s.iconBtn}
-          aria-label={`Actions for Door ${item.line_number}`}
-          data-test={`door-actions-${item.line_number}`}
-        >
-          <Icon icon={MoreVerticalIcon} size={18} />
-        </summary>
-        <div className={s.actionMenuPanel}>
-          <Link
-            className={s.actionMenuItem}
-            href={`/print/orders/${orderId}?item=${item.id}`}
-            target="_blank"
-            rel="noreferrer"
-            data-test={`print-door-${item.line_number}`}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 rounded-lg text-brand-txt-secondary hover:bg-black/5 hover:text-brand-txt-primary focus-visible:ring-2 focus-visible:ring-brand-accent1"
+            aria-label={`Actions for Door ${item.line_number}`}
+            data-test={`door-actions-${item.line_number}`}
           >
-            Print PDF
-          </Link>
+            <MoreVertical className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40 rounded-xl p-1 shadow-md">
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium"
+          >
+            <Link
+              href={`/print/orders/${orderId}?item=${item.id}`}
+              target="_blank"
+              rel="noreferrer"
+              data-test={`print-door-${item.line_number}`}
+            >
+              <Printer className="size-3.5 text-brand-txt-secondary" />
+              <span>Print PDF</span>
+            </Link>
+          </DropdownMenuItem>
           {editable && (
             <>
-              <Link
-                className={s.actionMenuItem}
-                href={`/home/quotes/${orderId}/items/${item.id}/edit`}
-                data-test={`edit-door-${item.line_number}`}
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium"
               >
-                Edit
-              </Link>
-              <button
-                type="button"
-                className={s.actionMenuItem}
+                <Link
+                  href={`/home/quotes/${orderId}/items/${item.id}/edit`}
+                  data-test={`edit-door-${item.line_number}`}
+                >
+                  <Edit3 className="size-3.5 text-brand-txt-secondary" />
+                  <span>Edit</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 disabled={pending}
                 onClick={() => run("duplicate")}
+                className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium"
                 data-test={`duplicate-door-${item.line_number}`}
               >
-                {pending ? "Duplicating…" : "Duplicate"}
-              </button>
-              <button
-                type="button"
-                className={`${s.actionMenuItem} ${s.actionMenuDanger}`}
+                <Copy className="size-3.5 text-brand-txt-secondary" />
+                <span>{pending ? "Duplicating…" : "Duplicate"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem
+                variant="destructive"
                 disabled={pending}
-                onClick={() => {
-                  menu.current?.removeAttribute("open");
-                  dialog.current?.showModal();
-                }}
+                onClick={() => setDeleteOpen(true)}
+                className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium text-destructive focus:bg-destructive/10 focus:text-destructive"
                 data-test={`delete-door-${item.line_number}`}
               >
-                Delete
-              </button>
+                <Trash2 className="size-3.5 text-destructive" />
+                <span>Delete</span>
+              </DropdownMenuItem>
             </>
           )}
-        </div>
-      </details>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       {message && (
         <p className={s.fieldError} role="alert">
           {message}
         </p>
       )}
-      <dialog
-        ref={dialog}
-        className={s.adminDialog}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") dialog.current?.close();
-        }}
-        onClick={(event) => {
-          if (event.target === dialog.current) dialog.current?.close();
-        }}
-      >
-        <div className={s.confirmDialog}>
-          <header className={s.adminDialogHead}>
-            <div>
-              <h2 className={s.cardTitle}>Delete Door {item.line_number}?</h2>
-              <p className={s.hint}>This permanently removes its saved configuration.</p>
-            </div>
-            <button
-              type="button"
-              className={s.iconBtn}
-              aria-label="Close delete confirmation"
-              onClick={() => dialog.current?.close()}
-            >
-              ×
-            </button>
-          </header>
-          <div className={s.confirmDialogBody}>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="rounded-2xl p-6 sm:max-w-md">
+          <DialogHeader className="space-y-1.5">
+            <DialogTitle className="text-title-2 font-bold text-brand-txt-primary">
+              Delete Door {item.line_number}?
+            </DialogTitle>
+            <DialogDescription className="text-subtitle text-brand-txt-secondary">
+              This permanently removes its saved configuration.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 text-sm text-brand-txt-secondary">
             <p>
               Door {item.line_number}
               {item.location ? ` · ${item.location}` : ""} will be removed. Existing door numbers
               will not change.
             </p>
-            <div className={s.actions}>
-              <button
-                type="button"
-                className={`${s.btn} ${s.btnDangerSolid}`}
-                disabled={pending}
-                onClick={() => run("delete")}
-                data-test="confirm-delete-door"
-              >
-                {pending ? "Deleting…" : "Delete door"}
-              </button>
-              <button type="button" className={s.btn} onClick={() => dialog.current?.close()}>
-                Keep door
-              </button>
-            </div>
           </div>
-        </div>
-      </dialog>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)}>
+              Keep door
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={pending}
+              onClick={() => {
+                setDeleteOpen(false);
+                run("delete");
+              }}
+              data-test="confirm-delete-door"
+            >
+              {pending ? "Deleting…" : "Delete door"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
