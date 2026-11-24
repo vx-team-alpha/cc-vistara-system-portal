@@ -225,11 +225,11 @@ export function DrawingSkeleton({
       role="status"
       aria-live="polite"
       aria-label="Updating your design"
-      className={s.drawingSkeleton}
+      className={`${s.drawingSkeleton}`}
     >
       <span
         aria-hidden="true"
-        className={`${s.skeleton} ${s.skeletonDrawing}`}
+        className={`${s.skeleton} ${s.skeletonDrawing} -mt-20`}
         style={{ aspectRatio: `${widthMm} / ${heightMm}` }}
       />
     </div>

@@ -98,8 +98,14 @@ const INLINE_BAR_ASSETS = {
   black: "/hardware/inline-bar-black.png",
 };
 
-// Quotila elevation slot on a ~914×2013 slab: x≈726 y≈400 w≈39 h≈1200
-const INLINE_BAR_FX = { w: 39 / 914, h: 1200 / 2013, y: 400 / 2013 };
+// Quotila elevation slots on a ~914×2013 slab: x≈148/727 y≈400 w≈39 h≈1200
+const INLINE_BAR_FX = {
+  w: 39 / 914,
+  h: 1200 / 2013,
+  y: 400 / 2013,
+  xLeft: 148 / 914,
+  xRight: 727 / 914,
+};
 
 const ESCUTCHEON_ASSETS = {
   chrome: "/hardware/escutcheon-chrome.png",
@@ -131,21 +137,26 @@ function ensureEscutcheonAssets(data) {
   }
 }
 
-function fitInlineBarHandle(el, slab) {
+function fitInlineBarHandle(el, slab, handleOnLeft) {
   if (slab) {
+    const sx = Number(slab.getAttribute("x") || 0);
     const sy = Number(slab.getAttribute("y") || 0);
     const sw = Number(slab.getAttribute("width") || 1);
     const sh = Number(slab.getAttribute("height") || 1);
     const nw = INLINE_BAR_FX.w * sw;
     const nh = INLINE_BAR_FX.h * sh;
-    const ox = Number(el.getAttribute("x") || 0);
-    const ow = Number(el.getAttribute("width") || 0);
-    const cx = ox + ow / 2;
-    el.setAttribute("x", String(cx - nw / 2));
+    el.setAttribute(
+      "x",
+      String(sx + (handleOnLeft ? INLINE_BAR_FX.xLeft : INLINE_BAR_FX.xRight) * sw),
+    );
     el.setAttribute("y", String(sy + INLINE_BAR_FX.y * sh));
     el.setAttribute("width", String(nw));
     el.setAttribute("height", String(nh));
     el.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    // The inside catalogue handle already carries a face-specific mirror.
+    // The replacement bar uses an explicit handed slot, so retaining that
+    // transform would mirror it a second time away from its escutcheon.
+    el.removeAttribute("transform");
     return;
   }
   const h = Number(el.getAttribute("height") || 0);
@@ -555,7 +566,7 @@ export async function renderDoor({
           srcNamed(data, `inline_bar_${tone || "chrome"}`) ||
           srcNamed(data, "1200_inline_bar") ||
           href;
-        fitInlineBarHandle(el, slabForHandle);
+        fitInlineBarHandle(el, slabForHandle, handleOnLeft);
       } else if (handle && /pad/i.test(handle.description))
         href = srcNamed(data, `lever_pad_${tone || "chrome"}`) || href;
       else if (handle && /lever\/lever/i.test(handle.description))
@@ -578,7 +589,19 @@ export async function renderDoor({
             /slab_blank/i.test(decodeURIComponent(assetUrl(data, el))) &&
             !/side_panel/i.test(decodeURIComponent(assetUrl(data, el))),
         );
-      const place = (fragment, fx, fy, fw, fh) => {
+      let hardwareOverlay = null;
+      const overlay = () => {
+        if (hardwareOverlay) return hardwareOverlay;
+        hardwareOverlay = make(base, "g", { "data-hardware-overlay": "true" });
+        const slabLayer = slab?.parentElement;
+        for (const name of ["transform", "clip-path"]) {
+          const value = slabLayer?.getAttribute(name);
+          if (value) hardwareOverlay.setAttribute(name, value);
+        }
+        (slabLayer?.closest("svg") ?? nested).append(hardwareOverlay);
+        return hardwareOverlay;
+      };
+      const place = (fragment, fx, fy, fw, fh, hardwareName) => {
         if (!slab) return;
         const href = srcNamed(data, fragment);
         if (!href) return;
@@ -593,10 +616,11 @@ export async function renderDoor({
           height: fh * sh,
           preserveAspectRatio: "xMidYMid",
           opacity: "1",
+          "data-hardware": hardwareName,
         });
         el.setAttributeNS(XL, "href", href);
         if (tint) tintFlat(base, tint, el);
-        (slab.parentElement ?? nested).append(el);
+        overlay().append(el);
       };
       const letter = choice("Letterplate");
       if (letter && !letter.description.startsWith("No ")) {
@@ -617,6 +641,7 @@ export async function renderDoor({
           fy,
           310 / 914,
           76 / 2013,
+          "letterplate",
         );
       }
       const drip = choice("Drip Bar");
@@ -642,7 +667,7 @@ export async function renderDoor({
           rx: sw * 0.004,
         });
         bar.setAttribute("fill", `rgb(${rgb.join(",")})`);
-        (slab.parentElement ?? nested).append(bar);
+        overlay().append(bar);
       }
       const knocker = choice("Knocker");
       const knockerOn = knocker && !knocker.description.startsWith("No ");
@@ -656,7 +681,7 @@ export async function renderDoor({
             : knockerHasSpy
               ? "chrome_knocker_with_spyhole"
               : "knocker/chrome_knocker.png";
-        place(fragment, 410 / 914, 555.5 / 2013, 76 / 914, 162 / 2013);
+        place(fragment, 410 / 914, 555.5 / 2013, 76 / 914, 162 / 2013, "knocker");
       }
       const spyhole = choice("Spyhole");
       if (spyhole && !spyhole.description.startsWith("No ") && !knockerHasSpy) {
@@ -670,6 +695,7 @@ export async function renderDoor({
           spyY / 2013,
           32 / 914,
           32 / 2013,
+          "spyhole",
         );
       }
       const numeral = choice("Numeral");
@@ -730,7 +756,7 @@ export async function renderDoor({
         });
         el.setAttributeNS(XL, "href", escHref);
         if (tint) tintFlat(base, tint, el);
-        (slab.parentElement ?? nested).append(el);
+        overlay().append(el);
       }
     }
     const mirror =

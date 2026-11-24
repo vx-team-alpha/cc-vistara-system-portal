@@ -355,6 +355,43 @@ test("letterplate positions dynamically adapt to door design and omit when none 
   const posDescriptions = posQ.options.map((o) => o.description);
   assert.deepEqual(posDescriptions, ["Position 14 - Midrail", "Position 34 - Bottom Rail"]);
 
+  const renderAtPosition = async (description) => {
+    const position = posQ.options.find((option) => option.description === description);
+    assert.ok(position);
+    const state = doorState(manifest, door.features.source, {
+      style: "Traditional",
+      design_id: carnoustie.designId,
+      picks: {
+        [letterQ.key]: letterYes.id,
+        [posQ.key]: position.id,
+      },
+    });
+    const svg = await renderDoor({
+      data: manifest,
+      layout: door.features.source,
+      design: state.design,
+      sideDesigns: state.sides,
+      questions: state.questions,
+      picks: state.picks,
+      texts: {},
+      internal: false,
+    });
+    const doc = new dom.window.DOMParser().parseFromString(svg, "image/svg+xml");
+    const letterplate = doc.querySelector('[data-hardware="letterplate"]');
+    assert.ok(letterplate, `${description} should render a letterplate`);
+    const overlay = letterplate.parentElement;
+    assert.equal(overlay?.getAttribute("data-hardware-overlay"), "true");
+    assert.equal(overlay, overlay?.parentElement?.lastElementChild);
+    return letterplate;
+  };
+
+  const midrailLetterplate = await renderAtPosition("Position 14 - Midrail");
+  const bottomLetterplate = await renderAtPosition("Position 34 - Bottom Rail");
+  assert.equal(Number(midrailLetterplate.getAttribute("y")), 1045.5);
+  assert.equal(Number(bottomLetterplate.getAttribute("y")), 1860);
+  assert.equal(midrailLetterplate.getAttribute("width"), bottomLetterplate.getAttribute("width"));
+  assert.equal(midrailLetterplate.getAttribute("height"), bottomLetterplate.getAttribute("height"));
+
   const augustaLong2 = manifest.designs.original.Contemporary.find((d) =>
     d.designName.includes("Augusta Long 2"),
   );
@@ -408,6 +445,53 @@ test("inline bar handle dynamically reveals matching Escutcheon (Slab) question"
   assert.equal(Math.round(Number(escImage.getAttribute("height"))), 72);
   assert.equal(Math.round(Number(escImage.getAttribute("x"))), 785);
   assert.equal(Math.round(Number(escImage.getAttribute("y"))), 608);
+
+  const rightDoor = rows.layouts.find(
+    (layout) => layout.range_id === originalRange.id && layout.name === "Door Right Hand",
+  );
+  assert.ok(rightDoor);
+  const rightInitial = doorState(manifest, rightDoor.features.source, configuration);
+  const rightHandleQ = rightInitial.questions.find((q) => q.originalName === "Handle");
+  const rightHardwareQ = rightInitial.questions.find((q) => q.originalName === "Hardware Colour");
+  const rightBar = rightHandleQ.options.find((option) => /inline bar/i.test(option.description));
+  const rightBlack = rightHardwareQ.options.find((option) => option.description === "Black");
+  const rightWithBar = doorState(manifest, rightDoor.features.source, {
+    ...configuration,
+    picks: {
+      [rightHandleQ.key]: rightBar.id,
+      [rightHardwareQ.key]: rightBlack.id,
+    },
+  });
+  const rightEscQ = rightWithBar.questions.find(
+    (question) => question.originalName === "Escutcheon (Slab)",
+  );
+  const insideSvg = await renderDoor({
+    data: manifest,
+    layout: rightDoor.features.source,
+    design: rightWithBar.design,
+    sideDesigns: rightWithBar.sides,
+    questions: rightWithBar.questions,
+    picks: {
+      ...rightWithBar.picks,
+      [rightEscQ.key]: rightEscQ.options[0].id,
+    },
+    texts: {},
+    internal: true,
+  });
+  const insideDoc = new dom.window.DOMParser().parseFromString(insideSvg, "image/svg+xml");
+  const insideBar = [...insideDoc.querySelectorAll('[data-section="door"] image')].find((image) =>
+    image.getAttributeNS("http://www.w3.org/1999/xlink", "href")?.endsWith("inline-bar-black.png"),
+  );
+  const insideEscutcheon = insideDoc.querySelector('[data-hardware="escutcheon"]');
+  assert.ok(insideBar, "Inside right-hand elevation must render the inline bar");
+  assert.ok(insideEscutcheon, "Inside right-hand elevation must render the escutcheon");
+  const center = (element) =>
+    Number(element.getAttribute("x")) + Number(element.getAttribute("width")) / 2;
+  assert.equal(
+    Math.sign(center(insideBar) - 457),
+    Math.sign(center(insideEscutcheon) - 457),
+    "inside inline bar and escutcheon must be on the same side of the slab",
+  );
 
   const noneOpt = escQ.options.find((o) => o.description === "None");
   const svgNone = await renderDoor({
