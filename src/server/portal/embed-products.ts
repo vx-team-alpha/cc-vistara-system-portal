@@ -3,6 +3,8 @@ import { unstable_cache } from "next/cache";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
+const STABLE_DOOR_RANGE_SLUG = "gripcore-stable";
+
 export type EmbedProduct = {
   id: string;
   name: string;
@@ -21,7 +23,8 @@ async function fetchEmbedCatalogue(configuratorTypeId: number): Promise<EmbedCat
     .from("product_ranges")
     .select("id,name")
     .eq("configurator_type_id", configuratorTypeId)
-    .eq("active", true);
+    .eq("active", true)
+    .neq("slug", STABLE_DOOR_RANGE_SLUG);
   if (rangeError) throw new Error("Could not load product ranges.");
 
   const { data: layouts, error: layoutError } = ranges?.length
@@ -84,7 +87,7 @@ const cachedEmbedCatalogue = unstable_cache(
   async (configuratorTypeId: number): Promise<EmbedCatalogue> => {
     return fetchEmbedCatalogue(configuratorTypeId);
   },
-  ["embed-catalogue"],
+  ["embed-catalogue-without-stable-doors"],
   { revalidate: 3600, tags: ["catalogue"] },
 );
 
