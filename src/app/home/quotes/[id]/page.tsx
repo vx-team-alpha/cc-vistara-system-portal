@@ -1,18 +1,20 @@
+import type { VariantProps } from "class-variance-authority";
+import { ArrowLeft, Edit3, Plus, Printer } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
+import { PageHeader } from "@/components/page-header";
 import { OrderDeleteDialog } from "@/components/portal/order-delete-dialog";
 import { OrderItemActions } from "@/components/portal/order-item-actions";
 import { OrderStatusForm } from "@/components/portal/order-status-form";
-import {
-  Badge,
-  Card,
-  formatDate,
-  formatStatus,
-  PageHead,
-  portalStyles as s,
-} from "@/components/portal/ui";
+import { formatDate, formatStatus } from "@/components/portal/ui";
+import { Badge, type badgeVariants } from "@/components/ui/badge";
+
+type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Typography } from "@/components/ui/typography";
 import { getCurrentAccount } from "@/server/auth-wrapper";
 import { getOrder } from "@/server/orders/data";
 import type { Json } from "@/types/supabase";
@@ -24,108 +26,210 @@ function snapshot(value: Json) {
   return value;
 }
 
+function getStatusBadgeVariant(status: string): BadgeVariant {
+  switch (status.toLowerCase()) {
+    case "confirmed":
+      return "lime";
+    case "in_production":
+    case "production":
+      return "success";
+    case "issued":
+      return "blue";
+    case "completed":
+      return "primary";
+    case "cancelled":
+      return "destructive";
+    case "draft":
+    default:
+      return "secondary";
+  }
+}
+
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
   const [order, account] = await Promise.all([getOrder(id), getCurrentAccount()]);
   if (!order) notFound();
   const customer = snapshot(order.customer_snapshot);
+  const badgeVariant = getStatusBadgeVariant(order.status);
 
   return (
-    <>
-      <PageHead
+    <div className="space-y-6">
+      {/* Back Link */}
+      <div>
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="-ml-2 gap-1.5 text-brand-txt-secondary hover:text-brand-txt-primary"
+        >
+          <Link href="/home/quotes">
+            <ArrowLeft className="size-4" />
+            <span>Back to Quotes</span>
+          </Link>
+        </Button>
+      </div>
+
+      {/* Page Header */}
+      <PageHeader
         title={order.order_number}
-        note={`Created ${formatDate(order.created_at)}${order.delivery_date ? ` · Delivery ${formatDate(order.delivery_date)}` : ""}`}
+        subtitle={`Created ${formatDate(order.created_at)}${
+          order.delivery_date ? ` · Estimated Delivery ${formatDate(order.delivery_date)}` : ""
+        }`}
       >
-        <div className={s.pageActions}>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={badgeVariant} className="px-3 py-1 text-xs">
+            {formatStatus(order.status)}
+          </Badge>
+
           {order.status === "draft" && (
-            <Link className={s.btn} href={`/home/quotes/${order.id}/edit`} data-test="edit-order">
-              Edit order
-            </Link>
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={`/home/quotes/${order.id}/edit`}
+                className="flex items-center gap-1.5"
+                data-test="edit-order"
+              >
+                <Edit3 className="size-3.5" />
+                <span>Edit Details</span>
+              </Link>
+            </Button>
           )}
+
           {order.order_items.length > 0 && (
-            <Link
-              className={s.btn}
-              href={`/print/orders/${order.id}`}
-              target="_blank"
-              rel="noreferrer"
-              data-test="print-order-details"
-            >
-              Print details
-            </Link>
+            <Button variant="light" size="sm" asChild>
+              <Link
+                href={`/print/orders/${order.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5"
+                data-test="print-order-details"
+              >
+                <Printer className="size-3.5" />
+                <span>Print Specification</span>
+              </Link>
+            </Button>
           )}
+
           {account.role === "admin" && ["draft", "cancelled"].includes(order.status) && (
             <OrderDeleteDialog orderId={order.id} orderNumber={order.order_number} />
           )}
-          <Badge state={order.status}>{formatStatus(order.status)}</Badge>
         </div>
-      </PageHead>
-      <div className={s.stack}>
-        <Link href="/home/quotes" className={s.link}>
-          ← Quotes
-        </Link>
-        <div className={s.grid2}>
-          <Card title="Customer">
-            <dl className={s.spec}>
-              <dt>Name</dt>
-              <dd>{String(customer.name || "—")}</dd>
-              <dt>Phone</dt>
-              <dd>{String(customer.phone || "—")}</dd>
-              <dt>Address</dt>
-              <dd>
-                {String(customer.address || "—")}, {String(customer.city || "")}{" "}
-                {String(customer.state || "")} {String(customer.zip_code || "")}
+      </PageHeader>
+
+      {/* Grid for Customer and Order Metadata */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {/* Customer Details */}
+        <Card className="rounded-2xl border border-border bg-card shadow-xs">
+          <CardHeader className="border-b border-border/60 px-6 py-4">
+            <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
+              Customer Details
+            </CardTitle>
+            <CardDescription className="text-subtitle text-brand-txt-secondary">
+              Contact and delivery destination
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <dl className="text-subtitle grid grid-cols-3 gap-y-3.5">
+              <dt className="font-medium text-brand-txt-secondary">Name</dt>
+              <dd className="col-span-2 font-semibold text-brand-txt-primary">
+                {String(customer.name || "—")}
+              </dd>
+
+              <dt className="font-medium text-brand-txt-secondary">Phone</dt>
+              <dd className="col-span-2 text-brand-txt-primary">{String(customer.phone || "—")}</dd>
+
+              <dt className="font-medium text-brand-txt-secondary">Address</dt>
+              <dd className="col-span-2 text-brand-txt-primary">
+                {[customer.address, customer.city, customer.state, customer.zip_code]
+                  .filter(Boolean)
+                  .join(", ") || "—"}
               </dd>
             </dl>
-          </Card>
-          <Card title="Order">
+          </CardContent>
+        </Card>
+
+        {/* Order Status & Timeline */}
+        <Card className="rounded-2xl border border-border bg-card shadow-xs">
+          <CardHeader className="border-b border-border/60 px-6 py-4">
+            <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
+              Order Workflow
+            </CardTitle>
+            <CardDescription className="text-subtitle text-brand-txt-secondary">
+              Production status and scheduling
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 p-6">
             <OrderStatusForm
               orderId={order.id}
               currentStatus={order.status}
               revision={order.revision}
             />
-            <dl className={s.spec}>
-              <dt>Delivery</dt>
-              <dd>{order.delivery_date ? formatDate(order.delivery_date) : "Not set"}</dd>
-              <dt>Note</dt>
-              <dd>{order.note || "No note"}</dd>
+
+            <dl className="text-subtitle grid grid-cols-3 gap-y-3.5 border-t border-border/60 pt-2">
+              <dt className="font-medium text-brand-txt-secondary">Delivery</dt>
+              <dd className="col-span-2 font-medium text-brand-txt-primary">
+                {order.delivery_date ? formatDate(order.delivery_date) : "Not set"}
+              </dd>
+
+              <dt className="font-medium text-brand-txt-secondary">Note</dt>
+              <dd className="col-span-2 text-brand-txt-secondary italic">
+                {order.note || "No special instructions provided"}
+              </dd>
             </dl>
-          </Card>
-        </div>
-        <Card
-          title="Door items"
-          note={`${order.order_items.length} ${order.order_items.length === 1 ? "door" : "doors"}`}
-          actions={
-            order.status === "draft" ? (
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Door Specification Items Card */}
+      <Card className="rounded-2xl border border-border bg-card shadow-xs">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4.5">
+          <div className="space-y-0.5">
+            <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
+              Door & Frame Specifications
+            </CardTitle>
+            <CardDescription className="text-subtitle text-brand-txt-secondary">
+              {order.order_items.length}{" "}
+              {order.order_items.length === 1 ? "door item" : "door items"} in this order
+            </CardDescription>
+          </div>
+          {order.status === "draft" && (
+            <Button variant="primary" size="sm" asChild>
               <Link
-                className={`${s.btn} ${s.btnPrimary}`}
                 href={`/home/quotes/${order.id}/items/new`}
+                className="flex items-center gap-1.5"
               >
-                Add door
+                <Plus className="size-4" />
+                <span>Add Door</span>
               </Link>
-            ) : null
-          }
-          flush
-        >
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="p-6">
           {order.order_items.length ? (
-            <div className={s.cardBody}>
+            <div className="divide-y divide-border/60">
               {order.order_items
                 .toSorted((a, b) => a.line_number - b.line_number)
                 .map((item) => (
-                  <div className={s.row} key={item.id}>
-                    <div>
-                      <div className={s.rowTitle}>
-                        <strong>Door {item.line_number}</strong>
-                        <Badge state="active">
+                  <div
+                    key={item.id}
+                    className="flex flex-col gap-4 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-body font-bold text-brand-txt-primary">
+                          Door #{item.line_number}
+                        </span>
+                        <Badge variant="lime" className="text-xxs uppercase">
                           {item.system === "rehau" ? "Rehau Total70" : "Eurocell Composite"}
                         </Badge>
                       </div>
-                      <small>
+                      <p className="text-subtitle text-brand-txt-secondary">
                         {item.width_mm} × {item.height_mm} mm · Qty {item.quantity}
-                        {item.location ? ` · ${item.location}` : ""}
-                      </small>
+                        {item.location ? ` · Location: ${item.location}` : ""}
+                      </p>
                     </div>
-                    <div className={s.rowActions}>
+
+                    <div className="shrink-0">
                       <OrderItemActions
                         orderId={order.id}
                         revision={order.revision}
@@ -137,21 +241,23 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 ))}
             </div>
           ) : (
-            <div className={s.empty}>
-              <h3>Choose the first door</h3>
-              <p>Select a style, enter the frame details and complete the door specification.</p>
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <Typography variant="h3" className="text-title-2 font-bold text-brand-txt-primary">
+                No doors configured yet
+              </Typography>
+              <Typography className="text-body mt-1 mb-5 max-w-sm text-brand-txt-secondary">
+                Select a Eurocell or Rehau frame style, enter the dimensions and customize your
+                specification.
+              </Typography>
               {order.status === "draft" && (
-                <Link
-                  className={`${s.btn} ${s.btnPrimary}`}
-                  href={`/home/quotes/${order.id}/items/new`}
-                >
-                  Choose door style
-                </Link>
+                <Button variant="primary" size="sm" asChild>
+                  <Link href={`/home/quotes/${order.id}/items/new`}>Choose Door Style</Link>
+                </Button>
               )}
             </div>
           )}
-        </Card>
-      </div>
-    </>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

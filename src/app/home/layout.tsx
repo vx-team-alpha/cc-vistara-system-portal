@@ -1,29 +1,40 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { PortalShell } from "@/components/portal/shell";
+import { AppSidebar } from "@/components/app-sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { signOutAction } from "@/server/auth";
 import { portalContext } from "@/server/portal/data";
+
 export const metadata: Metadata = {
   title: { default: "Overview · Vistara", template: "%s · Vistara" },
 };
+
 export default async function HomeLayout({ children }: { children: React.ReactNode }) {
-  const [{ account, user }, cookieStore] = await Promise.all([portalContext(), cookies()]);
-  const initialTheme = cookieStore.get("frontage-theme")?.value === "dark" ? "dark" : "light";
+  const { account, user } = await portalContext();
+
   async function signOut() {
     "use server";
     await signOutAction();
     redirect("/auth/sign-in");
   }
+
   return (
-    <PortalShell
-      name={account.name || ""}
-      email={user.email || ""}
-      initialTheme={initialTheme}
-      signOut={signOut}
-    >
-      {children}
-    </PortalShell>
+    <SidebarProvider>
+      <AppSidebar
+        account={{ name: account.name || "Vistara", role: account.role }}
+        user={{ name: account.name || "", email: user.email || "" }}
+        signOut={signOut}
+      />
+      <SidebarInset className="m-2 overflow-hidden rounded-2xl border border-[#DCDCDC] bg-background shadow-xs peer-data-[variant=inset]:max-h-[calc(100svh-theme(spacing.4))] md:m-3">
+        <ScrollArea className="h-full">
+          <div className="relative mx-auto w-full max-w-[1440px] p-4 md:p-8 lg:p-10">
+            <SidebarTrigger className="absolute top-4 right-4 z-20 flex md:hidden" />
+            {children}
+          </div>
+        </ScrollArea>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

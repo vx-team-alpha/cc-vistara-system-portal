@@ -52,6 +52,9 @@ export function OrderDeleteDialog({
       <dialog
         ref={dialog}
         className={s.adminDialog}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") dialog.current?.close();
+        }}
         onClick={(event) => {
           if (event.target === dialog.current) dialog.current?.close();
         }}

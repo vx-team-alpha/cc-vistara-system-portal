@@ -1,9 +1,12 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
+import { PageHeader } from "@/components/page-header";
 import { OrderItemConfigurator } from "@/components/portal/order-item-configurator";
-import { Badge, PageHead, portalStyles as s } from "@/components/portal/ui";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getOrder } from "@/server/orders/data";
 import { ConfigurationSchema } from "@/server/portal/schemas";
 
@@ -42,36 +45,50 @@ export default async function ConfigureOrderItemPage({
       });
 
   return (
-    <>
-      <PageHead
-        title="Door questions"
-        note={`${order.order_number} · ${item.width_mm}w × ${item.height_mm}h · Quantity ${item.quantity}`}
+    <div className="space-y-6">
+      <div>
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="-ml-2 gap-1.5 text-brand-txt-secondary hover:text-brand-txt-primary"
+        >
+          <Link href={`/home/quotes/${order.id}`}>
+            <ArrowLeft className="size-4" />
+            <span>Back to Order {order.order_number}</span>
+          </Link>
+        </Button>
+      </div>
+
+      <PageHeader
+        title={`Configure Door #${item.line_number}`}
+        subtitle={`${order.order_number} · ${item.width_mm}mm × ${item.height_mm}mm · Qty ${item.quantity}`}
       >
-        <Badge state="active">
+        <Badge variant="lime" className="px-3 py-1 text-xs">
           {item.system === "rehau" ? "Rehau Total70" : "Eurocell Composite"}
         </Badge>
-      </PageHead>
-      <Link href={`/home/quotes/${order.id}`} className={s.link}>
-        ← Order summary
-      </Link>
-      <OrderItemConfigurator
-        orderId={order.id}
-        itemId={item.id}
-        layoutId={item.layout_id}
-        system={item.system === "rehau" ? "rehau" : "eurocell"}
-        revision={order.revision}
-        initialConfiguration={initialConfiguration}
-        initialDrawings={{
-          outside: item.outside_drawing || "",
-          inside: item.inside_drawing || "",
-        }}
-        frameDetails={{
-          width_mm: item.width_mm,
-          height_mm: item.height_mm,
-          quantity: item.quantity,
-          location: item.location,
-        }}
-      />
-    </>
+      </PageHeader>
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-xs">
+        <OrderItemConfigurator
+          orderId={order.id}
+          itemId={item.id}
+          layoutId={item.layout_id}
+          system={item.system === "rehau" ? "rehau" : "eurocell"}
+          revision={order.revision}
+          initialConfiguration={initialConfiguration}
+          initialDrawings={{
+            outside: item.outside_drawing || "",
+            inside: item.inside_drawing || "",
+          }}
+          frameDetails={{
+            width_mm: item.width_mm,
+            height_mm: item.height_mm,
+            quantity: item.quantity,
+            location: item.location,
+          }}
+        />
+      </div>
+    </div>
   );
 }

@@ -41,10 +41,10 @@ export function DatePicker({
     if (typeof value === "string") {
       const trimmed = value.trim();
       if (!trimmed) return undefined;
-      const parsed = parse(trimmed, "yyyy-MM-dd", new Date());
+      const parsed = parse(trimmed, "yyyy-MM-dd", new Date(0));
       if (isValid(parsed)) return parsed;
-      const fallback = new Date(trimmed);
-      return isValid(fallback) ? fallback : undefined;
+      const timestamp = Date.parse(trimmed);
+      return Number.isNaN(timestamp) ? undefined : new Date(timestamp);
     }
     return undefined;
   }, [value]);
@@ -82,7 +82,7 @@ export function DatePicker({
             aria-invalid={ariaInvalid}
             data-test={dataTest}
             className={cn(
-              "w-full justify-between text-left font-normal h-[38px] px-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-hover)] hover:text-[var(--ink)] transition-colors",
+              "h-[38px] w-full justify-between rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-left font-normal text-[var(--ink)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--ink)]",
               !selectedDate && "text-[var(--soft)]",
               ariaInvalid && "border-destructive text-destructive",
             )}
@@ -104,7 +104,7 @@ export function DatePicker({
                     onChange?.("");
                   }
                 }}
-                className="ml-2 rounded-sm p-0.5 text-[var(--soft)] hover:bg-[var(--fill)] hover:text-[var(--ink)] transition-colors"
+                className="ml-2 rounded-sm p-0.5 text-[var(--soft)] transition-colors hover:bg-[var(--fill)] hover:text-[var(--ink)]"
               >
                 <XIcon className="h-3.5 w-3.5" />
               </span>
@@ -112,15 +112,10 @@ export function DatePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-0 z-50 bg-[var(--surface)] border border-[var(--border)] shadow-lg rounded-xl"
+          className="z-50 w-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-0 shadow-lg"
           align="start"
         >
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleSelect}
-            autoFocus
-          />
+          <Calendar mode="single" selected={selectedDate} onSelect={handleSelect} />
         </PopoverContent>
       </Popover>
     </div>
