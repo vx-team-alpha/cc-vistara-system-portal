@@ -115,9 +115,11 @@ export default async function EditOrderItemPage({
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
-              <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-brand-backgroundSecondary p-6">
-                <LayoutPreview src={selected.image} />
-                <span className="text-subtitle mt-4 font-bold text-brand-txt-primary">
+              <div className="flex flex-col items-center justify-center">
+                <div className="flex h-[280px] max-h-[280px] w-full items-center justify-center overflow-hidden [&_svg]:mx-auto [&_svg]:h-full [&_svg]:max-h-[280px] [&_svg]:w-auto [&_svg]:max-w-full">
+                  <LayoutPreview src={selected.image} />
+                </div>
+                <span className="text-subtitle mt-3 font-bold text-brand-txt-primary">
                   {selected.name}
                 </span>
               </div>
