@@ -1,7 +1,6 @@
 "use client";
 import {
   DashboardSquare01Icon,
-  CodeIcon,
   Mail01Icon,
   Settings01Icon,
   Menu01Icon,
@@ -9,9 +8,6 @@ import {
   Sun01Icon,
   Logout01Icon,
   Cancel01Icon,
-  UserMultiple02Icon,
-  ChartAverageIcon,
-  ArtboardIcon,
 } from "@hugeicons/core-free-icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,14 +19,8 @@ import { Icon } from "./icon";
 import s from "./portal.module.css";
 const links = [
   { href: "/home", label: "Overview", icon: DashboardSquare01Icon },
-  { href: "/home/designer", label: "Designer", icon: ArtboardIcon },
-  { href: "/home/widgets", label: "Embed components", icon: CodeIcon },
-  { href: "/home/quotes", label: "Quote queries", icon: Mail01Icon },
+  { href: "/home/quotes", label: "Quotes", icon: Mail01Icon },
   { href: "/home/settings", label: "Settings", icon: Settings01Icon },
-];
-const adminLinks = [
-  { href: "/home/admin", label: "Admin overview", icon: ChartAverageIcon },
-  { href: "/home/admin/users", label: "All users", icon: UserMultiple02Icon },
 ];
 const subscribeTheme = (notify: () => void) => {
   window.addEventListener("storage", notify);
@@ -55,14 +45,12 @@ const subscribeMobile = (notify: () => void) => {
 export function PortalShell({
   name,
   email,
-  role = "user",
   initialTheme = "light",
   signOut,
   children,
 }: {
   name: string;
   email: string;
-  role?: string;
   initialTheme?: "light" | "dark";
   signOut: () => Promise<void>;
   children: React.ReactNode;
@@ -94,12 +82,7 @@ export function PortalShell({
     document.documentElement.getBoundingClientRect();
     requestAnimationFrame(() => requestAnimationFrame(() => style.remove()));
   }
-  const isAdminActive = adminLinks.find((l) =>
-    l.href === "/home/admin" ? pathname === "/home/admin" : pathname.startsWith(l.href),
-  );
-  const breadcrumbLabel =
-    role === "admin" && isAdminActive ? isAdminActive.label : active?.label || "Portal";
-  const breadcrumbSection = role === "admin" && isAdminActive ? "Admin" : "Workspace";
+  const breadcrumbLabel = active?.label || "Workspace";
   return (
     <div className={s.app} data-theme={theme} data-admin-app>
       <a href="#main-content" className={s.skipLink}>
@@ -153,32 +136,6 @@ export function PortalShell({
             </Link>
           ))}
         </nav>
-        {role === "admin" && (
-          <>
-            <div className={s.navGroup}>Admin</div>
-            <nav className={s.nav} aria-label="Admin navigation">
-              {adminLinks.map((link) => {
-                const isActive =
-                  link.href === "/home/admin"
-                    ? pathname === "/home/admin"
-                    : pathname.startsWith(link.href);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={s.navLink}
-                    onClick={() => setOpen(false)}
-                    data-active={isActive || undefined}
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    <Icon icon={link.icon} />
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </>
-        )}
         <div className={s.sideFoot}>
           <span className={s.avatar}>{(name || email || "V").slice(0, 2).toUpperCase()}</span>
           <div className={s.account}>
@@ -207,12 +164,12 @@ export function PortalShell({
               <Icon icon={open ? Cancel01Icon : Menu01Icon} />
             </button>
             <div className={s.breadcrumb}>
-              {breadcrumbSection} <span aria-hidden="true">/</span>
+              Workspace <span aria-hidden="true">/</span>
               <strong>{breadcrumbLabel}</strong>
             </div>
           </div>
           <div className={s.topActions}>
-            <span className={s.badge}>{role === "admin" ? "Admin" : "Customer portal"}</span>
+            <span className={s.badge}>Order workspace</span>
             <button
               type="button"
               className={s.iconBtn}

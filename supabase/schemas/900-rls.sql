@@ -143,3 +143,65 @@ create policy embed_widgets_update on public.embed_widgets for update to authent
 -- Pause embeds instead of deleting them, preserving quote attribution.
 alter table public.widget_views enable row level security;
 create policy widget_views_select on public.widget_views for select to authenticated using (account_id = (select auth.uid()));
+
+-- ===========================================================================
+-- Internal orders
+-- ===========================================================================
+
+alter table public.business_profiles enable row level security;
+alter table public.customers enable row level security;
+alter table public.orders enable row level security;
+alter table public.order_items enable row level security;
+alter table public.order_events enable row level security;
+alter table public.order_documents enable row level security;
+
+create policy business_profiles_select on public.business_profiles
+  for select to authenticated using (account_id = (select auth.uid()));
+create policy business_profiles_insert on public.business_profiles
+  for insert to authenticated with check (account_id = (select auth.uid()));
+create policy business_profiles_update on public.business_profiles
+  for update to authenticated
+  using (account_id = (select auth.uid()))
+  with check (account_id = (select auth.uid()));
+
+create policy customers_select on public.customers
+  for select to authenticated using (account_id = (select auth.uid()));
+create policy customers_insert on public.customers
+  for insert to authenticated with check (account_id = (select auth.uid()));
+create policy customers_update on public.customers
+  for update to authenticated
+  using (account_id = (select auth.uid()))
+  with check (account_id = (select auth.uid()));
+create policy customers_delete on public.customers
+  for delete to authenticated using (account_id = (select auth.uid()));
+
+create policy orders_select on public.orders
+  for select to authenticated using (account_id = (select auth.uid()));
+create policy orders_insert on public.orders
+  for insert to authenticated with check (account_id = (select auth.uid()));
+create policy orders_update on public.orders
+  for update to authenticated
+  using (account_id = (select auth.uid()))
+  with check (account_id = (select auth.uid()));
+create policy orders_delete_draft on public.orders
+  for delete to authenticated
+  using (account_id = (select auth.uid()) and status = 'draft');
+
+create policy order_items_select on public.order_items
+  for select to authenticated using (account_id = (select auth.uid()));
+create policy order_items_insert on public.order_items
+  for insert to authenticated with check (account_id = (select auth.uid()));
+create policy order_items_update on public.order_items
+  for update to authenticated
+  using (account_id = (select auth.uid()))
+  with check (account_id = (select auth.uid()));
+create policy order_items_delete on public.order_items
+  for delete to authenticated using (account_id = (select auth.uid()));
+
+create policy order_events_select on public.order_events
+  for select to authenticated using (account_id = (select auth.uid()));
+create policy order_events_insert on public.order_events
+  for insert to authenticated with check (account_id = (select auth.uid()));
+
+create policy order_documents_select on public.order_documents
+  for select to authenticated using (account_id = (select auth.uid()));

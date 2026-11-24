@@ -34,6 +34,7 @@ revoke all on function public.current_account() from public, anon;
 revoke all on function public.handle_new_user() from public, anon, authenticated;
 revoke all on function public.handle_user_email_change() from public, anon, authenticated;
 revoke all on function public.set_updated_at() from public, anon, authenticated;
+revoke all on function public.set_order_number() from public, anon, authenticated, service_role;
 
 -- current_account() is called directly by app code to read the caller's own row,
 -- because the accounts SELECT grant below is column-restricted — see the note
@@ -94,6 +95,41 @@ grant update (name, picture_url) on public.accounts to authenticated;
 -- service_role ---------------------------------------------------------------
 -- BYPASSRLS, but it still needs table grants.
 grant all on public.accounts to service_role;
+
+-- internal order workspace ---------------------------------------------------
+revoke all on public.business_profiles from public, anon, authenticated, service_role;
+revoke all on public.customers from public, anon, authenticated, service_role;
+revoke all on public.orders from public, anon, authenticated, service_role;
+revoke all on public.order_items from public, anon, authenticated, service_role;
+revoke all on public.order_events from public, anon, authenticated, service_role;
+revoke all on public.order_documents from public, anon, authenticated, service_role;
+
+revoke maintain, references, trigger, truncate on public.business_profiles, public.customers,
+  public.orders, public.order_items, public.order_events, public.order_documents
+  from anon, authenticated;
+
+grant select, insert on public.business_profiles to authenticated;
+grant update (business_name, phone, address, city, state, zip_code, logo_url, pdf_footer,
+  order_prefix, timezone) on public.business_profiles to authenticated;
+
+grant select, insert, delete on public.customers to authenticated;
+grant update (name, phone, phone_normalized, address, city, state, zip_code)
+  on public.customers to authenticated;
+
+grant select, insert, delete on public.orders to authenticated;
+grant update (status, customer_snapshot, delivery_date, note, revision, issued_at,
+  confirmed_at, production_at, completed_at, cancelled_at) on public.orders to authenticated;
+
+grant select, insert, delete on public.order_items to authenticated;
+grant update (line_number, layout_id, system, width_mm, height_mm, quantity, location,
+  configuration, catalogue_snapshot, manufacturing_snapshot, outside_drawing, inside_drawing)
+  on public.order_items to authenticated;
+
+grant select, insert on public.order_events to authenticated;
+grant select on public.order_documents to authenticated;
+
+grant all on public.business_profiles, public.customers, public.orders, public.order_items,
+  public.order_events, public.order_documents to service_role;
 
 
 -- ===========================================================================

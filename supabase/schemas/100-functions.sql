@@ -39,3 +39,36 @@ as $$
   from public.accounts a
   where a.id = (select auth.uid());
 $$;
+
+-- Allocate a sequential, business-prefixed order number safely when multiple
+-- requests create orders at the same time. The per-account advisory lock keeps
+-- the max+1 calculation serial without blocking other accounts.
+create or replace function public.set_order_number()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  next_number bigint;
+  prefix text;
+begin
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended(new.account_id::text, 0)
+  );
+
+  select coalesce(max(o.sequence_number), 0) + 1
+    into next_number
+    from public.orders o
+   where o.account_id = new.account_id;
+
+  select coalesce(nullif(bp.order_prefix, ''), 'ORD')
+    into prefix
+    from public.business_profiles bp
+   where bp.account_id = new.account_id;
+
+  new.sequence_number := next_number;
+  new.order_number := coalesce(prefix, 'ORD') || '-' || lpad(next_number::text, 6, '0');
+  return new;
+end;
+$$;

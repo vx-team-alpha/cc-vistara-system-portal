@@ -114,3 +114,18 @@ $$;
 
 create trigger set_updated_at before update on public.embed_widgets
   for each row execute function public.set_updated_at();
+
+create trigger set_updated_at before update on public.business_profiles
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at before update on public.customers
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at before update on public.orders
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at before update on public.order_items
+  for each row execute function public.set_updated_at();
+
+create trigger set_order_number before insert on public.orders
+  for each row execute function public.set_order_number();

@@ -24,13 +24,13 @@ async function read(url, signal) {
   return response.json();
 }
 const runtimeCache = new Map();
-function runtimeKey(publicKey, layoutId) {
-  return `${publicKey}:${layoutId}`;
+function runtimeKey(sourceKey, layoutId) {
+  return `${sourceKey}:${layoutId}`;
 }
-function loadRuntime(publicKey, layoutId) {
-  const key = runtimeKey(publicKey, layoutId);
+function loadRuntime(sourceKey, layoutId, configUrl) {
+  const key = runtimeKey(sourceKey, layoutId);
   if (runtimeCache.has(key)) return runtimeCache.get(key);
-  const promise = read(`/api/embed/${publicKey}/config?layout=${layoutId}`)
+  const promise = read(`${configUrl}?layout=${layoutId}`)
     .then(async (config) => {
       installAssets(config.paths);
       if (config.kind === "door")
@@ -62,9 +62,10 @@ function loadRuntime(publicKey, layoutId) {
   }
   return promise;
 }
-/** @param {{publicKey:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, onDrawingChange?:(value:string)=>void, headerAction?:import('react').ReactNode, completionAction?:import('react').ReactNode, frameDetails?:import('@/server/portal/schemas').Configuration['frame']}} props */
+/** @param {{publicKey?:string, configUrl?:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, onDrawingChange?:(value:string, internal:boolean)=>void, headerAction?:import('react').ReactNode, completionAction?:import('react').ReactNode, frameDetails?:import('@/server/portal/schemas').Configuration['frame']}} props */
 export function Configurator({
   publicKey,
+  configUrl,
   layoutId,
   onChange,
   onDrawingChange,
@@ -81,10 +82,11 @@ export function Configurator({
     [query, setQuery] = useState("");
   const optionScroll = useRef(null);
   const [drawing, setDrawing] = useState({ request: "", markup: "", error: "" });
+  const runtimeSource = configUrl || `/api/embed/${publicKey}/config`;
   useEffect(() => {
     let active = true;
-    if (retry) runtimeCache.delete(runtimeKey(publicKey, layoutId));
-    loadRuntime(publicKey, layoutId)
+    if (retry) runtimeCache.delete(runtimeKey(runtimeSource, layoutId));
+    loadRuntime(runtimeSource, layoutId, runtimeSource)
       .then((value) => {
         if (active) {
           setRuntime(value);
@@ -97,7 +99,7 @@ export function Configurator({
     return () => {
       active = false;
     };
-  }, [publicKey, layoutId, retry]);
+  }, [runtimeSource, layoutId, retry]);
   const state = useMemo(
     () =>
       runtime
@@ -151,8 +153,8 @@ export function Configurator({
 
   const request = JSON.stringify([layoutId, configuration, internal, runtime?.kind, retry]);
   useEffect(() => {
-    onDrawingChange?.(drawing.request === request ? drawing.markup : "");
-  }, [drawing.markup, drawing.request, onDrawingChange, request]);
+    onDrawingChange?.(drawing.request === request ? drawing.markup : "", internal);
+  }, [drawing.markup, drawing.request, onDrawingChange, request, internal]);
   useEffect(() => {
     if (!runtime || !state) return;
     const controller = new AbortController();

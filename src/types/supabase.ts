@@ -50,6 +50,26 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"business_profiles": {
+                  Row: {
+                    "account_id": string,"address": string,"business_name": string,"city": string,"created_at": string,"logo_url": string,"order_prefix": string,"pdf_footer": string,"phone": string,"state": string,"timezone": string,"updated_at": string,"zip_code": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"address"?: string,"business_name"?: string,"city"?: string,"created_at"?: string,"logo_url"?: string,"order_prefix"?: string,"pdf_footer"?: string,"phone"?: string,"state"?: string,"timezone"?: string,"updated_at"?: string,"zip_code"?: string
+                  }
+                  Update: {
+                    "account_id"?: string,"address"?: string,"business_name"?: string,"city"?: string,"created_at"?: string,"logo_url"?: string,"order_prefix"?: string,"pdf_footer"?: string,"phone"?: string,"state"?: string,"timezone"?: string,"updated_at"?: string,"zip_code"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "business_profiles_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: true
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"configurator_types": {
                   Row: {
                     "id": number,"label": string,"slug": string
@@ -63,6 +83,26 @@ export type Database = {
                   }
                   Relationships: [
                     
+                  ]
+                },"customers": {
+                  Row: {
+                    "account_id": string,"address": string,"city": string,"created_at": string,"id": string,"name": string,"phone": string,"phone_normalized": string,"state": string,"updated_at": string,"zip_code": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"address": string,"city": string,"created_at"?: string,"id"?: string,"name": string,"phone": string,"phone_normalized": string,"state": string,"updated_at"?: string,"zip_code": string
+                  }
+                  Update: {
+                    "account_id"?: string,"address"?: string,"city"?: string,"created_at"?: string,"id"?: string,"name"?: string,"phone"?: string,"phone_normalized"?: string,"state"?: string,"updated_at"?: string,"zip_code"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "customers_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"design_styles": {
                   Row: {
@@ -186,6 +226,116 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "questions"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"order_documents": {
+                  Row: {
+                    "account_id": string,"checksum": string,"created_at": string,"document_type": string,"generation_metadata": NonNullable<Json>,"id": string,"order_id": string,"revision": number,"storage_key": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"checksum": string,"created_at"?: string,"document_type": string,"generation_metadata"?: NonNullable<Json>,"id"?: string,"order_id": string,"revision": number,"storage_key": string
+                  }
+                  Update: {
+                    "account_id"?: string,"checksum"?: string,"created_at"?: string,"document_type"?: string,"generation_metadata"?: NonNullable<Json>,"id"?: string,"order_id"?: string,"revision"?: number,"storage_key"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "order_documents_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_documents_order_id_account_id_fkey"
+      columns: ["order_id","account_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id","account_id"]
+    }
+                  ]
+                },"order_events": {
+                  Row: {
+                    "account_id": string,"created_at": string,"event_type": string,"id": string,"metadata": NonNullable<Json>,"next_status": string | null,"order_id": string,"previous_status": string | null,"revision": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"created_at"?: string,"event_type": string,"id"?: string,"metadata"?: NonNullable<Json>,"next_status"?: string | null,"order_id": string,"previous_status"?: string | null,"revision": number
+                  }
+                  Update: {
+                    "account_id"?: string,"created_at"?: string,"event_type"?: string,"id"?: string,"metadata"?: NonNullable<Json>,"next_status"?: string | null,"order_id"?: string,"previous_status"?: string | null,"revision"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "order_events_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_events_order_id_account_id_fkey"
+      columns: ["order_id","account_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id","account_id"]
+    }
+                  ]
+                },"order_items": {
+                  Row: {
+                    "account_id": string,"catalogue_snapshot": NonNullable<Json>,"configuration": NonNullable<Json>,"created_at": string,"height_mm": number,"id": string,"inside_drawing": string | null,"layout_id": string | null,"line_number": number,"location": string,"manufacturing_snapshot": Json | null,"order_id": string,"outside_drawing": string | null,"quantity": number,"system": string,"updated_at": string,"width_mm": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"catalogue_snapshot"?: NonNullable<Json>,"configuration"?: NonNullable<Json>,"created_at"?: string,"height_mm": number,"id"?: string,"inside_drawing"?: string | null,"layout_id"?: string | null,"line_number": number,"location"?: string,"manufacturing_snapshot"?: Json | null,"order_id": string,"outside_drawing"?: string | null,"quantity"?: number,"system"?: string,"updated_at"?: string,"width_mm": number
+                  }
+                  Update: {
+                    "account_id"?: string,"catalogue_snapshot"?: NonNullable<Json>,"configuration"?: NonNullable<Json>,"created_at"?: string,"height_mm"?: number,"id"?: string,"inside_drawing"?: string | null,"layout_id"?: string | null,"line_number"?: number,"location"?: string,"manufacturing_snapshot"?: Json | null,"order_id"?: string,"outside_drawing"?: string | null,"quantity"?: number,"system"?: string,"updated_at"?: string,"width_mm"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "order_items_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_items_layout_id_fkey"
+      columns: ["layout_id"]
+isOneToOne: false
+      referencedRelation: "layouts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "order_items_order_id_account_id_fkey"
+      columns: ["order_id","account_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id","account_id"]
+    }
+                  ]
+                },"orders": {
+                  Row: {
+                    "account_id": string,"cancelled_at": string | null,"completed_at": string | null,"confirmed_at": string | null,"created_at": string,"customer_id": string,"customer_snapshot": NonNullable<Json>,"delivery_date": string | null,"id": string,"issued_at": string | null,"note": string,"order_number": string,"production_at": string | null,"revision": number,"sequence_number": number,"status": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id": string,"cancelled_at"?: string | null,"completed_at"?: string | null,"confirmed_at"?: string | null,"created_at"?: string,"customer_id": string,"customer_snapshot": NonNullable<Json>,"delivery_date"?: string | null,"id"?: string,"issued_at"?: string | null,"note"?: string,"order_number": string,"production_at"?: string | null,"revision"?: number,"sequence_number": number,"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "account_id"?: string,"cancelled_at"?: string | null,"completed_at"?: string | null,"confirmed_at"?: string | null,"created_at"?: string,"customer_id"?: string,"customer_snapshot"?: NonNullable<Json>,"delivery_date"?: string | null,"id"?: string,"issued_at"?: string | null,"note"?: string,"order_number"?: string,"production_at"?: string | null,"revision"?: number,"sequence_number"?: number,"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "orders_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "orders_customer_id_account_id_fkey"
+      columns: ["customer_id","account_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id","account_id"]
     }
                   ]
                 },"product_ranges": {

@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 };
 export default async function HomeLayout({ children }: { children: React.ReactNode }) {
   const [{ account, user }, cookieStore] = await Promise.all([portalContext(), cookies()]);
-  const role = account.role ?? "user";
   const initialTheme = cookieStore.get("frontage-theme")?.value === "dark" ? "dark" : "light";
   async function signOut() {
     "use server";
@@ -21,7 +20,6 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
     <PortalShell
       name={account.name || ""}
       email={user.email || ""}
-      role={role}
       initialTheme={initialTheme}
       signOut={signOut}
     >

@@ -1,93 +1,519 @@
-# Frontage customer portal
+# Focus-style order portal plan
 
-Every authenticated account manages its own door and window embed components.
-The account ID is the auth user ID; RLS is the authorization boundary.
+## 1. Product decision
 
-## Routes and workflows
+The portal becomes an authenticated, internal order workspace for a single business account. Public embeds, website components, visitor tracking and public quote capture are removed.
 
-- `/home`: views, quote enquiries, conversion rate, active components, recent
-  enquiries and component setup. All totals come from stored records.
-- `/home/designer`: signed-in configurator for dealers; pick a live component and
-  walk the same product flow without leaving the portal (no view tracking).
-- `/home/widgets`: create separate door/window components and manage their status.
-- `/home/widgets/[id]`: name, website, public preview and copyable iframe snippet.
-- `/home/quotes`: filter and page through homeowner enquiries.
-- `/home/quotes/[id]`: immutable saved specification, contact details, status.
-- `/home/settings`: existing account/security settings within the shared shell.
-- `/embed/[key]`: public product selection and enquiry entry point for the component.
-- `/api/embed/[key]`: public view tracking and quote submission, scoped server-side
-  to an enabled widget. Service credentials stay on the server.
+The primary business object is an **Order**. An order begins as a draft, contains one customer snapshot and one or more door items, and moves through a controlled production lifecycle. The navigation contains exactly three top-level destinations:
 
-## Database
+1. **Overview**
+2. **Quotes**
+3. **Settings**
 
-`embed_widgets` belongs to an account and a seeded configurator type.
-`widget_views` records a unique browser session per widget, owned by the same
-account. Leads reference widgets through a composite ownership foreign key.
-Submitted specs cannot be edited by account clients; only status is writable.
-Public callers cannot query account data directly. Counts describe tracked unique
-widget sessions, not unique people. No fabricated chart values or prices.
+`Quotes` is the requested navigation label. It lists the complete order lifecycle, including confirmed and production work. Pricing is outside this release, so an issued quote is a specification issued to the customer rather than a priced proposal.
 
-## Design
+## 2. Goals
 
-Use portal-ui tokens, Geist fallback display font, engraved frames/dividers,
-264px sidebar, compact controls, hatched bands and responsive mobile navigation.
-Themes use data-theme and token overrides. New UI uses CSS Modules and Hugeicons.
+- Let business staff create an order from an internal customer intake form.
+- Follow a Focus-style door configuration flow without depending on an embed component.
+- Support multiple door items in one order.
+- Support Eurocell during the first rollout.
+- Calculate and snapshot Eurocell parts, cut sizes, quantities, end preparations and formulas.
+- Produce reproducible specification, order confirmation and works order documents.
+- Preserve a confirmed order exactly even when catalogue or manufacturing data changes later.
+- Remove the old range picker while retaining the visual assets required by the door designer.
 
-## Delivery boundary
+## 3. Explicit non-goals
 
-The public embed loads its selected product from the database and immutable storage
-snapshots, then uses the ported MVP question and SVG mutation engines. Door style,
-design, finish, glass, hardware, side sections and inside/outside views use captured
-catalogue data. Window dependency contexts and inside/outside materials follow the
-MVP flow. Rendering is indicative and retains the existing catalogue coverage gaps.
-Submitted option IDs are checked server-side against the active source context;
-labels, defaults and the saved specification are derived from catalogue data.
-The quote detail page presents those saved choices as readable rows.
+- Public embeds or iframe snippets
+- Public quote/enquiry submission
+- Widget branding and per-widget configuration
+- Website visitor/session analytics
+- Windows
+- Rehau in the first rollout
+- Selling prices, VAT, discounts, deposits or totals
+- Multiple portal users, roles or permissions
+- A browser editor for parts, formulas or manufacturing rules
+- Migration of old embed, view or enquiry data
 
-Runtime source is tracked in `src/lib/configurator/runtime/`; the application does
-not import from the ignored MVP folder. The importer publishes the original-path
-asset map at `frontage://asset-map` in the assets registry, enabling the renderer
-to resolve original references after hashed uploads. Extensionless JPEG/PNG files
-are detected from their signatures. Rerun prepare/upload/seed when deploying this
-runtime onto a database populated by an older importer.
+The data model must permit future Rehau and pricing modules without adding unused controls to the first release.
 
-## Verification
+## 4. Information architecture
 
-- `pnpm typecheck`, focused ESLint and `pnpm build` validate application code.
-- `supabase/tests/portal-isolation.sql` runs inside a rolled-back transaction and
-  checks account isolation, analytics write protection, immutable quote specs,
-  writable status, composite ownership attribution and anonymous access denial.
-- Pg-delta declarative sync must report no schema changes after replay.
-- Public POST validates the key, enabled state, product type, active catalogue,
-  request size and contact fields. A honeypot and a per-widget submission cap
-  reduce basic abuse; production deployment should add edge rate limiting and
-  bot verification before making high-traffic embeds public.
-- The website URL is a label, not an enforced domain allowlist. Quote collection
-  is available on any website embedding the public URL; this is stated in the UI.
-- A browser session is counted once per component. Reloads and submission retries
-  do not create extra view or enquiry rows. Browser storage clearing starts a new
-  session. These are tracked sessions, not verified unique people.
+### Overview
 
-Run the local integration checks with:
+Show operational work rather than embed analytics:
 
-```sh
-docker exec -i supabase_db_cc-frontage-desgn psql -U postgres -d postgres < supabase/tests/portal-isolation.sql
-pnpm build
-pnpm start --port 3018
-# In a second terminal:
-node scripts/portal/smoke.mjs
+- Draft orders
+- Issued specifications
+- Confirmed orders
+- Orders in production
+- Orders due within seven days
+- Overdue orders
+- Recently updated orders
+- Primary action: **New order**
+
+Counts represent current records, not fabricated trends. Delivery metrics use the order's optional `delivery_date` and the business timezone.
+
+### Quotes
+
+This page is the order register. It supports:
+
+- Search by order number, customer name, phone, address, ZIP code and door location
+- Filters for status, created date and delivery date
+- Sorting by recently updated, created date and delivery date
+- Pagination
+- Primary action: **New order**
+- Resume draft, open, duplicate and permitted cancel/delete actions
+
+Recommended columns:
+
+| Column   | Purpose                                                         |
+| -------- | --------------------------------------------------------------- |
+| Order    | Generated order number                                          |
+| Customer | Name and phone                                                  |
+| Items    | Number of door items and total quantity                         |
+| Status   | Draft, Issued, Confirmed, In production, Completed or Cancelled |
+| Delivery | Delivery date or `Not set`                                      |
+| Updated  | Last meaningful change                                          |
+
+### Settings
+
+Settings contains only:
+
+- Business name, address, city, state and ZIP code
+- Business phone
+- Logo
+- PDF footer and document details
+- Order number prefix
+- Account name
+- Email and password
+- Connected login accounts
+- Delete account
+
+There is no user administration, role administration, profile-system editor or manufacturing-rule editor.
+
+## 5. New order workflow
+
+### Step 1: Customer and order intake
+
+Route: `/home/quotes/new`
+
+Fields:
+
+| Field         | Requirement |
+| ------------- | ----------- |
+| Customer name | Required    |
+| Phone         | Required    |
+| Address       | Required    |
+| City          | Required    |
+| State         | Required    |
+| ZIP code      | Required    |
+| Delivery date | Optional    |
+| Note          | Optional    |
+
+`created_at` is the order date and is generated by the database. It is not a form field.
+
+The form searches existing customers by normalized phone number and name. Staff can reuse an existing customer or create one. Submitting valid intake data creates a draft order, allocates the order number transactionally and redirects to the first door item.
+
+### Step 2: Configure a door item
+
+Route: `/home/quotes/[orderId]/items/new`
+
+The sequence is:
+
+1. Choose structural door style/layout and handing.
+2. Select frame/profile system. Eurocell is enabled; Rehau is disabled for rollout one.
+3. Enter frame details: overall width, overall height, quantity and location.
+4. Choose slab design.
+5. Answer the existing door option questions.
+6. Review outside and inside drawings, dimensions and selected options.
+7. Calculate Eurocell manufacturing parts and validation results.
+8. Save the item into the order.
+
+The old Original, GRiPCORE and GRiPCORE Stable picker is removed. Active designs appear in one curated Door Styles library. The source range can remain as hidden compatibility metadata until asset resolution is independent of it.
+
+Frame validation occurs when staff continue from Frame Details and again on the server when the item is saved. Invalid dimensions block progress with a field-level explanation. Client validation is convenience only; server validation is authoritative.
+
+### Step 3: Order summary
+
+Route: `/home/quotes/[orderId]`
+
+Show:
+
+- Customer and delivery information
+- Order status and timestamps
+- Every door item with drawing, location, dimensions, quantity and summary
+- Edit, duplicate and remove actions where the status permits them
+- **Add another door**
+- Specification preview/download
+- **Mark as Issued**
+
+Draft changes autosave after completed steps. A user can leave and resume from Quotes.
+
+## 6. Order lifecycle
+
+```text
+Draft -> Issued -> Confirmed -> In production -> Completed
+  |         |          |
+  +---------+----------+------------------------> Cancelled
 ```
 
-The smoke script requires local Supabase, creates a temporary confirmed user,
-exercises authenticated pages and public capture endpoints, and removes its data.
-Browser visual checks at desktop and tablet widths remain a separate check.
+Rules:
 
-Runtime tests use prepared seed data and a DOM implementation:
+- A Draft can be edited or permanently deleted.
+- Issuing freezes an immutable specification/document snapshot.
+- Confirmation freezes an immutable manufacturing snapshot for each item.
+- Confirmed and later orders cannot have manufacturing inputs edited directly.
+- Reopening a confirmed order creates an auditable revision rather than overwriting the confirmed snapshot.
+- Issued, Confirmed, In production and Completed orders cannot be permanently deleted.
+- Eligible orders can be cancelled and duplicated into a new Draft.
+- Every transition stores its timestamp and an order event.
 
-```sh
-node --test scripts/portal/render.test.mjs
+## 7. Domain model and proposed database
+
+The supplied database must be reconciled with this model before order mutations are implemented.
+
+### `business_profiles`
+
+One row per authenticated account.
+
+- `account_id`
+- business identity and address fields
+- phone and logo asset reference
+- PDF footer/details
+- `order_prefix`
+- timezone
+- timestamps
+
+### `customers`
+
+- `id`, `account_id`
+- `name`
+- normalized and display phone values
+- address, city, state and ZIP code
+- timestamps
+
+Customer search uses account-scoped indexes on normalized phone and name. Duplicate detection assists the user but does not merge records automatically.
+
+### `orders`
+
+- `id`, `account_id`, `customer_id`
+- generated `order_number`
+- status
+- immutable customer snapshot JSON
+- delivery date and note
+- revision number
+- issued, confirmed, production, completed and cancelled timestamps
+- created and updated timestamps
+
+Order numbering must be allocated with a database sequence or locked counter, never `count + 1`.
+
+### `order_items`
+
+- `id`, `order_id`, line number
+- layout, handing, slab design and Eurocell system references
+- width, height, quantity and location
+- configuration selections and text values
+- outside and inside drawing snapshots or reproducible asset references
+- catalogue snapshot
+- manufacturing snapshot
+- validation state
+- timestamps
+
+An order item represents one identical configured door with a quantity. Different sizes, locations or options require separate items.
+
+### `order_events`
+
+- `id`, `order_id`
+- event type
+- previous and next status
+- revision
+- structured metadata
+- actor account ID
+- timestamp
+
+### `order_documents`
+
+- `id`, `order_id`
+- optional order item reference
+- document type and revision
+- storage key
+- checksum
+- generation metadata
+- timestamp
+
+Documents are previewed from a live Draft. Issued and Confirmed documents are saved as immutable versions.
+
+### Catalogue and manufacturing data
+
+The new database is the intended authority for door styles, questions, options, profile systems, parts, valid combinations and formulas. Static visual assets stay in object storage and are referenced by records.
+
+Until database reconciliation is complete, verified Eurocell rules may remain behind the existing manufacturing service. UI components and order actions must call the service rather than import Eurocell constants directly. Rehau records can exist with `enabled = false` but must not be selectable or calculated.
+
+### Snapshot policy
+
+References support current display and editing. Snapshots preserve history. Each saved item records readable selected values. Confirmation additionally stores the exact manufacturing output: rule-set version, part codes, descriptions, quantities, cut dimensions, end preparations, formulas and warnings.
+
+## 8. Backend changes
+
+### Keep and extend
+
+- Supabase authentication and the `accounts` table
+- Authenticated page protection
+- `authAction` server-action boundary
+- Account-scoped RLS
+- Catalogue assets needed by door rendering
+- Lower-level door configuration and SVG rendering modules
+- Manufacturing service boundary
+- Account/security settings
+
+### Replace
+
+- Replace `leads` reads and mutations with order/customer/order-item services.
+- Replace widget-based catalogue loading with authenticated internal catalogue queries.
+- Replace public POST submission with authenticated Server Actions.
+- Replace widget statistics with operational order queries.
+- Replace widget logo upload with business logo upload.
+- Replace print payloads passed through browser storage with order/document reads by authenticated ID and revision.
+
+Recommended server modules:
+
+```text
+src/server/orders/
+  actions.ts
+  data.ts
+  schemas.ts
+  transitions.ts
+  numbering.ts
+  documents.ts
+
+src/server/customers/
+  actions.ts
+  data.ts
+  schemas.ts
+
+src/server/catalogue/
+  data.ts
+
+src/server/manufacturing/
+  calculate.ts
+  validate.ts
 ```
 
-These checks cover door finish changes, window glazing dependencies and both
-faces, SVG sanitization, and forged-selection rejection. They do not replace a
-desktop/tablet browser review of the rendered products.
+Every mutation validates input with Zod, scopes access to the authenticated account, relies on RLS as the database boundary and revalidates affected order routes.
+
+### Remove
+
+- Public embed configuration endpoints
+- Public view tracking
+- Public quote submission and anti-spam paths used only by embeds
+- Widget CRUD actions and data loaders
+- Widget/session statistics
+- Embed-specific cache keys and data types
+- Widget logo upload endpoint and widget-branding records
+
+## 9. Frontend changes
+
+### Navigation
+
+Remove Designer, Embed Components and Admin navigation. Keep only Overview, Quotes and Settings.
+
+### Replace Designer
+
+Delete the widget-dependent Designer page. The new internal order flow owns the configurator. It receives authenticated catalogue data directly and saves into an order item.
+
+Refactor the reusable question, selection and SVG rendering behavior out of `PublicEmbed`/widget assumptions into internal components such as:
+
+```text
+OrderIntakeForm
+DoorStyleStep
+ProfileSystemStep
+FrameDetailsStep
+DoorQuestionsStep
+DoorReviewStep
+OrderItemCard
+OrderSummary
+```
+
+Do not retain iframe messaging, embed resize behavior, website branding, public enquiry dialogs or session tracking inside these components.
+
+### Remove frontend routes and components
+
+- `/home/designer`
+- `/home/widgets`
+- `/home/widgets/[id]`
+- `/embed/[key]`
+- Embed code component
+- Widget form and widget preview
+- Public enquiry form/dialog
+- Widget-specific branding controls
+- Range selection UI
+- Window selection paths
+- Admin pages and navigation for multi-user management
+
+### Preserve/refactor frontend behavior
+
+- Door style previews
+- Door questions and conditional options
+- Inside/outside drawing
+- Frame dimensions on the drawing
+- Eurocell manufacturing output
+- Printable documents
+- Shared portal shell, accessible forms, loading and error states
+
+## 10. Document outputs
+
+### Specification
+
+- Business and customer details
+- Order number, created date and delivery date
+- Outside and inside door views
+- Dimensions, quantity and location
+- Selected door options
+- No prices
+
+### Order confirmation
+
+- Confirmed specification revision
+- Confirmation date
+- Same visual/specification detail required to establish what was approved
+
+### Works order
+
+- Order and item identity
+- Both door views when handing or hardware differs
+- Overall and finished frame dimensions
+- Check diagonal
+- Profile system and finish
+- Part codes and descriptions
+- Per-door and total quantities
+- Width/height cuts
+- End preparations
+- Formula/rule-set version
+- Production checks and notes
+
+PDF generation reads the saved order revision from the server. It must never fall back silently to default dimensions, colours or drawings.
+
+## 11. Removal matrix
+
+| Existing area                        | Action                                         | Replacement                                          |
+| ------------------------------------ | ---------------------------------------------- | ---------------------------------------------------- |
+| `embed_widgets`                      | Drop after database reconciliation             | `business_profiles` plus internal catalogue settings |
+| `widget_views`                       | Drop                                           | Operational order metrics                            |
+| `leads`                              | Drop; no migration                             | `orders`, `customers`, `order_items`                 |
+| `/home/designer`                     | Replace                                        | `/home/quotes/new` and order item workflow           |
+| `/home/widgets/**`                   | Remove                                         | None                                                 |
+| `/embed/[key]`                       | Remove                                         | None                                                 |
+| `/api/embed/[key]/**`                | Remove                                         | Authenticated order actions/catalogue reads          |
+| `PublicEmbed`                        | Remove after extracting reusable door behavior | Internal order configurator                          |
+| Widget form/code/logo components     | Remove                                         | Business settings and logo upload                    |
+| Embed analytics cards                | Remove                                         | Order status/delivery cards                          |
+| Range picker                         | Remove                                         | Curated unified style library                        |
+| Window workflow/runtime entry points | Remove from active product                     | None in release one                                  |
+| Rehau selection                      | Disable                                        | Future verified rule set                             |
+| Browser-storage print handoff        | Remove                                         | Server-backed order document route                   |
+
+Database removal must include foreign keys, policies, grants, indexes, triggers, storage objects and generated types associated only with these features. Existing rows do not need preservation.
+
+## 12. Delivery phases
+
+### Phase 0: Database reconciliation
+
+1. Attach and inspect the new database/schema.
+2. Map its customer, order, catalogue, profile, part and formula data to this domain model.
+3. Record accepted differences in ADRs.
+4. Verify Eurocell source data against real Focus works orders.
+5. Mark Rehau disabled.
+
+Gate: no order write code begins until table ownership, identifiers, RLS and Eurocell authority are agreed.
+
+### Phase 1: Remove embed product surface
+
+1. Change navigation to Overview, Quotes and Settings.
+2. Remove widget, embed, public quote and analytics routes/components.
+3. Remove related backend actions, APIs and cache paths.
+4. Drop obsolete data through a migration after the replacement schema exists.
+5. Regenerate Supabase types.
+
+Gate: authentication and account settings still work; deleted public URLs return 404; no embed dependency remains in active routes.
+
+### Phase 2: Order foundation
+
+1. Add business profile, customer, order, item, event and document persistence.
+2. Add RLS and account-scoped queries.
+3. Implement order numbering and state transitions.
+4. Build Quotes list/search/filter and order intake.
+5. Add draft resume, delete, cancel and duplicate behavior.
+
+Gate: an authenticated account can create, find, resume and lifecycle a draft without configuring a door.
+
+### Phase 3: Internal door configurator
+
+1. Decouple catalogue/configurator loading from public keys and widgets.
+2. Build unified Door Styles selection without range UI.
+3. Add Eurocell system step and disabled Rehau state.
+4. Add frame details, questions, both views and review.
+5. Save multiple immutable order items.
+
+Gate: selections and dimensions survive reload; both views retain correct handing and hardware; invalid dimensions cannot be saved.
+
+### Phase 4: Manufacturing and documents
+
+1. Reconcile Eurocell rules with database records.
+2. Store versioned manufacturing snapshots.
+3. Generate specification, confirmation and works order documents from server data.
+4. Add Issue, Confirm, In production, Complete and Cancel transitions.
+
+Gate: sample Focus orders reproduce verified part codes, cut dimensions, quantities, end preparations and door views with no default substitutions.
+
+### Phase 5: Overview and cleanup
+
+1. Replace analytics with operational metrics.
+2. Add due-soon and overdue queries.
+3. Remove compatibility metadata and dead runtime code only after asset coverage is verified.
+4. Complete accessibility, responsive and print reviews.
+
+Gate: only the three requested navigation destinations remain, and repository searches show no active embed/widget/public-enquiry dependency.
+
+## 13. Verification strategy
+
+- Database tests for RLS, numbering concurrency, status transitions, snapshot immutability and account isolation
+- Server tests for validation and transition rules
+- Manufacturing fixtures based on verified Focus works orders
+- Browser tests for intake, resume, multi-item orders, internal/external views, handing, frame validation and cancellation
+- Document checks for dimensions, colours, drawings, quantities and part codes
+- Build, typecheck, lint and migration replay gates
+- Manual comparison of representative PDFs against Focus output
+
+Critical regression cases:
+
+1. User-entered dimensions appear in the drawing, saved item, manufacturing snapshot and every document.
+2. Left/right handing produces consistent outside and mirrored inside views.
+3. Missing selections produce actionable validation and never substitute a default colour or part suffix.
+4. Confirmed orders do not change after catalogue or formula updates.
+5. Two simultaneous order creations receive distinct sequential order numbers.
+
+## 14. Future extension points
+
+### Rehau
+
+Enable only after verified profiles, suffixes, combinations, dimension limits and manufacturing fixtures exist. The UI should discover enabled systems from the service rather than contain a Rehau-specific branch.
+
+### Pricing
+
+Add versioned price books, item price snapshots, tax rules, discounts, deposits and monetary document totals as a separate module. Do not place zero-value or placeholder prices in the first-release order schema or PDFs.
+
+## 15. Definition of done
+
+- Portal navigation contains Overview, Quotes and Settings only.
+- No public embed, widget management, visitor tracking or public enquiry flow remains.
+- New Order begins with the agreed customer form.
+- An order can contain multiple configured Eurocell door items.
+- Original/GRiPCORE/Stable is not shown as a user choice.
+- Rehau cannot be selected.
+- Drafts resume after navigation or sign-in.
+- Order statuses and immutable snapshots follow the lifecycle rules.
+- Specifications, confirmations and works orders are generated from saved server data.
+- Existing embed data is removed rather than migrated.
+- The supplied database has been reconciled and documented before implementation proceeds beyond the foundation gate.

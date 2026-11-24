@@ -650,6 +650,15 @@
   gap: 6px;
   margin-bottom: 14px;
 }
+.formGrid,
+.formGrid3 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+.formGrid3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .label {
   color: var(--text-2);
   font-size: 13px;
@@ -812,6 +821,80 @@
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 20px;
+}
+.searchForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.searchForm .input {
+  width: min(280px, 54vw);
+}
+.srOnly {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.styleLibrary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px;
+}
+.styleCard {
+  display: grid;
+  grid-template-rows: 190px auto;
+  min-width: 0;
+  padding: 14px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  box-shadow: var(--hair-b), var(--hair-r);
+  transition: background-color 160ms var(--ease-out-quint);
+}
+.styleCard:hover {
+  background: var(--lift);
+}
+.stylePreview,
+.selectedStylePreview {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  overflow: hidden;
+}
+.stylePreview :global(svg),
+.selectedStylePreview :global(svg) {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+.styleName {
+  padding-top: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+.selectedStyle {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+}
+.selectedStylePreview {
+  height: 280px;
+}
+.stepTitle {
+  margin: 14px 0 4px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
 }
 .tabs {
   display: flex;
@@ -1077,6 +1160,11 @@
   .grid2 {
     grid-template-columns: 1fr;
   }
+  .formGrid3,
+  .styleLibrary,
+  .selectedStyle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1091,6 +1179,14 @@
   }
   .title {
     font-size: 22px;
+  }
+}
+@media (max-width: 600px) {
+  .formGrid,
+  .formGrid3,
+  .styleLibrary,
+  .selectedStyle {
+    grid-template-columns: 1fr;
   }
 }
 @media (prefers-reduced-motion: reduce) {
