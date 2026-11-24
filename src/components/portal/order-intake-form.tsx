@@ -7,11 +7,10 @@ import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createOrderAction } from "@/server/orders/actions";
 import { CreateOrderSchema, type CreateOrderInput } from "@/server/orders/schemas";
-
-import s from "./portal.module.css";
 
 export function OrderIntakeForm() {
   const [pending, startTransition] = useTransition();
@@ -44,80 +43,111 @@ export function OrderIntakeForm() {
   });
 
   return (
-    <form onSubmit={submit} noValidate data-test="new-order-form">
-      <div className={s.formGrid}>
-        <label className={s.field}>
-          <span className={s.label}>Customer name</span>
+    <form onSubmit={submit} noValidate data-test="new-order-form" className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="oi-customer-name"
+            className="text-subtitle font-medium text-brand-txt-primary"
+          >
+            Customer name
+          </Label>
           <Input
+            id="oi-customer-name"
             autoComplete="name"
             aria-invalid={Boolean(form.formState.errors.customer_name)}
             {...form.register("customer_name")}
           />
           {form.formState.errors.customer_name && (
-            <span className={s.fieldError}>{form.formState.errors.customer_name.message}</span>
+            <p className="text-xs text-destructive">
+              {form.formState.errors.customer_name.message}
+            </p>
           )}
-        </label>
-        <label className={s.field}>
-          <span className={s.label}>Phone</span>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="oi-phone" className="text-subtitle font-medium text-brand-txt-primary">
+            Phone
+          </Label>
           <Input
+            id="oi-phone"
             type="tel"
             autoComplete="tel"
             aria-invalid={Boolean(form.formState.errors.phone)}
             {...form.register("phone")}
           />
           {form.formState.errors.phone && (
-            <span className={s.fieldError}>{form.formState.errors.phone.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
           )}
-        </label>
+        </div>
       </div>
-      <label className={s.field}>
-        <span className={s.label}>Address</span>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="oi-address" className="text-subtitle font-medium text-brand-txt-primary">
+          Address
+        </Label>
         <Input
+          id="oi-address"
           autoComplete="street-address"
           aria-invalid={Boolean(form.formState.errors.address)}
           {...form.register("address")}
         />
         {form.formState.errors.address && (
-          <span className={s.fieldError}>{form.formState.errors.address.message}</span>
+          <p className="text-xs text-destructive">{form.formState.errors.address.message}</p>
         )}
-      </label>
-      <div className={s.formGrid3}>
-        <label className={s.field}>
-          <span className={s.label}>City</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="oi-city" className="text-subtitle font-medium text-brand-txt-primary">
+            City
+          </Label>
           <Input
+            id="oi-city"
             autoComplete="address-level2"
             aria-invalid={Boolean(form.formState.errors.city)}
             {...form.register("city")}
           />
           {form.formState.errors.city && (
-            <span className={s.fieldError}>{form.formState.errors.city.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.city.message}</p>
           )}
-        </label>
-        <label className={s.field}>
-          <span className={s.label}>State</span>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="oi-state" className="text-subtitle font-medium text-brand-txt-primary">
+            State
+          </Label>
           <Input
+            id="oi-state"
             autoComplete="address-level1"
             aria-invalid={Boolean(form.formState.errors.state)}
             {...form.register("state")}
           />
           {form.formState.errors.state && (
-            <span className={s.fieldError}>{form.formState.errors.state.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.state.message}</p>
           )}
-        </label>
-        <label className={s.field}>
-          <span className={s.label}>ZIP code</span>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="oi-zip" className="text-subtitle font-medium text-brand-txt-primary">
+            ZIP code
+          </Label>
           <Input
+            id="oi-zip"
             autoComplete="postal-code"
             aria-invalid={Boolean(form.formState.errors.zip_code)}
             {...form.register("zip_code")}
           />
           {form.formState.errors.zip_code && (
-            <span className={s.fieldError}>{form.formState.errors.zip_code.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.zip_code.message}</p>
           )}
-        </label>
+        </div>
       </div>
-      <div className={s.field}>
-        <span className={s.label}>Delivery date</span>
+
+      <div className="space-y-1.5">
+        <Label
+          htmlFor="oi-delivery-date"
+          className="text-subtitle font-medium text-brand-txt-primary"
+        >
+          Delivery date
+        </Label>
         <Controller
           control={form.control}
           name="delivery_date"
@@ -132,24 +162,31 @@ export function OrderIntakeForm() {
             />
           )}
         />
-        <span className={s.hint}>Optional. The order date is recorded automatically.</span>
+        <p className="text-xs text-muted-foreground">
+          Optional. The order date is recorded automatically.
+        </p>
         {form.formState.errors.delivery_date && (
-          <span className={s.fieldError}>{form.formState.errors.delivery_date.message}</span>
+          <p className="text-xs text-destructive">{form.formState.errors.delivery_date.message}</p>
         )}
       </div>
-      <label className={s.field}>
-        <span className={s.label}>Note</span>
-        <Textarea {...form.register("note")} />
+
+      <div className="space-y-1.5">
+        <Label htmlFor="oi-note" className="text-subtitle font-medium text-brand-txt-primary">
+          Note
+        </Label>
+        <Textarea id="oi-note" rows={3} {...form.register("note")} />
         {form.formState.errors.note && (
-          <span className={s.fieldError}>{form.formState.errors.note.message}</span>
+          <p className="text-xs text-destructive">{form.formState.errors.note.message}</p>
         )}
-      </label>
+      </div>
+
       {message && (
-        <p className={s.notice} data-error role="alert">
+        <p className="text-subtitle font-medium text-destructive" role="alert">
           {message}
         </p>
       )}
-      <div className={s.actions}>
+
+      <div className="flex items-center justify-end gap-3 pt-2">
         <Button type="submit" variant="primary" disabled={pending} data-test="create-order">
           {pending ? "Creating order…" : "Continue to door selection"}
         </Button>

@@ -25,7 +25,6 @@ import { imageMap, selectWindowOption } from "@/lib/configurator/runtime/windows
 
 import { ConfiguratorSkeleton, DrawingSkeleton } from "./loading-skeletons";
 
-import s from "./portal.module.css";
 const empty = { style: "", design_id: "", side_designs: {}, picks: {}, texts: {} };
 async function read(url, signal) {
   const response = await fetch(url, { signal });
@@ -71,6 +70,7 @@ function loadRuntime(sourceKey, layoutId, configUrl) {
   }
   return promise;
 }
+
 /** @param {{publicKey?:string, configUrl?:string, layoutId:string, onChange:(value: import('@/server/portal/schemas').Configuration|null)=>void, onDrawingChange?:(value:string, internal:boolean)=>void, headerAction?:import('react').ReactNode, completionAction?:import('react').ReactNode, frameDetails?:import('@/server/portal/schemas').Configuration['frame'], initialConfiguration?:import('@/server/portal/schemas').Configuration|null}} props */
 export function Configurator({
   publicKey,
@@ -228,10 +228,14 @@ export function Configurator({
   useEffect(() => {
     if (optionScroll.current) optionScroll.current.scrollTop = 0;
   }, [runtime, index, query, state?.questions.length]);
+
   if (error)
     return (
-      <div className={s.notice} data-error role="alert">
-        {error}
+      <div
+        className="flex items-center justify-between gap-4 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm font-medium text-destructive"
+        role="alert"
+      >
+        <span>{error}</span>
         <Button variant="outline" size="sm" type="button" onClick={() => setRetry((v) => v + 1)}>
           Try again
         </Button>
@@ -267,21 +271,30 @@ export function Configurator({
     )
       setInternal(true);
   }
+
   return (
-    <section className={s.configurator} aria-label="Product configuration">
-      <div className={s.elevationPanel}>
-        <div className={s.toolbar}>
-          <strong>{internal ? "Inside view" : "Outside view"}</strong>
+    <section
+      className="mt-5 grid h-auto grid-cols-1 items-stretch gap-5 md:h-[min(720px,calc(100svh-160px))] md:max-h-[min(720px,calc(100svh-160px))] md:grid-cols-2"
+      aria-label="Product configuration"
+    >
+      <div className="flex min-h-0 min-w-0 flex-col overflow-visible rounded-2xl border border-border bg-card p-5 shadow-xs md:overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border/60 pb-3">
+          <strong className="text-sm font-semibold text-brand-txt-primary">
+            {internal ? "Inside view" : "Outside view"}
+          </strong>
           <Button variant="outline" size="sm" type="button" onClick={() => setInternal(!internal)}>
             View {internal ? "outside" : "inside"}
           </Button>
         </div>
-        <div className={s.elevation} aria-busy={drawing.request !== request}>
+        <div
+          className="elevation-canvas grid min-h-[300px] flex-1 place-items-center py-4 md:min-h-0 [&_div]:h-full [&_div]:min-h-0 [&_div]:w-full [&_svg]:block [&_svg]:h-[300px] [&_svg]:w-full md:[&_svg]:h-full md:[&_svg]:max-h-[420px]"
+          aria-busy={drawing.request !== request}
+        >
           {drawing.request !== request ? (
             <DrawingSkeleton widthMm={frameDetails?.width_mm} heightMm={frameDetails?.height_mm} />
           ) : drawing.error ? (
-            <p role="alert">
-              {drawing.error}
+            <div role="alert" className="p-4 text-center">
+              <p className="mb-3 text-sm text-destructive">{drawing.error}</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -290,22 +303,22 @@ export function Configurator({
               >
                 Retry drawing
               </Button>
-            </p>
+            </div>
           ) : (
             <div dangerouslySetInnerHTML={{ __html: drawing.markup }} />
           )}
         </div>
-        <p className={s.hint}>
+        <p className="shrink-0 border-t border-border/40 pt-3 text-xs text-muted-foreground">
           Catalogue sizes shown in millimetres. Elevation is illustrative and not to scale; product
           availability will be confirmed by the team.
         </p>
       </div>
-      <div className={s.optionPanel}>
+      <div className="flex max-h-[min(520px,calc(100svh-8rem))] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-xs md:max-h-none">
         {question ? (
           <>
-            <div className={s.optionHeader}>
-              <div className={s.optionMeta}>
-                <span className={s.hint}>
+            <div className="grid shrink-0 gap-3 border-b border-border/60 pb-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground">
                   Option {active + 1} of {state.questions.length}
                 </span>
                 {headerAction}
@@ -332,19 +345,24 @@ export function Configurator({
                 </SelectContent>
               </Select>
             </div>
-            <h2 className={s.cardTitle}>{question.name.replace(" (Door)", "")}</h2>
-            <div className={s.optionScrollFrame}>
+            <h2 className="text-title-2 mt-3 mb-2 font-bold text-brand-txt-primary">
+              {question.name.replace(" (Door)", "")}
+            </h2>
+            <div className="min-h-0 flex-1 overflow-hidden">
               <div
                 ref={optionScroll}
-                className={s.optionScroll}
+                className="h-full overflow-y-auto overscroll-contain rounded-lg pr-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 tabIndex={0}
                 role="region"
                 aria-label="Available options"
               >
                 <div>
                   {(question.options || []).length > 12 && (
-                    <div className={s.field}>
-                      <label className={s.label} htmlFor="option-search">
+                    <div className="mb-3.5 grid gap-1.5">
+                      <label
+                        className="text-xs font-medium text-brand-txt-primary"
+                        htmlFor="option-search"
+                      >
                         Find an option
                       </label>
                       <Input
@@ -355,35 +373,42 @@ export function Configurator({
                       />
                     </div>
                   )}
-                  <div className={s.optionList}>
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,136px),1fr))] items-start gap-2.5 p-1">
                     {options.map((o) => (
                       <button
                         key={o.id}
                         type="button"
-                        className={s.optionTile}
+                        className="group relative flex min-h-[52px] min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card p-0 text-left text-xs leading-snug transition-all hover:border-brand-txt-primary hover:bg-muted/50 aria-pressed:border-brand-txt-primary aria-pressed:ring-2 aria-pressed:ring-brand-txt-primary"
                         aria-pressed={state.picks[question.key] === o.id}
                         onClick={() => pick(o)}
                       >
                         {o.src && (
-                          <span className={s.optionMedia}>
+                          <span className="grid h-[124px] w-full place-items-center overflow-hidden bg-muted/40 p-3 shadow-[inset_0_-1px_0_var(--border)]">
                             <Image
                               unoptimized
                               width={120}
                               height={104}
-                              className={s.optionImage}
+                              className="block h-full min-h-0 w-full object-contain"
                               src={resolveAsset(runtime.paths, o.src)}
                               alt=""
                             />
                           </span>
                         )}
-                        <span className={s.optionName}>{o.description}</span>
+                        <span className="flex min-h-[50px] w-full flex-1 items-center p-2.5 break-words text-brand-txt-primary group-aria-pressed:font-semibold">
+                          {o.description}
+                        </span>
                       </button>
                     ))}
-                    {!options.length && <p className={s.hint}>No matching options.</p>}
+                    {!options.length && (
+                      <p className="p-2 text-xs text-muted-foreground">No matching options.</p>
+                    )}
                   </div>
                   {textQuestion && (
-                    <div className={s.field}>
-                      <label className={s.label} htmlFor="option-text">
+                    <div className="mt-3.5 mb-2 grid gap-1.5">
+                      <label
+                        className="text-xs font-medium text-brand-txt-primary"
+                        htmlFor="option-text"
+                      >
                         {textQuestion.name}
                       </label>
                       <Input
@@ -407,7 +432,7 @@ export function Configurator({
                 </div>
               </div>
             </div>
-            <div className={s.actions}>
+            <div className="mt-auto flex shrink-0 items-center justify-between gap-3 border-t border-border/60 pt-3">
               <Button
                 type="button"
                 variant="outline"
@@ -440,7 +465,9 @@ export function Configurator({
         ) : (
           <>
             {headerAction}
-            <p>No additional options are available for this product.</p>
+            <p className="my-auto text-center text-sm text-muted-foreground">
+              No additional options are available for this product.
+            </p>
             {completionAction}
           </>
         )}

@@ -233,3 +233,23 @@
 .bg-gradient-green {
   background: radial-gradient(at 10% bottom, #011b14 75%, #0d7555 130%);
 }
+
+/* Configurator & Layout Elevation SVG Dimensions */
+.elevation-canvas g[layertype="Dimensions"] path {
+  stroke: var(--border);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.elevation-canvas g[layertype="Dimensions"] text {
+  fill: var(--foreground);
+  stroke: var(--background);
+  stroke-width: 0.12em;
+  paint-order: stroke fill;
+  font-family: var(--font-sans);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.elevation-canvas g[layertype="Dimensions"] [data-dimension-kind="readonly"] text {
+  fill: var(--color-brand-accent5, #0086fc);
+}

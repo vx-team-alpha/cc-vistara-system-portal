@@ -4,11 +4,9 @@ import { Printer, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import s from "./print.module.css";
-
 export function PrintActions() {
   return (
-    <div className={s.screenActions}>
+    <div className="mx-auto mb-3 flex w-[210mm] max-w-full items-center justify-end gap-2 px-2 sm:px-0 print:hidden">
       <Button
         type="button"
         variant="primary"

@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/select";
 import { updateOrderStatusAction } from "@/server/orders/actions";
 
-import s from "./portal.module.css";
-
 const statuses = [
   ["draft", "Draft"],
   ["issued", "Issued"],
@@ -51,7 +49,7 @@ export function OrderStatusForm({
 
   return (
     <form
-      className={s.statusForm}
+      className="space-y-3"
       onSubmit={(event) => {
         event.preventDefault();
         setMessage("");
@@ -66,10 +64,10 @@ export function OrderStatusForm({
       }}
       data-test="order-status-form"
     >
-      <Label className={s.label} htmlFor="order-status">
+      <Label htmlFor="order-status" className="text-subtitle font-semibold text-brand-txt-primary">
         Order status
       </Label>
-      <div className={s.statusControls}>
+      <div className="flex flex-wrap items-center gap-2">
         <Select
           value={status}
           onValueChange={setStatus}
@@ -101,14 +99,15 @@ export function OrderStatusForm({
         </Button>
       </div>
       {message && (
-        <p className={resultClass(message)} role="status">
+        <p
+          className={`text-subtitle font-medium ${
+            message === "Status updated." ? "text-emerald-600" : "text-destructive"
+          }`}
+          role="status"
+        >
           {message}
         </p>
       )}
     </form>
   );
-}
-
-function resultClass(message: string) {
-  return message === "Status updated." ? s.successText : s.fieldError;
 }

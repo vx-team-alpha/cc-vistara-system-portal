@@ -1,11 +1,20 @@
 "use client";
+
 import { ImageUploadIcon } from "@hugeicons/core-free-icons";
 import Image, { type ImageLoaderProps } from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,8 +26,6 @@ import { createWidget, updateWidget } from "@/server/portal/actions";
 import { WidgetSchema, UpdateWidgetSchema } from "@/server/portal/schemas";
 
 import { Icon } from "./icon";
-
-import s from "./portal.module.css";
 
 const MAX_LOGO_BYTES = 1024 * 1024;
 const ALLOWED_LOGO_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
@@ -40,6 +47,7 @@ type Widget = {
   brand_background_color: string;
   brand_text_color: string;
 };
+
 export function WidgetForm({
   widget,
   initialType = "door",
@@ -61,7 +69,6 @@ export function WidgetForm({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [widgetType, setWidgetType] = useState(initialType);
   const [enabledValue, setEnabledValue] = useState(String(widget?.enabled ?? true));
-  const previewDialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     return () => {
@@ -71,12 +78,6 @@ export function WidgetForm({
 
   function openPreview() {
     setPreviewOpen(true);
-    requestAnimationFrame(() => previewDialogRef.current?.showModal());
-  }
-
-  function closePreview() {
-    previewDialogRef.current?.close();
-    setPreviewOpen(false);
   }
 
   function stageLogo(file: File) {
@@ -85,29 +86,25 @@ export function WidgetForm({
     setLogoError(false);
 
     if (!ALLOWED_LOGO_TYPES.has(file.type)) {
-      setLogoFile(null);
-      setLogoPreviewUrl(logoUrl);
       setLogoError(true);
-      setLogoMessage("Choose a PNG, JPG, or WebP image.");
+      setLogoMessage("Only PNG, JPG or WebP images are supported.");
       return;
     }
-    if (file.size === 0 || file.size > MAX_LOGO_BYTES) {
-      setLogoFile(null);
-      setLogoPreviewUrl(logoUrl);
+    if (file.size > MAX_LOGO_BYTES) {
       setLogoError(true);
-      setLogoMessage("Logo files must be 1 MB or smaller.");
+      setLogoMessage("Logo must be 1 MB or smaller.");
       return;
     }
 
+    if (logoPreviewUrl.startsWith("blob:")) URL.revokeObjectURL(logoPreviewUrl);
     setLogoFile(file);
     setLogoPreviewUrl(URL.createObjectURL(file));
-    setLogoMessage("Ready to upload when you save.");
+    setLogoMessage("Logo ready to save.");
   }
 
-  async function uploadLogo(file: File) {
+  async function uploadLogo(file: File): Promise<string> {
     const body = new FormData();
-    body.set("file", file);
-    body.set("widgetId", widget?.id || "");
+    body.append("logo", file);
     const response = await fetch("/api/portal/widget-logo", { method: "POST", body });
     const result = (await response.json().catch(() => ({}))) as {
       url?: string;
@@ -186,6 +183,7 @@ export function WidgetForm({
       }
     });
   }
+
   return (
     <>
       <form
@@ -193,11 +191,12 @@ export function WidgetForm({
           event.preventDefault();
           submit(new FormData(event.currentTarget));
         }}
+        className="space-y-5"
       >
-        <div className={s.field}>
-          <label className={s.label} htmlFor="widget-name">
+        <div className="space-y-1.5">
+          <Label htmlFor="widget-name" className="text-subtitle font-medium text-brand-txt-primary">
             Component name
-          </label>
+          </Label>
           <Input
             id="widget-name"
             name="name"
@@ -207,11 +206,15 @@ export function WidgetForm({
             placeholder="e.g. Main website doors"
           />
         </div>
+
         {!widget && (
-          <div className={s.field}>
-            <label className={s.label} htmlFor="widget-type">
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="widget-type"
+              className="text-subtitle font-medium text-brand-txt-primary"
+            >
               Product type
-            </label>
+            </Label>
             <Select
               value={widgetType}
               onValueChange={(val) => setWidgetType(val as "door" | "window")}
@@ -225,13 +228,19 @@ export function WidgetForm({
               </SelectContent>
             </Select>
             <input type="hidden" name="type" value={widgetType} />
-            <span className={s.hint}>Door and window components have separate embed codes.</span>
+            <p className="text-xs text-muted-foreground">
+              Door and window components have separate embed codes.
+            </p>
           </div>
         )}
-        <div className={s.field}>
-          <label className={s.label} htmlFor="widget-website">
-            Website URL <span className={s.hint}>(optional)</span>
-          </label>
+
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="widget-website"
+            className="text-subtitle font-medium text-brand-txt-primary"
+          >
+            Website URL <span className="text-xs text-muted-foreground">(optional)</span>
+          </Label>
           <Input
             type="url"
             id="widget-website"
@@ -240,20 +249,27 @@ export function WidgetForm({
             placeholder="https://your-website.com"
             maxLength={500}
           />
-          <span className={s.hint}>
+          <p className="text-xs text-muted-foreground">
             For your records. This does not restrict where the component can be embedded.
-          </span>
+          </p>
         </div>
-        <fieldset className={s.brandingFields}>
-          <legend>Component branding</legend>
-          <p className={s.hint}>
+
+        <fieldset className="space-y-4 rounded-xl border border-border/60 p-4">
+          <legend className="text-subtitle font-semibold text-brand-txt-primary">
+            Component branding
+          </legend>
+          <p className="text-xs text-muted-foreground">
             These settings only affect this component, so every embed can match the website where it
             appears.
           </p>
-          <div className={s.field}>
-            <label className={s.label} htmlFor="widget-brand-name">
+
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="widget-brand-name"
+              className="text-subtitle font-medium text-brand-txt-primary"
+            >
               Brand name
-            </label>
+            </Label>
             <Input
               id="widget-brand-name"
               name="brand_name"
@@ -263,12 +279,11 @@ export function WidgetForm({
               placeholder="Your company"
             />
           </div>
-          <div className={s.logoField}>
-            <span className={s.label}>Logo</span>
+
+          <div className="space-y-1.5">
+            <Label className="text-subtitle font-medium text-brand-txt-primary">Logo</Label>
             <label
-              className={s.logoDropzone}
-              data-dragging={logoDragging || undefined}
-              data-uploading={pending || undefined}
+              className="relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-6 text-center transition-colors hover:border-brand-accent1 hover:bg-brand-backgroundSecondary/50"
               htmlFor="widget-brand-logo"
               onDragEnter={(event) => {
                 event.preventDefault();
@@ -291,13 +306,12 @@ export function WidgetForm({
               }}
             >
               <input
-                className={s.fileInput}
+                className="sr-only"
                 type="file"
                 id="widget-brand-logo"
                 accept="image/png,image/jpeg,image/webp"
                 required={!logoUrl && !logoFile}
                 disabled={pending}
-                aria-describedby="widget-brand-logo-help widget-brand-logo-status"
                 data-test="upload-widget-logo"
                 onChange={(event) => {
                   const file = event.currentTarget.files?.[0];
@@ -305,7 +319,7 @@ export function WidgetForm({
                 }}
               />
               {logoPreviewUrl ? (
-                <span className={s.logoPreview}>
+                <span className="mb-2 block">
                   <Image
                     loader={directImageLoader}
                     unoptimized
@@ -316,12 +330,12 @@ export function WidgetForm({
                   />
                 </span>
               ) : (
-                <span className={s.logoUploadIcon}>
+                <span className="mb-2 flex size-10 items-center justify-center rounded-full bg-brand-accent3 text-brand-txt-secondary">
                   <Icon icon={ImageUploadIcon} size={20} />
                 </span>
               )}
-              <span className={s.logoDropCopy}>
-                <strong>
+              <span className="flex flex-col text-sm text-brand-txt-secondary">
+                <strong className="font-semibold text-brand-txt-primary">
                   {logoUploading
                     ? "Uploading logo…"
                     : logoFile
@@ -334,26 +348,27 @@ export function WidgetForm({
               </span>
             </label>
             <input type="hidden" name="brand_logo_url" value={logoUrl} />
-            <div className={s.logoUploadFoot}>
-              <span className={s.hint} id="widget-brand-logo-help">
-                PNG, JPG or WebP · 1 MB maximum
-              </span>
-            </div>
+            <p className="text-xs text-muted-foreground" id="widget-brand-logo-help">
+              PNG, JPG or WebP · 1 MB maximum
+            </p>
             {logoMessage && (
               <p
                 id="widget-brand-logo-status"
-                className={s.logoStatus}
-                data-error={logoError || undefined}
+                className={`text-xs ${logoError ? "text-destructive" : "text-emerald-600"}`}
                 role={logoError ? "alert" : "status"}
               >
                 {logoMessage}
               </p>
             )}
           </div>
-          <div className={s.field}>
-            <label className={s.label} htmlFor="widget-brand-phone">
+
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="widget-brand-phone"
+              className="text-subtitle font-medium text-brand-txt-primary"
+            >
               Phone number
-            </label>
+            </Label>
             <Input
               id="widget-brand-phone"
               name="brand_phone"
@@ -363,13 +378,13 @@ export function WidgetForm({
               autoComplete="tel"
               defaultValue={widget?.brand_phone}
               placeholder="e.g. 0113 460 2305"
-              aria-describedby="widget-brand-phone-help"
             />
-            <span className={s.hint} id="widget-brand-phone-help">
+            <p className="text-xs text-muted-foreground">
               Shown in the component header so visitors can call for help.
-            </span>
+            </p>
           </div>
-          <div className={s.brandColors}>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <ColorField
               id="widget-brand-primary"
               name="brand_primary_color"
@@ -390,11 +405,15 @@ export function WidgetForm({
             />
           </div>
         </fieldset>
+
         {widget && (
-          <div className={s.field}>
-            <label className={s.label} htmlFor="widget-enabled">
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="widget-enabled"
+              className="text-subtitle font-medium text-brand-txt-primary"
+            >
               Availability
-            </label>
+            </Label>
             <Select value={enabledValue} onValueChange={setEnabledValue}>
               <SelectTrigger id="widget-enabled" className="h-9 w-full bg-background">
                 <SelectValue />
@@ -407,12 +426,17 @@ export function WidgetForm({
             <input type="hidden" name="enabled" value={enabledValue} />
           </div>
         )}
+
         {message && (
-          <p className={s.notice} data-error={error || undefined} role="status">
+          <p
+            className={`text-subtitle font-medium ${error ? "text-destructive" : "text-emerald-600"}`}
+            role="status"
+          >
             {message}
           </p>
         )}
-        <div className={s.actions}>
+
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button type="submit" variant="primary" disabled={pending} data-test="save-widget">
             {logoUploading
               ? "Uploading logo…"
@@ -439,46 +463,27 @@ export function WidgetForm({
           )}
         </div>
       </form>
+
       {widget && (
-        <dialog
-          ref={previewDialogRef}
-          className={`${s.adminDialog} ${s.previewDialog}`}
-          onClose={() => setPreviewOpen(false)}
-          onClick={(event) => {
-            if (event.target === previewDialogRef.current) closePreview();
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") closePreview();
-          }}
-        >
-          <div className={s.previewDialogInner}>
-            <header className={s.adminDialogHead}>
-              <div>
-                <h2 className={s.cardTitle}>Component preview</h2>
-                <p className={s.hint}>
-                  Live product options, elevations, and enquiry flow for this component.
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                aria-label="Close preview"
-                onClick={closePreview}
-              >
-                ✕
-              </Button>
-            </header>
+        <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+          <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-h3 font-bold text-brand-txt-primary">
+                Component preview
+              </DialogTitle>
+              <DialogDescription className="text-subtitle text-brand-txt-secondary">
+                Live product options, elevations, and enquiry flow for this component.
+              </DialogDescription>
+            </DialogHeader>
             {previewOpen && (
               <iframe
-                className={s.previewDialogFrame}
+                className="h-[650px] w-full rounded-xl border border-border"
                 src={`/embed/${widget.public_key}`}
                 title={`${widget.name} preview`}
               />
             )}
-          </div>
-        </dialog>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );
@@ -497,18 +502,21 @@ function ColorField({
 }) {
   const [value, setValue] = useState(defaultValue);
   return (
-    <label className={s.colorField} htmlFor={id}>
-      <span className={s.label}>{label}</span>
-      <span className={s.colorControl}>
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="text-subtitle font-medium text-brand-txt-primary">
+        {label}
+      </Label>
+      <div className="flex items-center gap-2 rounded-lg border border-input bg-background p-1.5">
         <input
           id={id}
           name={name}
           type="color"
           value={value}
           onChange={(event) => setValue(event.target.value)}
+          className="size-7 cursor-pointer rounded border-0 bg-transparent p-0"
         />
-        <span>{value.toUpperCase()}</span>
-      </span>
-    </label>
+        <span className="font-mono text-xs font-semibold">{value.toUpperCase()}</span>
+      </div>
+    </div>
   );
 }

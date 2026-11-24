@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import s from "./portal.module.css";
-
 // Catalogue SVGs reference stored textures. An <img> blocks those nested
 // requests; inline SVG uses the same rendering context as the configurator.
 export function LayoutPreview({ src }: { src: string }) {
@@ -33,7 +31,7 @@ export function LayoutPreview({ src }: { src: string }) {
   }, [src]);
 
   if (!src || (preview.src === src && preview.error))
-    return <span className={s.hint}>Preview unavailable</span>;
+    return <span className="text-xs text-muted-foreground">Preview unavailable</span>;
   if (preview.src !== src)
     return (
       <span role="status" aria-label="Loading preview" className="block h-full w-full p-4">
@@ -42,7 +40,7 @@ export function LayoutPreview({ src }: { src: string }) {
     );
   return (
     <span
-      className={s.embedSvg}
+      className="block h-full min-h-0 w-full overflow-hidden [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
       aria-hidden="true"
       dangerouslySetInnerHTML={{ __html: preview.markup }}
     />

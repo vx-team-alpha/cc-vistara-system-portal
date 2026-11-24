@@ -1,11 +1,13 @@
 "use client";
+
 import { useSyncExternalStore, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import s from "./portal.module.css";
 const subscribe = () => () => {};
+
 export function EmbedCode({ publicKey, name }: { publicKey: string; name: string }) {
   const origin = useSyncExternalStore(
     subscribe,
@@ -31,6 +33,7 @@ export function EmbedCode({ publicKey, name }: { publicKey: string; name: string
   });
 })();
 </script>`;
+
   async function copy(value: string) {
     try {
       await navigator.clipboard.writeText(value);
@@ -39,16 +42,17 @@ export function EmbedCode({ publicKey, name }: { publicKey: string; name: string
       setMessage("Copy was unavailable. Select the code above and copy it manually.");
     }
   }
+
   return (
-    <>
-      <p className={s.cardNote}>
+    <div className="space-y-4">
+      <p className="text-sm text-brand-txt-secondary">
         Paste this code into an HTML block on your website. It automatically follows the component’s
         height, so visitors never get a scrollbar inside the embed.
       </p>
-      <div className={s.field}>
-        <label className={s.label} htmlFor="embed-code">
+      <div className="space-y-1.5">
+        <Label htmlFor="embed-code" className="text-subtitle font-medium text-brand-txt-primary">
           Responsive embed code
-        </label>
+        </Label>
         <Textarea
           id="embed-code"
           readOnly
@@ -58,7 +62,7 @@ export function EmbedCode({ publicKey, name }: { publicKey: string; name: string
           className="font-mono text-xs"
         />
       </div>
-      <div className={s.actions}>
+      <div className="flex flex-wrap items-center gap-2 pt-1">
         <Button
           type="button"
           variant="outline"
@@ -85,14 +89,14 @@ export function EmbedCode({ publicKey, name }: { publicKey: string; name: string
         </Button>
       </div>
       {message && (
-        <p role="status" className={s.notice}>
+        <p role="status" className="text-sm font-medium text-brand-txt-primary">
           {message}
         </p>
       )}
-      <p className={s.hint}>
+      <p className="text-xs text-muted-foreground">
         Preview visits count as tracked sessions. Pausing this component also pauses its public
         link.
       </p>
-    </>
+    </div>
   );
 }

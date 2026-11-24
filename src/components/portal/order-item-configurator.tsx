@@ -8,8 +8,6 @@ import type { Configuration } from "@/server/portal/schemas";
 
 import { Configurator } from "./configurator";
 
-import s from "./portal.module.css";
-
 type FrameDetails = Configuration["frame"];
 
 export function OrderItemConfigurator({
@@ -40,9 +38,11 @@ export function OrderItemConfigurator({
     () => ({
       ...initialConfiguration,
       system,
+      frame: frameDetails,
     }),
-    [initialConfiguration, system],
+    [initialConfiguration, system, frameDetails],
   );
+
   const onDrawingChange = useCallback((markup: string, internal: boolean) => {
     if (!markup) return;
     setDrawings((value) => ({ ...value, [internal ? "inside" : "outside"]: markup }));
@@ -77,6 +77,7 @@ export function OrderItemConfigurator({
     <Button
       type="button"
       variant="primary"
+      size="sm"
       disabled={pending || !configuration}
       onClick={save}
       data-test="save-door-configuration"
@@ -88,7 +89,7 @@ export function OrderItemConfigurator({
   return (
     <>
       {message && (
-        <p className={s.notice} data-error role="alert">
+        <p className="mb-4 text-sm font-medium text-destructive" role="alert">
           {message}
         </p>
       )}
@@ -99,8 +100,8 @@ export function OrderItemConfigurator({
         frameDetails={frameDetails}
         onChange={setConfiguration}
         onDrawingChange={onDrawingChange}
-        headerAction={saveButton("Save")}
-        completionAction={null}
+        completionAction={saveButton("Save and finish door")}
+        headerAction={saveButton("Save configuration")}
       />
     </>
   );

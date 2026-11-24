@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { deleteOrderItemAction, duplicateOrderItemAction } from "@/server/orders/actions";
 
-import s from "./portal.module.css";
-
 export function OrderItemActions({
   orderId,
   revision,
@@ -131,7 +129,7 @@ export function OrderItemActions({
       </DropdownMenu>
 
       {message && (
-        <p className={s.fieldError} role="alert">
+        <p className="text-xs text-destructive" role="alert">
           {message}
         </p>
       )}
