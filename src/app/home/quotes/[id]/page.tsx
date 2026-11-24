@@ -129,7 +129,7 @@ export default async function OrderPage({
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Customer Details */}
         <Card className="rounded-2xl border border-border bg-card shadow-xs">
-          <CardHeader className="border-b border-border/60 px-6 py-4">
+          <CardHeader className="border-b border-border/60 p-6">
             <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
               Customer Details
             </CardTitle>
@@ -159,7 +159,7 @@ export default async function OrderPage({
 
         {/* Order Status & Timeline */}
         <Card className="rounded-2xl border border-border bg-card shadow-xs">
-          <CardHeader className="border-b border-border/60 px-6 py-4">
+          <CardHeader className="border-b border-border/60 p-6">
             <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
               Order Workflow
             </CardTitle>
@@ -191,7 +191,7 @@ export default async function OrderPage({
 
       {/* Door Specification Items Card */}
       <Card className="rounded-2xl border border-border bg-card shadow-xs">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4.5">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 p-6">
           <div className="space-y-0.5">
             <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
               Door & Frame Specifications

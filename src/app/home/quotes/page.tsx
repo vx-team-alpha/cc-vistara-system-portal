@@ -106,7 +106,7 @@ export default async function QuotesPage({
 
       {/* Customer Orders Card with Table */}
       <Card className="rounded-2xl border border-border bg-card shadow-xs">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4.5">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 p-6">
           <div className="space-y-0.5">
             <CardTitle className="text-title-2 font-bold text-brand-txt-primary">
               Customer orders

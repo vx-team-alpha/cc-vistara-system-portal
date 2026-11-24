@@ -98,7 +98,7 @@ export function UpdatePasswordCard() {
               </p>
             ) : null}
 
-            <Button type="submit" disabled={isPending} className="w-fit">
+            <Button type="submit" size="sm" disabled={isPending} className="w-fit">
               {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
               Update password
             </Button>

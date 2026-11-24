@@ -87,7 +87,7 @@ export function UpdateNameCard({ initialName }: { initialName: string }) {
               </p>
             ) : null}
 
-            <Button type="submit" disabled={isPending || !isDirty} className="w-fit">
+            <Button type="submit" size="sm" disabled={isPending || !isDirty} className="w-fit">
               {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
               Save
             </Button>

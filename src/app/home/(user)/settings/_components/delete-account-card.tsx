@@ -80,6 +80,7 @@ export function DeleteAccountCard() {
 
         <Button
           type="button"
+          size="sm"
           variant="destructive"
           disabled={!canSubmit || isPending}
           className="w-fit"
