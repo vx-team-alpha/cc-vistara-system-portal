@@ -6,10 +6,9 @@ import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createOrderItemAction, updateOrderItemAction } from "@/server/orders/actions";
 import { CreateOrderItemSchema, UpdateOrderItemSchema } from "@/server/orders/schemas";
-
-import s from "./portal.module.css";
 
 export function OrderItemFrameForm({
   orderId,
@@ -33,6 +32,7 @@ export function OrderItemFrameForm({
   const editing = Boolean(item);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
+
   const form = useForm({
     resolver: zodResolver(UpdateOrderItemSchema),
     defaultValues: {
@@ -76,35 +76,55 @@ export function OrderItemFrameForm({
   });
 
   return (
-    <form onSubmit={submit} noValidate data-test="frame-details-form">
+    <form onSubmit={submit} noValidate data-test="order-item-frame-form" className="space-y-5">
       <input type="hidden" {...form.register("order_id")} />
       <input type="hidden" {...form.register("item_id")} />
       <input type="hidden" {...form.register("layout_id")} />
       <input type="hidden" {...form.register("revision")} />
-      <div className={s.field}>
-        <span className={s.label}>Profile system</span>
-        <div className={s.systemSelector} role="radiogroup" aria-label="Profile system">
-          <label className={s.systemCard} data-active={selectedSystem === "eurocell"}>
-            <input
-              type="radio"
-              value="eurocell"
-              className={s.srOnly}
-              {...form.register("system")}
-            />
-            <span className={s.systemCardTitle}>Eurocell Composite</span>
-            <span className={s.systemCardDesc}>70mm Eurologik Outer Frame · 85–225mm Cills</span>
+
+      <div className="space-y-2">
+        <Label className="text-subtitle font-semibold text-brand-txt-primary">Profile system</Label>
+        <div
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+          role="radiogroup"
+          aria-label="Profile system"
+        >
+          <label
+            className={`group relative flex cursor-pointer flex-col rounded-xl border p-4 transition-all ${
+              selectedSystem === "eurocell"
+                ? "border-brand-accent1 bg-brand-accent1/5 ring-2 ring-brand-accent1/20"
+                : "border-border bg-card hover:border-brand-accent1/40 hover:bg-brand-backgroundSecondary/50"
+            }`}
+          >
+            <input type="radio" value="eurocell" className="sr-only" {...form.register("system")} />
+            <span className="text-body font-bold text-brand-txt-primary">Eurocell Composite</span>
+            <span className="text-caption mt-1 text-brand-txt-secondary">
+              70mm Eurologik Outer Frame · 85–225mm Cills
+            </span>
           </label>
-          <label className={s.systemCard} data-active={selectedSystem === "rehau"}>
-            <input type="radio" value="rehau" className={s.srOnly} {...form.register("system")} />
-            <span className={s.systemCardTitle}>Rehau Total70</span>
-            <span className={s.systemCardDesc}>72mm Rehau Outer Frame · 95–180mm Cills</span>
+          <label
+            className={`group relative flex cursor-pointer flex-col rounded-xl border p-4 transition-all ${
+              selectedSystem === "rehau"
+                ? "border-brand-accent1 bg-brand-accent1/5 ring-2 ring-brand-accent1/20"
+                : "border-border bg-card hover:border-brand-accent1/40 hover:bg-brand-backgroundSecondary/50"
+            }`}
+          >
+            <input type="radio" value="rehau" className="sr-only" {...form.register("system")} />
+            <span className="text-body font-bold text-brand-txt-primary">Rehau Total70</span>
+            <span className="text-caption mt-1 text-brand-txt-secondary">
+              72mm Rehau Outer Frame · 95–180mm Cills
+            </span>
           </label>
         </div>
       </div>
-      <div className={s.formGrid}>
-        <label className={s.field}>
-          <span className={s.label}>Width (mm)</span>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="oif-width" className="text-subtitle font-medium text-brand-txt-primary">
+            Width (mm)
+          </Label>
           <Input
+            id="oif-width"
             type="number"
             inputMode="numeric"
             min={300}
@@ -114,12 +134,16 @@ export function OrderItemFrameForm({
             {...form.register("width_mm")}
           />
           {form.formState.errors.width_mm && (
-            <span className={s.fieldError}>{form.formState.errors.width_mm.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.width_mm.message}</p>
           )}
-        </label>
-        <label className={s.field}>
-          <span className={s.label}>Height (mm)</span>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="oif-height" className="text-subtitle font-medium text-brand-txt-primary">
+            Height (mm)
+          </Label>
           <Input
+            id="oif-height"
             type="number"
             inputMode="numeric"
             min={1750}
@@ -129,12 +153,16 @@ export function OrderItemFrameForm({
             {...form.register("height_mm")}
           />
           {form.formState.errors.height_mm && (
-            <span className={s.fieldError}>{form.formState.errors.height_mm.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.height_mm.message}</p>
           )}
-        </label>
-        <label className={s.field}>
-          <span className={s.label}>Quantity</span>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="oif-qty" className="text-subtitle font-medium text-brand-txt-primary">
+            Quantity
+          </Label>
           <Input
+            id="oif-qty"
             type="number"
             inputMode="numeric"
             min={1}
@@ -144,30 +172,37 @@ export function OrderItemFrameForm({
             {...form.register("quantity")}
           />
           {form.formState.errors.quantity && (
-            <span className={s.fieldError}>{form.formState.errors.quantity.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.quantity.message}</p>
           )}
-        </label>
-        <label className={s.field}>
-          <span className={s.label}>Location</span>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="oif-loc" className="text-subtitle font-medium text-brand-txt-primary">
+            Location
+          </Label>
           <Input
+            id="oif-loc"
             placeholder="For example: Front entrance"
             aria-invalid={Boolean(form.formState.errors.location)}
             {...form.register("location")}
           />
           {form.formState.errors.location && (
-            <span className={s.fieldError}>{form.formState.errors.location.message}</span>
+            <p className="text-xs text-destructive">{form.formState.errors.location.message}</p>
           )}
-        </label>
+        </div>
       </div>
-      <p className={s.hint}>
+
+      <p className="text-xs text-muted-foreground">
         Measurements are saved on this door and used by its drawing and documents.
       </p>
+
       {message && (
-        <p className={s.notice} data-error role="alert">
+        <p className="text-subtitle font-medium text-destructive" role="alert">
           {message}
         </p>
       )}
-      <div className={s.actions}>
+
+      <div className="flex items-center justify-end gap-3 pt-2">
         <Button variant="primary" type="submit" disabled={pending} data-test="save-frame-details">
           {pending
             ? "Saving frame details…"

@@ -14,8 +14,6 @@ import {
 import { updateQuoteStatus } from "@/server/portal/actions";
 import { QuoteStatusSchema } from "@/server/portal/schemas";
 
-import s from "./portal.module.css";
-
 export function QuoteStatus({ id, status: initialStatus }: { id: string; status: string }) {
   const [status, setStatus] = useState(initialStatus);
   const [pending, start] = useTransition();
@@ -39,11 +37,11 @@ export function QuoteStatus({ id, status: initialStatus }: { id: string; status:
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Label className={s.label} htmlFor="quote-status">
+    <form onSubmit={handleSubmit} className="space-y-2">
+      <Label htmlFor="quote-status" className="text-subtitle font-semibold text-brand-txt-primary">
         Query status
       </Label>
-      <div className={s.actions}>
+      <div className="flex flex-wrap items-center gap-2">
         <Select value={status} onValueChange={setStatus} disabled={pending}>
           <SelectTrigger id="quote-status" className="h-9 min-w-[160px] bg-background">
             <SelectValue placeholder="Select status" />
@@ -65,7 +63,12 @@ export function QuoteStatus({ id, status: initialStatus }: { id: string; status:
         </Button>
       </div>
       {message && (
-        <p role="status" className={s.notice}>
+        <p
+          role="status"
+          className={`text-subtitle font-medium ${
+            message === "Status updated." ? "text-emerald-600" : "text-destructive"
+          }`}
+        >
           {message}
         </p>
       )}

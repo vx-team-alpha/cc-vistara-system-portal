@@ -1,4 +1,3 @@
-import { portalStyles as s } from "@/components/portal/ui";
 import {
   getConfiguredLinkableProviders,
   getLinkableProviderOption,
@@ -53,7 +52,7 @@ export default async function SettingsPage() {
   const totalIdentityCount = identitiesData.length;
 
   return (
-    <div className={s.settingsStack}>
+    <div className="grid gap-5">
       <UpdateNameCard initialName={account.name ?? ""} />
       <UpdateEmailCard currentEmail={account.email ?? user.email ?? ""} />
       <UpdatePasswordCard />

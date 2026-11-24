@@ -12,8 +12,6 @@ import {
 import { Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
-export { default as portalStyles } from "./portal.module.css";
-
 type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
 
 export function PageHead({
