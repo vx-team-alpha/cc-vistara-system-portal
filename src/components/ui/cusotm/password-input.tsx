@@ -29,7 +29,7 @@ export function PasswordInput({
       />
 
       <InputGroupAddon>
-        <Lock aria-hidden="true" />
+        <Lock className="size-4 text-muted-foreground" aria-hidden="true" />
       </InputGroupAddon>
 
       <InputGroupAddon align="inline-end">
@@ -39,8 +39,13 @@ export function PasswordInput({
           aria-label={showPassword ? "Hide password" : "Show password"}
           aria-pressed={showPassword}
           onClick={() => setShowPassword((visible) => !visible)}
+          className="size-7 p-1 text-muted-foreground hover:text-foreground"
         >
-          {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+          {showPassword ? (
+            <EyeOff className="size-4" aria-hidden="true" />
+          ) : (
+            <Eye className="size-4" aria-hidden="true" />
+          )}
         </InputGroupButton>
       </InputGroupAddon>
     </InputGroup>

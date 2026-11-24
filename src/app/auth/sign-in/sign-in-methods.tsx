@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-
 import { MagicLinkForm } from "./magic-link-form";
 import { SignInForm } from "./sign-in-form";
 
@@ -19,17 +17,17 @@ export function SignInMethods({ next }: { next?: string }) {
     <div className="grid gap-4">
       {mode === "password" ? <SignInForm next={next} /> : <MagicLinkForm next={next} />}
 
-      <Button
-        type="button"
-        variant="link"
-        size="sm"
-        className="h-auto p-0 text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
-        onClick={() => setMode(mode === "password" ? "magic-link" : "password")}
-      >
-        {mode === "password"
-          ? "Sign in with a magic link instead"
-          : "Sign in with a password instead"}
-      </Button>
+      <div className="text-center">
+        <button
+          type="button"
+          className="cursor-pointer text-sm font-medium text-brand-txt-secondary underline-offset-4 transition-colors hover:text-brand-txt-primary hover:underline"
+          onClick={() => setMode(mode === "password" ? "magic-link" : "password")}
+        >
+          {mode === "password"
+            ? "Sign in with a magic link instead"
+            : "Sign in with a password instead"}
+        </button>
+      </div>
     </div>
   );
 }
