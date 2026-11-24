@@ -63,19 +63,22 @@ function InputGroupAddon({
   );
 }
 
-const inputGroupButtonVariants = cva("flex items-center gap-2 text-sm shadow-none", {
-  variants: {
-    size: {
-      xs: "h-6 gap-1 rounded-[calc(var(--radius)-3px)] px-1.5 [&>svg:not([class*='size-'])]:size-3.5",
-      sm: "",
-      "icon-xs": "size-6 rounded-[calc(var(--radius)-3px)] p-0 has-[>svg]:p-0",
-      "icon-sm": "size-8 p-0 has-[>svg]:p-0",
+const inputGroupButtonVariants = cva(
+  "inline-flex min-w-0 shrink-0 cursor-pointer items-center justify-center gap-1.5 text-sm shadow-none hover:!ring-0 disabled:cursor-not-allowed",
+  {
+    variants: {
+      size: {
+        xs: "h-6 min-w-0 rounded-[calc(var(--radius)-3px)] px-1.5 [&>svg:not([class*='size-'])]:size-3.5",
+        sm: "h-7 min-w-0 px-2 [&>svg:not([class*='size-'])]:size-4",
+        "icon-xs": "size-6 min-w-0 rounded-[calc(var(--radius)-3px)] p-0 [&>svg]:size-3.5",
+        "icon-sm": "size-7 min-w-0 rounded-md p-0 [&>svg]:size-4",
+      },
+    },
+    defaultVariants: {
+      size: "xs",
     },
   },
-  defaultVariants: {
-    size: "xs",
-  },
-});
+);
 
 function InputGroupButton({
   className,
@@ -90,7 +93,12 @@ function InputGroupButton({
       type={type}
       data-size={size}
       variant={variant}
-      className={cn(inputGroupButtonVariants({ size }), className)}
+      size={size === "icon-xs" ? "icon-xs" : size === "icon-sm" ? "icon-sm" : "sm"}
+      className={cn(
+        "min-w-0 text-muted-foreground hover:text-foreground hover:!ring-0",
+        inputGroupButtonVariants({ size }),
+        className,
+      )}
       {...props}
     />
   );

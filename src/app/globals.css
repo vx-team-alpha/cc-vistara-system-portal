@@ -126,6 +126,24 @@
   body {
     @apply font-sans;
   }
+  button,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  a,
+  select,
+  summary {
+    cursor: pointer;
+  }
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  [type="button"]:disabled,
+  [type="submit"]:disabled,
+  [type="reset"]:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
 }
 
 /* Typography scale from cc-the-ladder-app */

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 // Define button styles with variants matching cc-the-ladder-app
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center rounded-md font-medium transition-colors hover:ring-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md font-medium transition-colors hover:ring-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -19,7 +19,7 @@ const buttonVariants = cva(
         orange: "bg-brand-accent4 text-white hover:ring-brand-accent4/20 hover:brightness-95",
         transparent: "bg-transparent text-brand-accent0 hover:bg-brand-accent3/50",
         ghost: "hover:bg-accent hover:text-accent-foreground hover:!ring-0",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline hover:!ring-0",
         outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         tertiary: "border border-black/5 bg-white text-brand-txt-primary",
         destructive: "bg-brand-accent4 text-white hover:brightness-95",
@@ -29,8 +29,10 @@ const buttonVariants = cva(
         sm: "text-action-sm h-[34px] min-w-16 px-3 py-2",
         md: "text-action-md h-11 min-w-24 px-5 py-3",
         lg: "text-action-lg h-14 w-full !max-w-[361px] px-5 py-4",
-        icon: "size-10",
-        link: "h-auto min-w-0 p-1 text-brand-accent5",
+        icon: "size-10 min-w-0 p-0",
+        "icon-sm": "size-8 min-w-0 p-0",
+        "icon-xs": "size-6 min-w-0 p-0",
+        link: "h-auto min-w-0 p-0 text-brand-accent5",
         default: "text-action-md h-11 min-w-24 px-5 py-3",
       },
     },
