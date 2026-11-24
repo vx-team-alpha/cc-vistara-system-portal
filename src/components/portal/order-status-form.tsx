@@ -85,7 +85,7 @@ export function OrderStatusForm({
       {message && (
         <p
           className={`text-subtitle font-medium ${
-            message === "Status updated." ? "text-emerald-600" : "text-destructive"
+            message === "Status updated." ? "text-success" : "text-destructive"
           }`}
           role="status"
         >

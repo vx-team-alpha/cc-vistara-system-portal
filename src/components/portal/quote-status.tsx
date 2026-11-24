@@ -66,7 +66,7 @@ export function QuoteStatus({ id, status: initialStatus }: { id: string; status:
         <p
           role="status"
           className={`text-subtitle font-medium ${
-            message === "Status updated." ? "text-emerald-600" : "text-destructive"
+            message === "Status updated." ? "text-success" : "text-destructive"
           }`}
         >
           {message}

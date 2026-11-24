@@ -127,7 +127,7 @@ export function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
 
           {message && (
             <p
-              className={`text-subtitle ${isError ? "text-destructive" : "text-[#0d7555]"}`}
+              className={`text-subtitle ${isError ? "text-destructive" : "text-success"}`}
               role="status"
             >
               {message}

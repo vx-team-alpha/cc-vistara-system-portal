@@ -24,6 +24,13 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-info: var(--info);
+  --color-info-subtle: var(--info-subtle);
+  --color-destructive-subtle: var(--destructive-subtle);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -34,19 +41,20 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Brand Colors from cc-the-ladder-app */
-  --color-brand-accent0: #01130e;
-  --color-brand-accent1: #02291d;
-  --color-brand-accent2: #d4fd36;
-  --color-brand-accent3: #f3f2f5;
-  --color-brand-accent4: #ff3e00;
-  --color-brand-accent5: #0086fc;
-  --color-brand-accent6: #f4f4df;
-  --color-brand-accent7: #ff710b;
-  --color-brand-backgroundMain: #f3f2f5;
-  --color-brand-backgroundSecondary: #fbfaf9;
-  --color-brand-txt-primary: #343433;
-  --color-brand-txt-secondary: #999999;
+  /* Legacy brand aliases. Components still use these names, but their values
+     now follow the semantic theme in both light and dark modes. */
+  --color-brand-accent0: var(--brand-ink);
+  --color-brand-accent1: var(--brand-solid);
+  --color-brand-accent2: var(--brand-on-solid);
+  --color-brand-accent3: var(--muted);
+  --color-brand-accent4: var(--destructive);
+  --color-brand-accent5: var(--info);
+  --color-brand-accent6: var(--warning-subtle);
+  --color-brand-accent7: var(--warning);
+  --color-brand-backgroundMain: var(--background);
+  --color-brand-backgroundSecondary: var(--secondary);
+  --color-brand-txt-primary: var(--foreground);
+  --color-brand-txt-secondary: var(--muted-foreground);
 
   --font-sans: var(--font-honksans), system-ui, -apple-system, sans-serif;
   --font-obviously: var(--font-obviously), sans-serif;
@@ -56,67 +64,87 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #343433;
+  --background: #f3f7f9;
+  --foreground: #172b36;
   --card: #ffffff;
-  --card-foreground: #343433;
+  --card-foreground: #172b36;
   --popover: #ffffff;
-  --popover-foreground: #343433;
-  --primary: #02291d;
-  --primary-foreground: #d4fd36;
-  --secondary: #fbfaf9;
-  --secondary-foreground: #343433;
-  --muted: #f3f2f5;
-  --muted-foreground: #999999;
-  --accent: #f3f2f5;
-  --accent-foreground: #343433;
-  --destructive: #ff3e00;
+  --popover-foreground: #172b36;
+  --primary: #123b52;
+  --primary-foreground: #e7f8fc;
+  --secondary: #f8fafb;
+  --secondary-foreground: #172b36;
+  --muted: #eaf2f5;
+  --muted-foreground: #5c707b;
+  --accent: #dcecf1;
+  --accent-foreground: #123b52;
+  --destructive: #b83245;
   --destructive-foreground: #ffffff;
-  --border: #dcdcdc;
-  --input: #dcdcdc;
-  --ring: #02291d;
+  --destructive-subtle: #fcecef;
+  --success: #18784a;
+  --success-subtle: #e7f5ed;
+  --warning: #9a5a0a;
+  --warning-subtle: #fff3d8;
+  --info: #0b7194;
+  --info-subtle: #e7f4f8;
+  --border: #cedde3;
+  --input: #b9cdd5;
+  --ring: #0b7194;
+  --brand-ink: #0b2533;
+  --brand-solid: #123b52;
+  --brand-on-solid: #e7f8fc;
   --radius: 0.625rem;
   --rounded-box: 1rem;
 
-  --sidebar: #ededed;
-  --sidebar-foreground: #343433;
-  --sidebar-primary: #02291d;
-  --sidebar-primary-foreground: #d4fd36;
-  --sidebar-accent: #e0dfde;
-  --sidebar-accent-foreground: #01130e;
-  --sidebar-border: #dcdcdc;
-  --sidebar-ring: #02291d;
+  --sidebar: #0b2533;
+  --sidebar-foreground: #dcebf0;
+  --sidebar-primary: #65c9e6;
+  --sidebar-primary-foreground: #071822;
+  --sidebar-accent: #16394a;
+  --sidebar-accent-foreground: #f2fbfd;
+  --sidebar-border: #244757;
+  --sidebar-ring: #65c9e6;
 }
 
 .dark {
-  --background: #01130e;
-  --foreground: #f3f2f5;
-  --card: #02291d;
-  --card-foreground: #f3f2f5;
-  --popover: #02291d;
-  --popover-foreground: #f3f2f5;
-  --primary: #d4fd36;
-  --primary-foreground: #02291d;
-  --secondary: #011c15;
-  --secondary-foreground: #f3f2f5;
-  --muted: #043828;
-  --muted-foreground: #999999;
-  --accent: #043828;
-  --accent-foreground: #f3f2f5;
-  --destructive: #ff3e00;
-  --destructive-foreground: #ffffff;
-  --border: #043828;
-  --input: #043828;
-  --ring: #d4fd36;
+  --background: #071822;
+  --foreground: #e8f6fa;
+  --card: #0d202c;
+  --card-foreground: #e8f6fa;
+  --popover: #102733;
+  --popover-foreground: #e8f6fa;
+  --primary: #65c9e6;
+  --primary-foreground: #071822;
+  --secondary: #102733;
+  --secondary-foreground: #dcebf0;
+  --muted: #16313e;
+  --muted-foreground: #91a7b2;
+  --accent: #193d4d;
+  --accent-foreground: #e8f6fa;
+  --destructive: #e56b77;
+  --destructive-foreground: #0b1720;
+  --destructive-subtle: #3c2029;
+  --success: #68c994;
+  --success-subtle: #12382b;
+  --warning: #efb455;
+  --warning-subtle: #3d301c;
+  --info: #65c9e6;
+  --info-subtle: #143744;
+  --border: #24424f;
+  --input: #315361;
+  --ring: #65c9e6;
+  --brand-ink: #e8f6fa;
+  --brand-solid: #65c9e6;
+  --brand-on-solid: #071822;
 
-  --sidebar: #01130e;
-  --sidebar-foreground: #f3f2f5;
-  --sidebar-primary: #d4fd36;
-  --sidebar-primary-foreground: #02291d;
-  --sidebar-accent: #02291d;
-  --sidebar-accent-foreground: #d4fd36;
-  --sidebar-border: #043828;
-  --sidebar-ring: #d4fd36;
+  --sidebar: #06141d;
+  --sidebar-foreground: #dcebf0;
+  --sidebar-primary: #65c9e6;
+  --sidebar-primary-foreground: #071822;
+  --sidebar-accent: #14313f;
+  --sidebar-accent-foreground: #f2fbfd;
+  --sidebar-border: #203e4b;
+  --sidebar-ring: #65c9e6;
 }
 
 @layer base {
@@ -249,7 +277,7 @@
 }
 
 .bg-gradient-green {
-  background: radial-gradient(at 10% bottom, #011b14 75%, #0d7555 130%);
+  background: radial-gradient(at 10% bottom, #071d29 70%, #176985 135%);
 }
 
 /* Configurator & Layout Elevation SVG Dimensions */
@@ -269,5 +297,5 @@
   font-variant-numeric: tabular-nums;
 }
 .elevation-canvas g[layertype="Dimensions"] [data-dimension-kind="readonly"] text {
-  fill: var(--color-brand-accent5, #0086fc);
+  fill: var(--color-brand-accent5, #0b7194);
 }

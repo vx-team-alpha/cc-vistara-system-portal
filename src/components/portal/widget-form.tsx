@@ -354,7 +354,7 @@ export function WidgetForm({
             {logoMessage && (
               <p
                 id="widget-brand-logo-status"
-                className={`text-xs ${logoError ? "text-destructive" : "text-emerald-600"}`}
+                className={`text-xs ${logoError ? "text-destructive" : "text-success"}`}
                 role={logoError ? "alert" : "status"}
               >
                 {logoMessage}
@@ -429,7 +429,7 @@ export function WidgetForm({
 
         {message && (
           <p
-            className={`text-subtitle font-medium ${error ? "text-destructive" : "text-emerald-600"}`}
+            className={`text-subtitle font-medium ${error ? "text-destructive" : "text-success"}`}
             role="status"
           >
             {message}
